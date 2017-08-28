@@ -7,11 +7,8 @@ import Enterprise.data.intface.*;
 import Enterprise.misc.SQL;
 import javafx.beans.property.*;
 
-import java.io.File;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.logging.Level;
 
 /**
@@ -308,11 +305,10 @@ public class SimpleCreation extends EnterpriseEntry implements DataBase, Creatio
     @Override
     public void setCoverPath(String coverPath) {
         try {
-            File file = new File(coverPath);
-            URL uri = new URL(file.toString());
+            URI uri = new URI(coverPath);
 
             this.coverPath.set(coverPath);
-        } catch (MalformedURLException e) {
+        } catch (URISyntaxException e) {
             e.printStackTrace();
             throw new IllegalArgumentException("Not a valid Path: " + coverPath);
         }

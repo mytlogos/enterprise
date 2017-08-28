@@ -1,7 +1,7 @@
 package Enterprise.gui.controller;
 
-import Enterprise.gui.general.GlobalItemValues;
 import Enterprise.data.Default;
+import Enterprise.gui.general.GlobalItemValues;
 import Enterprise.modules.EnterpriseSegments;
 import com.sun.javafx.collections.ObservableListWrapper;
 import javafx.application.Platform;
@@ -153,6 +153,7 @@ abstract class ModifyEntry<E extends EnterpriseSegments> implements InputLimiter
             coverImage.setImage(img);
             //relativize path against home directory
             coverPath = new File("").toURI().relativize(file.toURI()).toString();
+            System.out.println(coverPath);
         }
     }
 
@@ -183,6 +184,7 @@ abstract class ModifyEntry<E extends EnterpriseSegments> implements InputLimiter
             coverImage.setImage(img);
             //relativize path against home directory
             coverPath = new File("").toURI().relativize(imageFile.toURI()).toString();
+            System.out.println(coverPath);
         } catch (URISyntaxException | IOException e) {
             // TODO: 24.08.2017 show alert, could not download image: invalid URL or a connection problem
             e.printStackTrace();
