@@ -1,0 +1,14 @@
+Aug 28, 2017 11:51:40 AM Enterprise.data.concurrent.AddCall addDataToDB
+INFORMATION: Addcall tried: 0 times
+Aug 28, 2017 11:51:40 AM Enterprise.data.concurrent.OnCloseRun run
+INFORMATION: Updated: false, Added: false Deleted: false
+Aug 28, 2017 11:51:40 AM Enterprise.data.concurrent.OnCloseRun run
+INFORMATION: program terminated normally
+Aug 28, 2017 11:59:06 AM Enterprise.data.concurrent.AddCall addDataToDB
+INFORMATION: AddCall was successful
+Aug 28, 2017 11:59:06 AM Enterprise.data.concurrent.AddCall addDataToDB
+INFORMATION: Addcall tried: 0 times
+Aug 28, 2017 11:59:06 AM Enterprise.data.concurrent.OnCloseRun run
+INFORMATION: Updated: false, Added: false Deleted: false
+Aug 28, 2017 11:59:06 AM Enterprise.data.concurrent.OnCloseRun run
+INFORMATION: program terminated normally

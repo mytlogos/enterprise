@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="module_readinglist" default="compile.module.readinglist">
+  <dirname property="module.readinglist.basedir" file="${ant.file.module_readinglist}"/>
+  
+  <property name="module.jdk.home.readinglist" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.readinglist" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.readinglist" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.readinglist" value="-encoding UTF-8 -source 1.8 -target 1.8 ${compiler.args}"/>
+  
+  <property name="readinglist.output.dir" value="${module.readinglist.basedir}/out/production/ReadingList"/>
+  <property name="readinglist.testoutput.dir" value="${module.readinglist.basedir}/out/test/ReadingList"/>
+  
+  <path id="readinglist.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="readinglist.module.production.classpath">
+    <path refid="${module.jdk.classpath.readinglist}"/>
+    <path refid="library.jsoup-1.10.3.classpath"/>
+    <path refid="library.sqlite-jdbc-3.19.3.classpath"/>
+    <path refid="library.controlsfx-8.40.12.classpath"/>
+  </path>
+  
+  <path id="readinglist.runtime.production.module.classpath">
+    <pathelement location="${readinglist.output.dir}"/>
+    <path refid="library.jsoup-1.10.3.classpath"/>
+    <path refid="library.sqlite-jdbc-3.19.3.classpath"/>
+    <path refid="library.controlsfx-8.40.12.classpath"/>
+  </path>
+  
+  <path id="readinglist.module.classpath">
+    <path refid="${module.jdk.classpath.readinglist}"/>
+    <pathelement location="${readinglist.output.dir}"/>
+    <path refid="library.jsoup-1.10.3.classpath"/>
+    <path refid="library.sqlite-jdbc-3.19.3.classpath"/>
+    <path refid="library.controlsfx-8.40.12.classpath"/>
+  </path>
+  
+  <path id="readinglist.runtime.module.classpath">
+    <pathelement location="${readinglist.testoutput.dir}"/>
+    <pathelement location="${readinglist.output.dir}"/>
+    <path refid="library.jsoup-1.10.3.classpath"/>
+    <path refid="library.sqlite-jdbc-3.19.3.classpath"/>
+    <path refid="library.controlsfx-8.40.12.classpath"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.readinglist">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.readinglist">
+    <patternset refid="excluded.from.module.readinglist"/>
+  </patternset>
+  
+  <path id="readinglist.module.sourcepath">
+    <dirset dir="${module.readinglist.basedir}">
+      <include name="src"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.readinglist" depends="compile.module.readinglist.production,compile.module.readinglist.tests" description="Compile module ReadingList"/>
+  
+  <target name="compile.module.readinglist.production" depends="register.custom.compilers" description="Compile module ReadingList; production classes">
+    <mkdir dir="${readinglist.output.dir}"/>
+    <javac2 destdir="${readinglist.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.readinglist}/javac">
+      <compilerarg line="${compiler.args.readinglist}"/>
+      <bootclasspath refid="readinglist.module.bootclasspath"/>
+      <classpath refid="readinglist.module.production.classpath"/>
+      <src refid="readinglist.module.sourcepath"/>
+      <patternset refid="excluded.from.compilation.readinglist"/>
+    </javac2>
+    
+    <copy todir="${readinglist.output.dir}">
+      <fileset dir="${module.readinglist.basedir}/src">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="compile.module.readinglist.tests" depends="register.custom.compilers,compile.module.readinglist.production" description="compile module ReadingList; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.readinglist" description="cleanup module">
+    <delete dir="${readinglist.output.dir}"/>
+    <delete dir="${readinglist.testoutput.dir}"/>
+  </target>
+</project>
