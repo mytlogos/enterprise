@@ -5,29 +5,28 @@ import Enterprise.data.impl.SimpleCreator;
 import Enterprise.data.intface.Creation;
 import Enterprise.data.intface.Creator;
 
-import java.sql.*;
-import java.util.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * DAO class of {@link Creator}.
  */
 public class CreatorTable extends AbstractDataTable<Creator> {
-    private static final String nameC;
+    private static final String nameC = "AUTHOR";
 
-    private static final String sortNameC;
+    private static final String sortNameC = "AUTHORSORT";
 
-    private static final String statusC;
+    private static final String statusC = "AUTHORSTATUS";
 
-    private static CreatorTable instance;
+    private static CreatorTable INSTANCE;
 
     static {
-        nameC = "AUTHOR";
-
-        sortNameC = "AUTHORSORT";
-
-        statusC = "AUTHORSTATUS";
         try {
-            instance = new CreatorTable();
+            INSTANCE = new CreatorTable();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -38,7 +37,7 @@ public class CreatorTable extends AbstractDataTable<Creator> {
      *
      * @throws SQLException if there was an error in establishing a connection or creating the table
      */
-    public CreatorTable() throws SQLException {
+    private CreatorTable() throws SQLException {
         super("CREATORTABLE", "AUTHOR_ID");
     }
 
@@ -50,7 +49,7 @@ public class CreatorTable extends AbstractDataTable<Creator> {
      * @see #CreatorTable()
      */
     public static CreatorTable getInstance() throws SQLException {
-        return instance;
+        return INSTANCE;
     }
 
     @Override

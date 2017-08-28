@@ -4,7 +4,9 @@ import scrape.sources.Source;
 
 import java.net.URISyntaxException;
 import java.sql.*;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Level;
 
 /**
@@ -13,6 +15,16 @@ import java.util.logging.Level;
 class SourceTable extends AbstractDataTable<Source> {
     private static final String sourceUrl = "SOURCEURL";
     private static final String sourceType = "SOURCETYPE";
+
+    private static SourceTable INSTANCE;
+
+    static {
+        try {
+            INSTANCE = new SourceTable();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
     /**
      * The constructor of {@code SourceTable}.
@@ -31,7 +43,11 @@ class SourceTable extends AbstractDataTable<Source> {
      * @see #SourceTable()
      */
     static SourceTable getInstance() throws SQLException {
-        return new SourceTable();
+        if (INSTANCE == null) {
+            throw new IllegalStateException();
+        } else {
+            return INSTANCE;
+        }
     }
 
     @Override

@@ -1,22 +1,18 @@
 package Enterprise.test;
 
-import Enterprise.data.database.CreationEntryTable;
-import Enterprise.data.database.UserTable;
-import Enterprise.data.impl.SimpleCreationEntry;
-import Enterprise.data.impl.SimpleSourceable;
-import Enterprise.data.impl.SimpleUser;
-import Enterprise.data.impl.SourceableEntryImpl;
-import Enterprise.data.intface.*;
-import org.sqlite.SQLiteException;
+import Enterprise.data.intface.ConHandler;
+import Enterprise.data.intface.User;
 
-import javax.lang.model.util.Elements;
-import javax.xml.crypto.Data;
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.sql.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
-import java.util.logging.Level;
 
 /**
  * Created by Dominik on 29.06.2017.
@@ -62,16 +58,17 @@ public class data {
         return result;
     }
 
-    public static void main(String[] args) throws ClassNotFoundException, SQLException {
+    public static void main(String[] args) throws ClassNotFoundException, SQLException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, NoSuchFieldException {
         HashMap<String, WeakReference<Object>> hashMap = new HashMap<>();
 
 
-        String select = "Select * from USERTABLE where OWNSTATUS = ? AND COMMENT = ? AND LIST = ? AND PROCESSED = ? AND RATING = ? AND KEYWORDS = ?";
+        Class<?> tableClass = Class.forName("Enterprise.data.database.UserTable");
+        Field tableField = tableClass.getDeclaredField("commentC");
+        tableField.setAccessible(true);
 
-        User user = new SimpleUser("eins", "zwei", 0, "drei", 0, "vier");
-
-        Boolean bol = getConnection(connection -> getaBoolean(select, user, connection));
-        System.out.println(bol);
+        Method getInstance = tableClass.getDeclaredMethod("getInstance", (Class<?>[]) null);
+        getInstance.setAccessible(true);
+        System.out.println((String) tableField.get(getInstance.invoke(null, (Object[]) null)));
     }
 
     private static Boolean getaBoolean(String select, User user, Connection connection) throws SQLException {
@@ -94,46 +91,5 @@ public class data {
 
     private static Connection connection() throws SQLException {
         return DriverManager.getConnection("jdbc:sqlite:enterprise.db");
-    }
-
-    public static boolean insert(User entry, Connection connection) {
-        boolean inserted = false;
-        try {
-            try (PreparedStatement stmt = connection.prepareStatement(getInsert(), Statement.RETURN_GENERATED_KEYS)) {
-                setInsertData(entry, stmt);
-                int affected = stmt.executeUpdate();
-                ResultSet set = stmt.getGeneratedKeys();
-
-                if (set != null && set.next()) {
-                    entry.setId(set.getInt(1), new UserTable());
-                    System.out.println(set.getInt(1));
-                }
-
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    private static void setInsertData(User entry, PreparedStatement stmt) throws SQLException {
-        String ownStatus = entry.getOwnStatus();
-        String comment = entry.getComment();
-        int rating = entry.getRating();
-        int processedPortion = entry.getProcessedPortion();
-        String list = entry.getList();
-        String keyWords = entry.getKeyWords();
-
-        stmt.setNull(1,Types.INTEGER);
-        stmt.setString(2,ownStatus);
-        stmt.setString(3,comment);
-        stmt.setString(4,list);
-        stmt.setInt(5,processedPortion);
-        stmt.setInt(6,rating);
-        stmt.setString(7,keyWords);
-    }
-
-    static String getInsert() {
-        return "insert into USERTABLE values(?,?,?,?,?,?,?)";
     }
 }

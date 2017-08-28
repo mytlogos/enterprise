@@ -1,24 +1,26 @@
 package Enterprise.data.database;
 
 import Enterprise.data.impl.SimpleSourceable;
-import scrape.sources.SourceList;
 import Enterprise.data.intface.Sourceable;
+import scrape.sources.SourceList;
 
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
 
 /**
  * DAO class of {@link Sourceable}.
  */
 public class SourceableTable extends AbstractDataTable<Sourceable> {
 
-    private static final String translatorC;
+    private static final String translatorC = "TRANSLATOR";
 
-    private static SourceableTable sourceableTable;
+    private static SourceableTable INSTANCE;
 
     static  {
-        translatorC = "TRANSLATOR";
         try {
-            sourceableTable = new SourceableTable();
+            INSTANCE = new SourceableTable();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -29,7 +31,7 @@ public class SourceableTable extends AbstractDataTable<Sourceable> {
      *
      * @throws SQLException if there was an error in establishing a connection or creating the table
      */
-    SourceableTable() throws SQLException {
+    private SourceableTable() throws SQLException {
         super("SOURCEABLETABLE", "SOURCEABLE_ID");
     }
 
@@ -41,7 +43,11 @@ public class SourceableTable extends AbstractDataTable<Sourceable> {
      * @see #SourceableTable()
      */
     static SourceableTable getInstance() throws SQLException {
-        return sourceableTable;
+        if (INSTANCE == null) {
+            throw new IllegalStateException();
+        } else {
+            return INSTANCE;
+        }
     }
 
     @Override

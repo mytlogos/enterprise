@@ -190,8 +190,11 @@ public class ClassSpy {
             try {
                 Field tableField = tableClass.getDeclaredField(field + "C");
                 tableField.setAccessible(true);
-                columnName = (String) tableField.get(tableClass.newInstance());
-            } catch (NoSuchFieldException | InstantiationException | IllegalAccessException e) {
+
+                Method getInstance = tableClass.getDeclaredMethod("getInstance", (Class<?>[]) null);
+                getInstance.setAccessible(true);
+                columnName = (String) tableField.get(getInstance.invoke(null, (Object[]) null));
+            } catch (NoSuchFieldException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
                 e.printStackTrace();
             }
         }
@@ -251,7 +254,6 @@ public class ClassSpy {
 
             if (columnName == null || columnName.isEmpty()) {
                 throw new IllegalStateException();
-
             }
         }
 

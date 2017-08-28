@@ -1,14 +1,17 @@
 package Enterprise.data.database;
 
-import Enterprise.misc.SetList;
 import Enterprise.data.impl.SimpleCreationEntry;
 import Enterprise.data.impl.SourceableEntryImpl;
 import Enterprise.data.intface.*;
+import Enterprise.misc.SetList;
 import Enterprise.misc.Utils;
 import Enterprise.modules.Module;
 
 import java.sql.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import java.util.logging.Level;
 
 /**
@@ -32,6 +35,16 @@ public class CreationEntryTable extends AbstractTable<CreationEntry> {
     private final String sourceableIdC = "SOURCEABLE_ID";
     private final String moduleC = "MODULE";
 
+    private static CreationEntryTable INSTANCE;
+
+    static {
+        try {
+            INSTANCE = new CreationEntryTable();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
 // TODO: 23.08.2017 maybe do this with a singleton pattern
     /**
      * The constructor of {@code CreationEntryTable}.
@@ -40,7 +53,6 @@ public class CreationEntryTable extends AbstractTable<CreationEntry> {
      */
     public CreationEntryTable() throws SQLException {
         super("CREATIONENTRYTABLE");
-        createTable();
     }
 
     @Override
@@ -55,14 +67,11 @@ public class CreationEntryTable extends AbstractTable<CreationEntry> {
      * @throws RuntimeException if class could not be instantiated
      */
     public static CreationEntryTable getInstance() throws RuntimeException {
-        CreationEntryTable table;
-        try {
-            table = new CreationEntryTable();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw new RuntimeException();
+        if (INSTANCE == null) {
+            throw new IllegalStateException();
+        } else {
+            return INSTANCE;
         }
-        return table;
     }
 
 

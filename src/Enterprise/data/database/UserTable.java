@@ -3,7 +3,10 @@ package Enterprise.data.database;
 import Enterprise.data.impl.SimpleUser;
 import Enterprise.data.intface.User;
 
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
 
 /**
  * DAO class of {@link User}.
@@ -12,7 +15,7 @@ import java.sql.*;
  */
 public class UserTable extends AbstractDataTable<User> {
 
-    public UserTable() throws SQLException {
+    private UserTable() throws SQLException {
         super("USERTABLE", "USER_ID");
     }
 

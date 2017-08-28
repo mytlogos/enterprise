@@ -22,12 +22,22 @@ public class EntrySourceTable extends AbstractSubRelation<Sourceable> {
     private static final String IdType = "INTEGER";
     private static final String sourceableId = "SOURCEABLE_ID";
 
+    private static EntrySourceTable INSTANCE;
+
+    static {
+        try {
+            INSTANCE = new EntrySourceTable();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     /**
      * The constructor of {@code EntrySourceTable}.
      *
      * @throws SQLException see {@link AbstractTable#AbstractTable(String)}
      */
-    public EntrySourceTable() throws SQLException {
+    private EntrySourceTable() throws SQLException {
         super("ENTRYSOURCETABLE", sourceableId);
     }
 
@@ -43,7 +53,7 @@ public class EntrySourceTable extends AbstractSubRelation<Sourceable> {
      * @throws SQLException if table could not be created
      */
     public static EntrySourceTable getInstance() throws SQLException {
-        return new EntrySourceTable();
+        return INSTANCE;
     }
 
     @Override

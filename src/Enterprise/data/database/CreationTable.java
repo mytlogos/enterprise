@@ -5,7 +5,8 @@ import Enterprise.data.intface.Creation;
 import Enterprise.data.intface.DataTable;
 
 import java.sql.*;
-import java.util.*;
+import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * DAO class responsible for the table holding the data of {@code Creation}entries.
@@ -18,7 +19,7 @@ public class CreationTable extends AbstractDataTable<Creation> implements DataTa
     private static final String coverPathC;
     private static final String workStatusC;
 
-    private static CreationTable instance;
+    private static CreationTable INSTANCE;
 
     static {
         titleC = "TITLE";
@@ -29,7 +30,7 @@ public class CreationTable extends AbstractDataTable<Creation> implements DataTa
         workStatusC = "WORKSTATUS";
 
         try {
-            instance = new CreationTable();
+            INSTANCE = new CreationTable();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -46,17 +47,16 @@ public class CreationTable extends AbstractDataTable<Creation> implements DataTa
      *
      * @throws SQLException if there was an error in establishing a connection or creating the table
      */
-    public CreationTable() throws SQLException {
+    private CreationTable() throws SQLException {
         super("CREATIONTABLE", "CREATION_ID");
     }
 
-    // TODO: 23.08.2017 singleton or not?
     /**
      * Static getInstance Method. Gets the static Instance of this {@code CreationTable}.
      * @return instance - a static instance of this {@code CreationTable}
      */
     public static CreationTable getInstance(){
-        return instance;
+        return INSTANCE;
     }
 
     @Override

@@ -36,7 +36,7 @@ public class UpdateCall implements Callable<Boolean> {
     public Boolean call() throws Exception {
         Thread.currentThread().setName("UpdateEntries");
 
-        Boolean updated = false;
+        Boolean updated;
         //gets the updates Entries
         List<CreationEntry> entries = OpEntryCarrier.getInstance().getUpdateEntries();
         //updates the Entries in the database
@@ -49,20 +49,7 @@ public class UpdateCall implements Callable<Boolean> {
 
     @Deprecated
     private Boolean updateTable() throws SQLException {
-        Boolean updated = false;
-        //List<? extends CreationEntry> animeEntries = anime.getInstance().getUpdateEntries();
-        //List<? extends CreationEntry> bookEntries = Book.getInstance().getUpdateEntries();
-        //List<? extends CreationEntry> mangaEntries = manga.getInstance().getUpdateEntries();
-        //List<? extends CreationEntry> novelEntries = Novel.getInstance().getUpdateEntries();
-        //List<? extends CreationEntry> seriesEntries = Series.getInstance().getUpdateEntries();
-
-
-        //entries.addAll(animeEntries);
-        //entries.addAll(bookEntries);
-        //entries.addAll(novelEntries);
-        //entries.addAll(mangaEntries);
-        //entries.addAll(seriesEntries);
-
+        Boolean updated;
 
         List<CreationEntry> entries = OpEntryCarrier.getInstance().getUpdateEntries();
         updated = CreationEntryTable.getInstance().updateEntries(entries);
