@@ -90,7 +90,7 @@ abstract class AbstractDataTable<E extends DataBase> extends AbstractTable<E> im
                     entries.forEach(E::setUpdated);
                 } else {
                     throw new IllegalStateException("Beinflusste Spalten beim " + getTableName() + " stimmen nicht überein!");
-                }   
+                }
             }
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "error occurred while updating " + getTableName(), e);
