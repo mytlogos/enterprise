@@ -20,6 +20,9 @@ public class SourceList extends SimpleListProperty<Source> implements Comparable
     private static final Set<Source> globalSources = new HashSet<>();
     private static final List<Source> deletedGlobalSources = new ArrayList<>();
 
+    private static final Map<Source, Set<Sourceable>> mappedRelation = new TreeMap<>();
+    private static final Map<Source, Set<Sourceable>> deletedRelation = new TreeMap<>();
+
     private final List<Source> deletedSources = new ArrayList<>();
     private final List<Source> addedSources = new ArrayList<>();
 
@@ -125,9 +128,7 @@ public class SourceList extends SimpleListProperty<Source> implements Comparable
      */
     @Override
     public boolean add(Source source) {
-        boolean added = false;
-
-        if (source != null) {
+        /*if (source != null) {
             if (!globalSources.contains(source)) {
                 if (!this.contains(source)) {
                     if (globalSources.add(source) && super.add(source)) {
@@ -148,8 +149,13 @@ public class SourceList extends SimpleListProperty<Source> implements Comparable
                     added = processLocalDuplicates(source);
                 }
             }
+        }*/
+        if (!this.contains(source)) {
+            addedSources.add(source);
+            return super.add(source);
+        } else {
+            return false;
         }
-        return added;
     }
 
     /**
@@ -222,19 +228,20 @@ public class SourceList extends SimpleListProperty<Source> implements Comparable
     @Override
     public boolean addAll(Collection<? extends Source> c) {
         removeAll(c);
-        boolean added = super.addAll(c);
-        System.out.println(this);
-        return added;
+        return super.addAll(c);
     }
 
     @Override
     public boolean remove(Object obj) {
-        if (obj instanceof Source) {
+        /*if (obj instanceof Source) {
             deletedSources.add((Source) obj);
             if (((Source) obj).getSourceables().isEmpty()) {
                 deletedGlobalSources.add((Source) obj);
                 globalSources.remove(obj);
             }
+        }*/
+        if (obj instanceof Source) {
+            deletedGlobalSources.add((Source) obj);
         }
         return super.remove(obj);
     }
@@ -243,4 +250,16 @@ public class SourceList extends SimpleListProperty<Source> implements Comparable
     public int compareTo(SourceList o) {
         return this.size() - o.size();
     }
+
+    /*public void setSourceable(Sourceable sourceable) {
+        Set<Sourceable> sourceables = new TreeSet<>();
+        sourceables.add(sourceable);
+        this.forEach(source -> {
+            if (mappedRelation.containsKey(source)) {
+                mappedRelation.get(source).add(sourceable);
+            } else {
+                mappedRelation.put(source, sourceables);
+            }
+        });
+    }*/
 }

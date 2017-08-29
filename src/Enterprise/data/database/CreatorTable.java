@@ -45,11 +45,14 @@ public class CreatorTable extends AbstractDataTable<Creator> {
      * Returns a static Instance of this {@code CreatorTable}.
      *
      * @return instance - Instance of this {@code CreatorTable}
-     * @throws SQLException if class could not be instantiated
      * @see #CreatorTable()
      */
-    public static CreatorTable getInstance() throws SQLException {
-        return INSTANCE;
+    public static CreatorTable getInstance() {
+        if (INSTANCE == null) {
+            throw new IllegalStateException();
+        } else {
+            return INSTANCE;
+        }
     }
 
     @Override

@@ -10,7 +10,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.util.Duration;
 import org.controlsfx.control.Notifications;
-import org.jsoup.select.Elements;
 import scrape.sources.novels.NovelPosts;
 
 import java.io.IOException;

@@ -30,7 +30,6 @@ public abstract class AddController<E extends EnterpriseSegments> extends Modify
      */
     protected abstract void add();
 
-
     /**
      * Constructs an {@code User} from the data input.
      *

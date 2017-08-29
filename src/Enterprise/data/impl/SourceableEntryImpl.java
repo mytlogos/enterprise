@@ -1,9 +1,8 @@
 package Enterprise.data.impl;
 
-import Enterprise.data.EnterpriseEntry;
 import Enterprise.data.OpEntryCarrier;
-import Enterprise.misc.SetList;
 import Enterprise.data.intface.*;
+import Enterprise.misc.SetList;
 import Enterprise.modules.Module;
 import javafx.beans.property.BooleanProperty;
 
@@ -39,6 +38,8 @@ public class SourceableEntryImpl extends AbstractCreationEntry implements Source
 
         incrementReferences(user,creation,creator,sourceable);
 
+        sourceable.getSourceList().forEach(this::incrementReferences);
+
         this.creation.setCreator(creator);
         this.sourceable.setUser(user);
         bindUpdated();
@@ -73,6 +74,15 @@ public class SourceableEntryImpl extends AbstractCreationEntry implements Source
     @Override
     public boolean readySourceableRemoval() {
         decrementReferences(sourceable);
+
+        sourceable.getSourceList().forEach(this::decrementReferences);
+
+        sourceable.getSourceList().forEach(source -> {
+            if (checkOnlyReference(source)) {
+                source.setDead();
+            }
+        });
+
         return checkOnlyReference(sourceable);
     }
 
@@ -108,10 +118,10 @@ public class SourceableEntryImpl extends AbstractCreationEntry implements Source
 
         SourceableEntryImpl that = (SourceableEntryImpl) o;
 
-        if (!creation.equals(that.creation)) return false;
-        if (module != that.module) return false;
-        if (!user.equals(that.user)) return false;
-        return sourceable.equals(that.sourceable);
+        return creation.equals(that.creation)
+                && module == that.module
+                && user.equals(that.user)
+                && sourceable.equals(that.sourceable);
     }
 
     @Override

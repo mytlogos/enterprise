@@ -1,12 +1,14 @@
 package Enterprise.data.impl;
 
 import Enterprise.data.EnterpriseEntry;
-import Enterprise.data.intface.*;
+import Enterprise.data.intface.Creation;
+import Enterprise.data.intface.CreationEntry;
+import Enterprise.data.intface.DataBase;
+import Enterprise.data.intface.User;
 import Enterprise.modules.Module;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 /**
  *
@@ -17,9 +19,6 @@ abstract class AbstractCreationEntry extends EnterpriseEntry {
     Module module;
 
     private Map<DataBase, Integer> references = new HashMap<>();
-    private Map<Creator, Integer> creatorReferences = new TreeMap<>();
-    private Map<User, Integer> userReferences = new TreeMap<>();
-    private Map<Sourceable, Integer> sourceableReferences = new TreeMap<>();
 
     void incrementReferences(DataBase... dataBases) {
         for (DataBase dataBase : dataBases) {
@@ -66,6 +65,4 @@ abstract class AbstractCreationEntry extends EnterpriseEntry {
             throw new UnsupportedOperationException();
         }
     }
-
-
 }

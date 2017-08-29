@@ -115,8 +115,7 @@ public class SimpleCreationEntry extends AbstractCreationEntry implements Creati
 
         SimpleCreationEntry that = (SimpleCreationEntry) o;
 
-        if (!user.equals(that.user)) return false;
-        return creation.equals(that.creation);
+        return user.equals(that.user) && creation.equals(that.creation);
     }
 
     @Override

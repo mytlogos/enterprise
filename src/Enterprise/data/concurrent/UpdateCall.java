@@ -52,6 +52,9 @@ public class UpdateCall implements Callable<Boolean> {
         Boolean updated;
 
         List<CreationEntry> entries = OpEntryCarrier.getInstance().getUpdateEntries();
+        for (CreationEntry entry : entries) {
+            CreationEntryTable.getInstance().updateEntry(entry);
+        }
         updated = CreationEntryTable.getInstance().updateEntries(entries);
 
         return updated;

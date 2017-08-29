@@ -39,10 +39,9 @@ public class SourceableTable extends AbstractDataTable<Sourceable> {
      * Returns a static Instance of this {@code SourceableTable}.
      *
      * @return instance - Instance of this {@code SourceableTable}
-     * @throws SQLException if class could not be instantiated
      * @see #SourceableTable()
      */
-    static SourceableTable getInstance() throws SQLException {
+    static SourceableTable getInstance() {
         if (INSTANCE == null) {
             throw new IllegalStateException();
         } else {
@@ -75,6 +74,7 @@ public class SourceableTable extends AbstractDataTable<Sourceable> {
         String tl = rs.getString(translatorC);
 
         entry = new SimpleSourceable(id,sources,tl);
+//        sources.setSourceable(entry);
         entry.setEntryOld();
         return entry;
     }

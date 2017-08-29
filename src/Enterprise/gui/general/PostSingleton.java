@@ -66,9 +66,9 @@ public class PostSingleton {
             List<Post> postList;
             postList = scheduledScraper.getValue();
 
-            posts.removeAll(postList);
+            postList.removeAll(posts);
             posts.addAll(postList);
-            posts.sort((o1, o2) -> o2.getTimeStamp().compareTo(o1.getTimeStamp()));
+
             System.out.println(posts);
             System.out.println("Scheduled Succeeded, Anzahl Posts: " + postList.size());
         });

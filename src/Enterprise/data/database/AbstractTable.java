@@ -65,7 +65,7 @@ abstract class AbstractTable<E extends DataBase> implements Table<E> {
     }
 
     @Override
-    final public boolean createTable() throws SQLException {
+    final public boolean createTable() {
         boolean created = false;
         if (!tableExists()) {
             created = Connections.getConnection(connection -> {
@@ -78,7 +78,7 @@ abstract class AbstractTable<E extends DataBase> implements Table<E> {
     }
 
     @Override
-    final public boolean tableExists() throws SQLException {
+    final public boolean tableExists() {
         return Connections.getConnection(this::tableExists);
     }
 

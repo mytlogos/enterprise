@@ -1,14 +1,13 @@
 package scrape.concurrent;
 
-import scrape.sources.novels.NovelPosts;
-import scrape.sources.SourceList;
-import scrape.sources.Source;
 import Enterprise.gui.general.PostSingleton;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
 import javafx.util.Duration;
-import org.jsoup.select.Elements;
 import scrape.sources.Post;
+import scrape.sources.Source;
+import scrape.sources.SourceList;
+import scrape.sources.novels.NovelPosts;
 
 import java.io.IOException;
 import java.net.MalformedURLException;

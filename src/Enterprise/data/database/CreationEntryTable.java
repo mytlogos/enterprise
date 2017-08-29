@@ -4,7 +4,6 @@ import Enterprise.data.impl.SimpleCreationEntry;
 import Enterprise.data.impl.SourceableEntryImpl;
 import Enterprise.data.intface.*;
 import Enterprise.misc.SetList;
-import Enterprise.misc.Utils;
 import Enterprise.modules.Module;
 
 import java.sql.*;
@@ -139,16 +138,49 @@ public class CreationEntryTable extends AbstractTable<CreationEntry> {
     }
 
     /**
-     * Updates the Database with the input data.
+     * Updates the database with the input parameter.
      *
-     * @param entries {@code Collection} of {@code CreationEntry}s
+     * @param entry {@code CreationEntry}, with the data to update the database
      * @return updated - integer {@code Array} holding the number of affected rows per statements per position
      */
-    private int[] update(List<? extends CreationEntry> entries) {
-        int[] creatorsUpdated = new int[0];
-        int[] creationsUpdated = new int[0];
-        int[] usersUpdated = new int[0];
-        int[] sourceablesUpdated = new int[0];
+    public boolean updateEntry(CreationEntry entry) {
+
+        User user = entry.getUser();
+        Creation creation = entry.getCreation();
+        Creator creator = entry.getCreator();
+        Sourceable sourceable;
+
+
+        boolean creatorsUpdated;
+        boolean creationsUpdated;
+        boolean usersUpdated;
+        boolean sourceablesUpdated = false;
+
+        creatorsUpdated = CreatorTable.getInstance().updateEntry(creator);
+        creationsUpdated = CreationTable.getInstance().updateEntry(creation);
+        usersUpdated = UserTable.getInstance().updateEntry(user);
+
+        if (entry instanceof SourceableEntryImpl) {
+            sourceable = (((SourceableEntryImpl) entry).getSourceable());
+            sourceablesUpdated = SourceableTable.getInstance().updateEntry(sourceable);
+        }
+
+
+        return creationsUpdated || creatorsUpdated || usersUpdated || sourceablesUpdated;
+    }
+
+    /**
+     * Updates the Entries in the Database.
+     *
+     * @param entries {@code Collection} of {@code CreationEntry}, who will update the database.
+     * @return true, if any row was affected
+     */
+    public boolean updateEntries(List<? extends CreationEntry> entries) {
+        boolean creatorsUpdated = false;
+        boolean creationsUpdated = false;
+        boolean usersUpdated = false;
+        boolean sourceablesUpdated = false;
+
 
         try {
             creatorsUpdated = checkForCreatorUpdates(entries);
@@ -161,59 +193,7 @@ public class CreationEntryTable extends AbstractTable<CreationEntry> {
             e.printStackTrace();
         }
 
-        return Utils.addArrays(creationsUpdated,creatorsUpdated,usersUpdated,sourceablesUpdated);
-    }
-
-    /**
-     * Updates the database with the input parameter.
-     *
-     * @param entry {@code CreationEntry}, with the data to update the database
-     * @return updated - integer {@code Array} holding the number of affected rows per statements per position
-     */
-    public int[] updateEntry(CreationEntry entry) {
-
-        User user = entry.getUser();
-        Creation creation = entry.getCreation();
-        Creator creator = entry.getCreator();
-        Sourceable sourceable;
-
-        int[] creatorsUpdated = new int[0];
-        int[] creationsUpdated = new int[0];
-        int[] usersUpdated = new int[0];
-        int[] sourceablesUpdated = new int[0];
-
-        try {
-            creatorsUpdated = CreatorTable.getInstance().updateEntry(creator);
-            creationsUpdated = CreationTable.getInstance().updateEntry(creation);
-            usersUpdated = UserTable.getInstance().updateEntry(user);
-            if (entry instanceof SourceableEntryImpl) {
-                sourceable =  (((SourceableEntryImpl) entry).getSourceable());
-                sourceablesUpdated = SourceableTable.getInstance().updateEntry(sourceable);
-            }
-
-        } catch (SQLException e) {
-            logger.log(Level.SEVERE, "error occurred while updating the database", e);
-            e.printStackTrace();
-        }
-
-
-        return Utils.addArrays(creationsUpdated,creatorsUpdated,usersUpdated,sourceablesUpdated);
-    }
-
-    /**
-     * Updates the Entries in the Database.
-     *
-     * @param entries {@code Collection} of {@code CreationEntry}, who will update the database.
-     * @return true, if any row was affected
-     */
-    public boolean updateEntries(List<? extends CreationEntry> entries) {
-        int[] results = update(entries);
-        boolean result = false;
-        // TODO: 22.08.2017 do sth better
-        if (results.length > 0) {
-            result = true;
-        }
-        return result;
+        return true;
     }
 
     /**
@@ -419,9 +399,8 @@ public class CreationEntryTable extends AbstractTable<CreationEntry> {
      *
      * @param entries {@code Collection} of {@code CreationEntry}s, to be updated
      * @return updated - integer {@code Array} holding the number of affected rows per statements per position
-     * @throws SQLException if there was an error in updating the Database
      */
-    private int[] checkForUserUpdates(Collection<? extends CreationEntry> entries) throws SQLException {
+    private boolean checkForUserUpdates(Collection<? extends CreationEntry> entries) {
         Collection<User> users = new ArrayList<>();
 
         for (CreationEntry entry : entries) {
@@ -430,12 +409,7 @@ public class CreationEntryTable extends AbstractTable<CreationEntry> {
                 users.add(user);
             }
         }
-        int[] usersUpdated = new int[0];
-
-        if (!users.isEmpty()) {
-            usersUpdated = UserTable.getInstance().updateEntries(users);
-        }
-        return usersUpdated;
+        return !users.isEmpty() && UserTable.getInstance().updateEntries(users);
 
     }
 
@@ -446,7 +420,7 @@ public class CreationEntryTable extends AbstractTable<CreationEntry> {
      * @return updated - integer {@code Array} holding the number of affected rows per statements per position
      * @throws SQLException if there was an error in updating the Database
      */
-    private int[] checkForCreatorUpdates(Collection<? extends CreationEntry> entries) throws SQLException {
+    private boolean checkForCreatorUpdates(Collection<? extends CreationEntry> entries) throws SQLException {
         Collection<Creator> creators = new ArrayList<>();
 
         for (CreationEntry entry : entries) {
@@ -455,11 +429,7 @@ public class CreationEntryTable extends AbstractTable<CreationEntry> {
                 creators.add(creator);
             }
         }
-        int[] creatorsUpdated = new int[0];
-        if (!creators.isEmpty()) {
-            creatorsUpdated = CreatorTable.getInstance().updateEntries(creators);
-        }
-        return creatorsUpdated;
+        return CreatorTable.getInstance().updateEntries(creators);
     }
 
     /**
@@ -467,9 +437,8 @@ public class CreationEntryTable extends AbstractTable<CreationEntry> {
      *
      * @param entries {@code Collection} of {@code CreationEntry}s, to be updated
      * @return updated - integer {@code Array} holding the number of affected rows per statements per position
-     * @throws SQLException if there was an error in updating the Database
      */
-    private int[] checkForCreationUpdates(Collection<? extends CreationEntry> entries) throws SQLException {
+    private boolean checkForCreationUpdates(Collection<? extends CreationEntry> entries) {
         Collection<Creation> creations = new ArrayList<>();
 
         for (CreationEntry entry : entries) {
@@ -478,11 +447,7 @@ public class CreationEntryTable extends AbstractTable<CreationEntry> {
                 creations.add(creation);
             }
         }
-        int[] creationsUpdated = new int[0];
-        if (!creations.isEmpty()) {
-            creationsUpdated = CreationTable.getInstance().updateEntries(creations);
-        }
-        return creationsUpdated;
+        return !creations.isEmpty() && CreationTable.getInstance().updateEntries(creations);
     }
 
     /**
@@ -492,23 +457,19 @@ public class CreationEntryTable extends AbstractTable<CreationEntry> {
      * @return updated - integer {@code Array} holding the number of affected rows per statements per position
      * @throws SQLException if there was an error in updating the Database
      */
-    private int[] checkForSourceableUpdates(Collection<? extends CreationEntry> entries) throws SQLException {
+    private boolean checkForSourceableUpdates(Collection<? extends CreationEntry> entries) throws SQLException {
         Collection<Sourceable> sourceables = new ArrayList<>();
 
         for (CreationEntry entry : entries) {
             if (entry instanceof SourceableEntry) {
-                Sourceable sourceable = ((SourceableEntry)entry).getSourceable();
+                Sourceable sourceable = ((SourceableEntry) entry).getSourceable();
 
                 if (sourceable.isUpdated()) {
                     sourceables.add(sourceable);
                 }
             }
         }
-        int[] sourceablesUpdated = new int[0];
-        if (!sourceables.isEmpty()) {
-            sourceablesUpdated = EntrySourceTable.getInstance().updateEntries(sourceables);
-        }
-        return sourceablesUpdated;
+        return !sourceables.isEmpty() && EntrySourceTable.getInstance().updateEntries(sourceables);
     }
 
     /**

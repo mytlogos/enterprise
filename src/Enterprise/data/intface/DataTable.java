@@ -45,7 +45,7 @@ public interface DataTable<E extends DataBase> extends Table<E> {
      * @param entry {@link Entry} to update
      * @return updated - integer {@code Array} holding the number of affected rows per statements per position
      */
-    int[] updateEntry(E entry);
+    boolean updateEntry(E entry);
 
     /**
      * Updates the database with the data of the given {@link Enterprise.data.intface.Entry}.
@@ -62,7 +62,7 @@ public interface DataTable<E extends DataBase> extends Table<E> {
      * @return updated - integer {@code Array} holding the number of affected rows per statements per position
      * @see ClassSpy
      */
-    int[] updateEntry(E entry, Connection connection) throws SQLException;
+    boolean updateEntry(E entry, Connection connection) throws SQLException;
 
     /**
      * Updates the database with the data of the given {@code Collection} of {@link Enterprise.data.intface.Entry}s.
@@ -71,7 +71,7 @@ public interface DataTable<E extends DataBase> extends Table<E> {
      * @param entries iterable Collection, with Entries extending Database, or Entry
      * @return return an integer Array of affected Rows per Statement
      */
-    int[] updateEntries(Collection<? extends E> entries);
+    boolean updateEntries(Collection<? extends E> entries);
 
     /***
      * Updates the database with the data of the given {@code Collection} of {@link Enterprise.data.intface.Entry}s.
@@ -87,7 +87,7 @@ public interface DataTable<E extends DataBase> extends Table<E> {
      * @param connection Connection, which should be used
      * @return return an integer Array of affected Rows per Statement
      */
-    int[] updateEntries(Collection<? extends E> entries, Connection connection);
+    boolean updateEntries(Collection<? extends E> entries, Connection connection);
 
     /**
      * Gets the entries from the table through the given {@code Connection}.

@@ -1,7 +1,5 @@
 package Enterprise.data.intface;
 
-import javafx.beans.property.BooleanProperty;
-
 /**
  * Classes, which will be saved into the Database, need to implement this Interface
  * Fields which will be saved into Database, need to be marked with the {@link Enterprise.misc.SQL} Annotation

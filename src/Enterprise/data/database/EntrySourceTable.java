@@ -2,12 +2,14 @@ package Enterprise.data.database;
 
 import Enterprise.data.intface.Sourceable;
 import Enterprise.misc.SetList;
-import Enterprise.misc.Utils;
 import scrape.sources.Source;
 import scrape.sources.SourceList;
 
 import java.sql.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import java.util.logging.Level;
 
 /**
@@ -50,10 +52,13 @@ public class EntrySourceTable extends AbstractSubRelation<Sourceable> {
     /**
      * Returns an instance of this {@code EntrySourceTable}.
      * @return instance - a new instance of this class
-     * @throws SQLException if table could not be created
      */
-    public static EntrySourceTable getInstance() throws SQLException {
-        return INSTANCE;
+    public static EntrySourceTable getInstance() {
+        if (INSTANCE == null) {
+            throw new IllegalStateException();
+        } else {
+            return INSTANCE;
+        }
     }
 
     @Override
@@ -111,23 +116,16 @@ public class EntrySourceTable extends AbstractSubRelation<Sourceable> {
 
         validate(entries, connection);
 
-        Iterator<? extends Sourceable> iterator = entries.iterator();
-        List<Source> sourceList = new ArrayList<>();
-
         try (PreparedStatement stmt = connection.prepareStatement(getInsert())) {
-            while (iterator.hasNext()) {
-                Sourceable entry = iterator.next();
+            for (Sourceable entry : entries) {
                 List<Source> sources = entry.getSourceList().getAddedSources();
+
+                insertNewParts(entries, sources, connection);
 
                 for (Source source : sources) {
                     setData(entry, stmt, source);
-
-                    if (source.isNewEntry()) {
-                        sourceList.add(source);
-                    }
                     stmt.addBatch();
                 }
-
             }
             // TODO: 15.07.2017 do sth about execute/executeUpdate
             if (!Arrays.asList(stmt.executeBatch()).isEmpty()) {
@@ -135,7 +133,6 @@ public class EntrySourceTable extends AbstractSubRelation<Sourceable> {
             }
         }
         //inserts new sources and Sourceables
-        boolean newInserted = insertNewParts(entries, sourceList, connection);
         return inserted;
     }
 
@@ -215,22 +212,50 @@ public class EntrySourceTable extends AbstractSubRelation<Sourceable> {
      * @return updated - integer {@code Array} holding the number of affected rows per statements per position
      * @throws SQLException if an error occurred in the database
      */
-    public int[] updateEntries(Collection<Sourceable> entries) throws SQLException {
+    public boolean updateEntries(Collection<Sourceable> entries) throws SQLException {
         List<Source> deletedSources = new ArrayList<>();
+        List<Source> addedSources = new ArrayList<>();
+
         entries.forEach(sourceable ->
                 sourceable.getSourceList().
                         stream().
                         filter(Source::isDead).
                         forEach(deletedSources::add));
-        int[] deleted;
-        int[] updated;
+        entries.forEach(sourceable ->
+                addedSources.addAll(
+                        sourceable.getSourceList().getAddedSources()));
+
+        boolean deleted = false;
+        boolean updated = false;
+        boolean added = false;
 
         try (Connection connection = Connections.connection()) {
-            deleted = SourceTable.getInstance().deleteSources(deletedSources, connection);
-            updated = SourceableTable.getInstance().updateEntries(entries, connection);
+            for (Sourceable entry : entries) {
+                insertNewParts(entry, entry.getSourceList(), connection);
+                insert(entries, connection);
+            }
+            if (!addedSources.isEmpty()) {
+                added = SourceTable.getInstance().insert(addedSources, connection);
+            }
+            if (!deletedSources.isEmpty()) {
+                deleted = SourceTable.getInstance().deleteSources(deletedSources, connection);
+            }
+            if (!entries.isEmpty()) {
+                updated = SourceableTable.getInstance().updateEntries(entries, connection);
+            }
         }
 
-        return Utils.addArrays(deleted, updated);
+        if (!deletedSources.isEmpty() == deleted
+                && !addedSources.isEmpty() == added
+                && !entries.isEmpty() == updated) {
+            return true;
+        } else {
+            throw new SQLException("incongruent data : "
+                    + "\ndeletedSources: " + !deletedSources.isEmpty() + " deleted: " + deleted
+                    + "\naddedSources: " + !addedSources.isEmpty() + " added: " + added
+                    + "\nentries available: " + !entries.isEmpty()
+            );
+        }
     }
 
     @Override
@@ -352,7 +377,7 @@ public class EntrySourceTable extends AbstractSubRelation<Sourceable> {
      * @param connection {@code Connection} to be used for this transaction
      * @return sources - a {@link SourceList}
      */
-    SourceList getSources(int id, Connection connection) throws SQLException {
+    private SourceList getSources(int id, Connection connection) throws SQLException {
         String selectSpecific = getFromMainId(id);
 
         SourceList sourceList = new SourceList();

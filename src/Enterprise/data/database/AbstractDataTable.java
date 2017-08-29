@@ -6,7 +6,10 @@ import Enterprise.data.intface.DataTable;
 import Enterprise.misc.SetList;
 
 import java.sql.*;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 
 /**
@@ -37,18 +40,18 @@ abstract class AbstractDataTable<E extends DataBase> extends AbstractTable<E> im
         createTable();
     }
 
-    public int[] updateEntry(E entry) {
+    public boolean updateEntry(E entry) {
         return Connections.getConnection((connection) -> updateEntry(entry, connection));
     }
 
     @Override
-    public int[] updateEntry(E entry, Connection connection) throws SQLException {
+    public boolean updateEntry(E entry, Connection connection) throws SQLException {
         validate(entry, connection);
-
+        boolean updated = false;
         ClassSpy classSpy = new ClassSpy();
         Set<String> statements = classSpy.updateStrings(entry, getTableName(), tableId);
 
-        int[] affected = new int[0];
+        int[] affected;
         try (Statement stmt = connection.createStatement()) {
             for (String sql : statements) {
                 stmt.addBatch(sql);
@@ -56,6 +59,7 @@ abstract class AbstractDataTable<E extends DataBase> extends AbstractTable<E> im
             affected = stmt.executeBatch();
             if (affected.length == statements.size()) {
                 entry.setUpdated();
+                updated = true;
             } else {
                 logger.log(Level.SEVERE, "a problem while updating occurred: " +
                         "statments: " + statements.size() +
@@ -65,18 +69,19 @@ abstract class AbstractDataTable<E extends DataBase> extends AbstractTable<E> im
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return affected;
+        return updated;
     }
 
     @Override
-    public int[] updateEntries(Collection<? extends E> entries) {
+    public boolean updateEntries(Collection<? extends E> entries) {
         return Connections.getConnection(connection -> updateEntries(entries, connection));
     }
 
     @Override
-    public int[] updateEntries(Collection<? extends E> entries, Connection connection) {
+    public boolean updateEntries(Collection<? extends E> entries, Connection connection) {
         Set<String> statements = updateStrings(entries);
-        int[] affected = new int[0];
+        int[] affected;
+        boolean updated = false;
         try {
             validate(entries, connection);
 
@@ -88,6 +93,7 @@ abstract class AbstractDataTable<E extends DataBase> extends AbstractTable<E> im
 
                 if (affected.length == statements.size()) {
                     entries.forEach(E::setUpdated);
+                    updated = true;
                 } else {
                     throw new IllegalStateException("Beinflusste Spalten beim " + getTableName() + " stimmen nicht überein!");
                 }
@@ -96,7 +102,7 @@ abstract class AbstractDataTable<E extends DataBase> extends AbstractTable<E> im
             logger.log(Level.SEVERE, "error occurred while updating " + getTableName(), e);
             e.printStackTrace();
         }
-        return affected;
+        return updated;
     }
 
     @Override
@@ -119,7 +125,6 @@ abstract class AbstractDataTable<E extends DataBase> extends AbstractTable<E> im
                     //sets the id of the entry
                     if (set != null && set.next()) {
                         entry.setId(set.getInt(1), this);
-                        System.out.println(set.getInt(1));
                     } else{
                         System.out.println("could not set id");
                     }
@@ -144,24 +149,20 @@ abstract class AbstractDataTable<E extends DataBase> extends AbstractTable<E> im
 
     @Override
     public boolean insert(Collection<? extends E> entries, Connection connection) throws SQLException {
-        boolean inserted = false;
         validate(entries, connection);
-        try (PreparedStatement stmt = connection.prepareStatement(getInsert())) {
 
-            for (E entry : entries) {
+        int toInsert = 0;
+        int inserted = 0;
 
-                if (entry.isNewEntry()) {
-                    setInsertData(entry, stmt);
-                    stmt.addBatch();
+        for (E entry : entries) {
+            if (entry.isNewEntry()) {
+                toInsert++;
+                if (insert(entry, connection)) {
+                    inserted++;
                 }
             }
-
-            // TODO: 15.07.2017 do sth about execute/executeUpdate
-            if (!Arrays.asList(stmt.executeBatch()).isEmpty()) {
-                inserted = true;
-            }
         }
-        return inserted;
+        return toInsert == inserted;
     }
 
     @Override

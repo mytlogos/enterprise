@@ -39,10 +39,9 @@ class SourceTable extends AbstractDataTable<Source> {
      * Returns a static Instance of this {@code SourceTable}.
      *
      * @return instance - Instance of this {@code SourceTable}
-     * @throws SQLException if class could not be instantiated
      * @see #SourceTable()
      */
-    static SourceTable getInstance() throws SQLException {
+    static SourceTable getInstance() {
         if (INSTANCE == null) {
             throw new IllegalStateException();
         } else {
@@ -106,23 +105,27 @@ class SourceTable extends AbstractDataTable<Source> {
      * @return integers return an integer {@code Array} of affected Rows per Statement
      * @throws SQLException if {@code Collection} could not be deleted
      */
-    int[] deleteSources(Collection<Source> entries, Connection connection) throws SQLException {
-        int[] deleted;
-            if (entries == null || connection == null || connection.isClosed()) {
-                throw new IllegalArgumentException();
-            }
-            String delete = "Delete from " + getTableName() + " where " + tableId + "= ?";
-            try (PreparedStatement statement = connection.prepareStatement(delete)) {
+    boolean deleteSources(Collection<Source> entries, Connection connection) throws SQLException {
+        validate(entries, connection);
 
-                for (Source entry : entries) {
-                    setDeleteData(statement, entry);
-                    statement.addBatch();
-                    System.out.println("Entry mit ID " + entry.getId() + " wurde gelöscht!");
-                    logger.log(Level.INFO, "entry with id " + entry.getId() + " was deleted.");
-                }
-                deleted = statement.executeBatch();
+        int[] deleted;
+        String delete = "Delete from " + getTableName() + " where " + tableId + "= ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(delete)) {
+
+            for (Source entry : entries) {
+                setDeleteData(statement, entry);
+                statement.addBatch();
+
+                System.out.println("Entry mit ID " + entry.getId() + " wurde gelöscht!");
             }
-        return deleted;
+            deleted = statement.executeBatch();
+        }
+        if (deleted.length == entries.size()) {
+            return true;
+        } else {
+            throw new SQLException("could not delete all");
+        }
     }
 
     /**
@@ -145,12 +148,12 @@ class SourceTable extends AbstractDataTable<Source> {
     }
 
     @Override @Deprecated
-    final public int[] updateEntry(Source entry, Connection connection) {
-        return new int[0];
+    final public boolean updateEntry(Source entry, Connection connection) {
+        throw new IllegalAccessError();
     }
 
     @Override @Deprecated
-    final public int[] updateEntries(Collection<? extends Source> entries, Connection connection) {
-        return new int[0];
+    final public boolean updateEntries(Collection<? extends Source> entries, Connection connection) {
+        throw new IllegalAccessError();
     }
 }

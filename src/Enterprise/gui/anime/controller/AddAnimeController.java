@@ -1,19 +1,17 @@
 package Enterprise.gui.anime.controller;
 
 import Enterprise.ControlComm;
-
-
-import Enterprise.data.*;
-import Enterprise.data.impl.*;
+import Enterprise.data.OpEntryCarrier;
+import Enterprise.data.impl.SimpleSourceable;
+import Enterprise.data.impl.SourceableEntryImpl;
 import Enterprise.data.intface.*;
 import Enterprise.gui.controller.SourceableAddController;
 import Enterprise.gui.general.GlobalItemValues;
+import Enterprise.gui.general.GuiPaths;
 import Enterprise.gui.general.Mode;
 import Enterprise.gui.general.PostSingleton;
 import Enterprise.modules.Anime;
 import Enterprise.modules.Module;
-import scrape.sources.Source;
-import Enterprise.gui.general.GuiPaths;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -22,6 +20,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import scrape.sources.Source;
 import scrape.sources.SourceList;
 
 import java.net.URISyntaxException;
