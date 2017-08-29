@@ -1,9 +1,9 @@
 package Enterprise.data.database;
 
 import Enterprise.data.ClassSpy;
-import Enterprise.misc.SetList;
 import Enterprise.data.intface.DataBase;
 import Enterprise.data.intface.DataTable;
+import Enterprise.misc.SetList;
 
 import java.sql.*;
 import java.util.*;
@@ -331,42 +331,4 @@ abstract class AbstractDataTable<E extends DataBase> extends AbstractTable<E> im
      *                      the given column does not exist
      */
     abstract E getData(ResultSet rs) throws SQLException;
-
-    /**
-     * Sets all parameters needed to identify one distinct row.
-     * Needed to get the database id of this object for further
-     * queries.
-     *
-     * @param entry {@link Enterprise.data.intface.Entry} to query with
-     * @param stmt {@code PreparedStatement} to set the parameter from
-     */
-    abstract void queryIdData(E entry, PreparedStatement stmt) throws SQLException;
-
-    /**
-     * The SQL statement of an SELECT operation.
-     * Queries the Id of the respective row_Id column.
-     *
-     * @return string - sql statement with placeholder '?'
-     */
-    abstract String getRowQuery();
-
-    /**
-     * Sets the id of the given {@code Database} object.
-     * To function properly, {@link #getRowQuery()} and
-     * {@link #queryIdData(DataBase, PreparedStatement)} need to be
-     * implemented.
-     *
-     * @param entry entry to alter
-     * @param connection connection to the database
-     */
-    void getWithId(E entry, Connection connection) throws SQLException {
-        validate(connection);
-
-        try (PreparedStatement statement = connection.prepareStatement(getRowQuery())) {
-            queryIdData(entry, statement);
-            ResultSet set = statement.executeQuery();
-            int id = set.getInt(1);
-            entry.setId(id, this);
-        }
-    }
 }

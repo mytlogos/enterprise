@@ -204,7 +204,6 @@ public class NovelPosts {
             }
         }
 
-        System.out.println(builder);
         Pattern pattern = Pattern.compile(builder.toString());
         return pattern.matcher(toMatch);
     }

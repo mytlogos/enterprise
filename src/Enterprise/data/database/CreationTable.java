@@ -86,26 +86,6 @@ public class CreationTable extends AbstractDataTable<Creation> implements DataTa
         stmt.setString(7,entry.getWorkStatus());
     }
 
-    void queryIdData(Creation entry, PreparedStatement stmt) throws SQLException {
-        stmt.setString(1,entry.getTitle());
-        stmt.setString(2,entry.getSeries());
-        stmt.setString(3,entry.getDateLastPortion());
-        stmt.setInt(4,entry.getNumPortion());
-        stmt.setString(5,entry.getCoverPath());
-        stmt.setString(6,entry.getWorkStatus());
-    }
-
-    @Override
-    String getRowQuery() {
-        return "Select " + tableId + " from " + getTableName() + " where "
-                + titleC + " = ? AND"
-                + seriesC + " = ? AND"
-                + dateLastPortionC + " = ? AND"
-                + numPortionC + " = ? AND"
-                + coverPathC + " = ? AND"
-                + workStatusC + " = ?";
-    }
-
     @Override
     Creation getData(ResultSet rs) throws SQLException {
         Creation entry;

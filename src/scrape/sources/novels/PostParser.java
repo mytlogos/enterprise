@@ -114,7 +114,6 @@ class PostParser {
             localDateTime = localDateTime.minusHours(8);
         }
 
-        System.out.println(localDateTime);
         return localDateTime;
     }
 

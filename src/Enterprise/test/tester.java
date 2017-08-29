@@ -1,15 +1,13 @@
 package Enterprise.test;
 
-import scrape.sources.Source;
-import scrape.sources.SourceList;
-
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.file.*;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.logging.FileHandler;
@@ -41,15 +39,6 @@ public class tester {
         FileVisitor<Path> fileProcessor = new ProcessFile();
         Files.walkFileTree(Paths.get(ROOT), fileProcessor);
 */
-
-        SourceList sources = new SourceList();
-        System.out.println(sources.isListChanged());
-        sources.add(new Source());
-        System.out.println(sources.isListChanged());
-        sources.setUpdated();
-        System.out.println(sources.isListChanged());
-        sources.add(new Source("http://bisafans.de", Source.SourceType.START));
-        System.out.println(sources.isListChanged());
 
 
         System.out.println(System.getProperties());

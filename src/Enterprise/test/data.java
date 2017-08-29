@@ -2,50 +2,65 @@ package Enterprise.test;
 
 import Enterprise.data.intface.ConHandler;
 import Enterprise.data.intface.User;
-import javafx.application.Application;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.stage.FileChooser;
-import javafx.stage.Stage;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.safety.Cleaner;
+import org.jsoup.safety.Whitelist;
+import org.jsoup.select.Elements;
 
-import java.io.File;
-import java.lang.ref.WeakReference;
-import java.lang.reflect.InvocationTargetException;
-import java.net.URI;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
 
 /**
  * Created by Dominik on 29.06.2017.
  * Part of OgameBot.
  */
-public class data extends Application {
+public class data {
 
-    private static Function<Connection, Object> connectionRFunction;
 
-    private static ImageView coverImage = new ImageView();
+    public static StringBuilder fetchXmlContent(String url) throws IOException {
+        StringBuilder xmlContent = new StringBuilder();
+        org.jsoup.Connection.Response document = Jsoup.connect(url).execute();
 
-    static class afrik {
-        static AtomicInteger integer = new AtomicInteger(1);
-        static List<Integer> reusableInts = new ArrayList<>();
+        Document document1 = document.parse();
 
-        static int creatId() {
-            if (reusableInts.isEmpty()) {
-                return integer.getAndIncrement();
-            } else {
-                int id = reusableInts.get(0);
-                reusableInts.remove(0);
-                return id;
-            }
-        }
+        Whitelist whitelist = Whitelist.relaxed();
+        whitelist.addAttributes("span", "class");
+        whitelist.addAttributes("div", "class");
+        whitelist.addAttributes("span", "time");
+        whitelist.addAttributes("div", "time");
+        Cleaner cleaner = new Cleaner(whitelist);
 
-        static void deleteId(int id) {
-            reusableInts.add(id);
-        }
+        System.out.println(cleaner.isValid(document1));
+        System.out.println(cleaner.isValidBodyHtml(document1.body().html()));
+        document1 = cleaner.clean(document1);
+
+        Elements postcontent = document1.getElementsByClass("post-body entry-content");
+
+        Document document2 = Jsoup.parse(postcontent.html());
+
+        xmlContent.append(document2.html());
+        return xmlContent;
+    }
+
+    public static void saveXmlFile(StringBuilder xmlContent, String saveLocation) throws IOException {
+        FileWriter fileWriter = new FileWriter(saveLocation);
+        BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+        bufferedWriter.write(xmlContent.toString());
+        bufferedWriter.close();
+        System.out.println("Downloading completed successfully..!");
+    }
+
+    public static void downloadXml() throws IOException {
+        String url = "http://www.sousetsuka.com/2017/08/death-march-kara-hajimaru-isekai_28.html";
+        String saveLocation = System.getProperty("user.dir") + "\\sousetsuka-testchapter8.html";
+        saveXmlFile(fetchXmlContent(url), saveLocation);
+    }
+
+    public static void main(String[] args) throws IOException {
+        downloadXml();
     }
 
     private static  <E> E getConnection(ConHandler<Connection, E> connectionRFunction) {
@@ -63,54 +78,6 @@ public class data extends Application {
             e.printStackTrace();
         }
         return result;
-    }
-
-    private static String coverPath = "";
-    private static String nonRelativeCoverPath = "";
-
-    public static void main(String[] args) throws ClassNotFoundException, SQLException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, NoSuchFieldException {
-        HashMap<String, WeakReference<Object>> hashMap = new HashMap<>();
-        launch();
-
-    }
-
-    protected static void addLocalImage() {
-        FileChooser fileChooser = new FileChooser();
-
-        //Set extension filter
-        FileChooser.ExtensionFilter extFilterJPG = new FileChooser.ExtensionFilter("JPG files (*.jpg)", "*.JPG");
-        FileChooser.ExtensionFilter extFilterPNG = new FileChooser.ExtensionFilter("PNG files (*.png)", "*.PNG");
-        fileChooser.getExtensionFilters().addAll(extFilterJPG, extFilterPNG);
-        fileChooser.setInitialDirectory(new File("img"));
-
-
-        //Show open file dialog
-        File file = fileChooser.showOpenDialog(null);
-
-        if (file != null) {
-            Image img = new Image(file.toURI().toString());
-            coverImage.setImage(img);
-            nonRelativeCoverPath = file.toURI().toString();
-            //relativize path against home directory
-            coverPath = new File("").toURI().relativize(file.toURI()).toString();
-        }
-    }
-
-    @Override
-    public void start(Stage primaryStage) throws Exception {
-        addLocalImage();
-        System.out.println(coverPath);
-        System.out.println(nonRelativeCoverPath);
-        URI uri1 = new URI(coverPath);
-        URI uri2 = new URI(nonRelativeCoverPath);
-        System.out.println(uri1);
-        System.out.println(uri2);
-        String path = "img/touhouxumaru.jpg";
-        File file = new File(path);
-        System.out.println(file);
-        System.out.println(file.toURI());
-        System.out.println(file.toString());
-        System.out.println(path);
     }
 
     private static Boolean getaBoolean(String select, User user, Connection connection) throws SQLException {

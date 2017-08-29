@@ -30,6 +30,7 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
+import javafx.stage.Stage;
 import scrape.concurrent.ScheduledScraper;
 
 import java.io.IOException;
@@ -103,13 +104,26 @@ public class EnterpriseController implements Initializable, Controller {
     @FXML
     private Button showPostsBtn;
 
+
+    private boolean openPostView = false;
+    private Stage postView = null;
     /**
      * Shows Posts scraped from {@link ScheduledScraper} in a new Window.
      */
     @FXML
     void showPosts() {
-        PostView postView = new PostView();
-        postView.open();
+        try {
+            PostView view = new PostView();
+            postView = view.open(root.getScene().getWindow());
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "could not open postView", e);
+        }
+
+        if (postView == null) {
+            showPostsBtn.setText("Zeige Posts");
+        } else {
+            showPostsBtn.setText("Schließe Posts");
+        }
     }
 
     /**
@@ -346,10 +360,9 @@ public class EnterpriseController implements Initializable, Controller {
 
         //starts the UpdateService
         service = new UpdateService();
-        //service.start();
-        // FIXME: 15.08.2017 uncomment the scheduled Services
+        service.start();
         //starts the ScheduledScraper
-        //PostSingleton.getInstance().startScheduledScraper();
+        PostSingleton.getInstance().startScheduledScraper();
 
         //ready the Graphical Content
         setTabPaneListeners();

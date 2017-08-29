@@ -103,32 +103,4 @@ public class UserTable extends AbstractDataTable<User> {
         entry.setEntryOld();
         return entry;
     }
-
-    @Override
-    void queryIdData(User entry, PreparedStatement stmt) throws SQLException {
-        String ownStatus = entry.getOwnStatus();
-        String comment = entry.getComment();
-        int rating = entry.getRating();
-        int processedPortion = entry.getProcessedPortion();
-        String list = entry.getList();
-        String keyWords = entry.getKeyWords();
-
-        stmt.setString(1,ownStatus);
-        stmt.setString(2,comment);
-        stmt.setString(3,list);
-        stmt.setInt(4,processedPortion);
-        stmt.setInt(5,rating);
-        stmt.setString(6,keyWords);
-    }
-
-    @Override
-    String getRowQuery() {
-        return "Select " + tableId + " from " + getTableName() + " where "
-                + ownStatusC + " = ? AND "
-                + commentC + " = ? AND "
-                + ratingC + " = ? AND "
-                + processedPortionC + " = ? AND "
-                + listC + " = ? AND "
-                + keyWordsC + " = ?";
-    }
 }

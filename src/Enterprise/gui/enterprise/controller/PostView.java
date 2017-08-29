@@ -1,6 +1,5 @@
 package Enterprise.gui.enterprise.controller;
 
-import scrape.concurrent.ScheduledScraper;
 import Enterprise.gui.general.PostSingleton;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -14,18 +13,27 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 import org.controlsfx.control.StatusBar;
+import scrape.concurrent.ScheduledScraper;
 import scrape.sources.Post;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.*;
+import java.util.ResourceBundle;
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 /**
  * This class is for presenting the scraped Posts in a new Window.
  * // TODO: 24.08.2017 do the javadoc
  */
 public class PostView implements Initializable{
+
+    private static Stage stage = null;
+    private Logger logger = Logger.getLogger(this.getClass().getSimpleName());
 
     @FXML
     private VBox root;
@@ -97,29 +105,67 @@ public class PostView implements Initializable{
         );
     }
 
-    public void add(Post post) {
-        if (post != null) {
-            listView.getItems().add(post);
-        } else {
-            System.out.println("Post ist null!");
+    {
+        try {
+            //creates a FileHandler for this Class and adds it to this logger
+            FileHandler fileHandler = new FileHandler("log\\" + this.getClass().getSimpleName() + ".log", true);
+            fileHandler.setFormatter(new SimpleFormatter());
+            logger.addHandler(fileHandler);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException();
         }
     }
 
     public void open() {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("../fxml/PostView.fxml"));
-        Parent root = null;
         try {
+            Parent root;
             root = loader.load();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        Stage stage = new Stage();
-        stage.setTitle("Posts");
-        if (root != null) {
-            stage.setScene(new Scene(root));
-        }
-        stage.show();
+            Stage stage = new Stage();
 
+            stage.setTitle("Posts");
+            stage.setScene(new Scene(root));
+
+            stage.show();
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "could not open postView", e);
+        }
+
+    }
+
+    Stage open(Window window) throws IOException {
+        if (stage == null) {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("../fxml/PostView.fxml"));
+            root = loader.load();
+
+            stage = new Stage();
+            stage.initOwner(window);
+            stage.setTitle("Posts");
+            stage.setScene(new Scene(root));
+
+            int closeWindowGap = -0;
+
+            window.xProperty().addListener((observable, oldValue, newValue) -> stage.setX(newValue.doubleValue() + window.getWidth() + closeWindowGap));
+            window.yProperty().addListener((observable, oldValue, newValue) -> stage.setY(newValue.doubleValue()));
+
+            window.widthProperty().addListener((observable, oldValue, newValue) -> stage.setX(window.getX() + newValue.doubleValue() + closeWindowGap));
+
+            stage.minHeightProperty().bind(window.heightProperty());
+            stage.maxHeightProperty().bind(window.heightProperty());
+
+            stage.setX(window.getX() + window.getWidth() + closeWindowGap);
+            stage.setHeight(window.getHeight());
+            stage.setY(window.getY());
+            stage.setMaxWidth(400);
+            stage.setMinWidth(400);
+
+            stage.show();
+        } else {
+            stage.close();
+            stage = null;
+        }
+        return stage;
     }
 
     private void setStatusBar() {

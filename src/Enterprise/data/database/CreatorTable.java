@@ -93,25 +93,6 @@ public class CreatorTable extends AbstractDataTable<Creator> {
     }
 
     @Override
-    void queryIdData(Creator entry, PreparedStatement stmt) throws SQLException {
-        String authName = entry.getName();
-        String authSortName = entry.getSortName();
-        String authStat = entry.getStatus();
-
-        stmt.setString(1,authName);
-        stmt.setString(2,authSortName);
-        stmt.setString(3,authStat);
-    }
-
-    @Override
-    String getRowQuery() {
-        return "Select " + tableId + " from " + getTableName() + " where "
-                + nameC + " = ? AND"
-                + sortNameC + " = ? AND"
-                + statusC + " = ?";
-    }
-
-    @Override
     String getInsert() {
         return "insert into " + getTableName() + " values(?,?,?,?)";
     }

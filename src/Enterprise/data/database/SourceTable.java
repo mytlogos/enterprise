@@ -92,22 +92,6 @@ class SourceTable extends AbstractDataTable<Source> {
     }
 
     @Override
-    void queryIdData(Source entry, PreparedStatement stmt) throws SQLException {
-        String sourceUrl = entry.getUrl();
-        String type = entry.getSourceType().name();
-
-        stmt.setString(2,sourceUrl);
-        stmt.setString(3,type);
-    }
-
-    @Override
-    String getRowQuery() {
-        return "Select " + tableId + " from " + getTableName() + " where "
-                + sourceUrl + " = ? AND"
-                + sourceType + " = ?";
-    }
-
-    @Override
     String getInsert() {
         return "insert into " + getTableName() + " values(?,?,?)";
     }

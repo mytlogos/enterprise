@@ -1,20 +1,20 @@
 package Enterprise.gui.general;
 
+import Enterprise.data.intface.Sourceable;
 import Enterprise.misc.KeyWordList;
-import javafx.concurrent.ScheduledService;
-import scrape.sources.SourceList;
-import scrape.concurrent.ScheduledScraper;
-import scrape.concurrent.ScrapeService;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.ReadOnlyStringProperty;
+import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Worker;
+import scrape.concurrent.ScheduledScraper;
+import scrape.concurrent.ScrapeService;
 import scrape.sources.Post;
-import Enterprise.data.intface.Sourceable;
+import scrape.sources.SourceList;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A Singleton to provide global Access and Functions to
@@ -28,7 +28,7 @@ public class PostSingleton {
     /**
      * This [{@code Map} maps a {@code List} of keyWords to an {@link SourceList}.
      */
-    private final Map<List<String>, SourceList> searchMap = new ConcurrentSkipListMap<>();
+    private final Map<List<String>, SourceList> searchMap = new ConcurrentHashMap<>();
 
     LocalDateTime localDateTime;
 
