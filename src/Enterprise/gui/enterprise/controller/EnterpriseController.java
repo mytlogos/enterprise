@@ -4,22 +4,19 @@ import Enterprise.ControlComm;
 import Enterprise.data.concurrent.GetCall;
 import Enterprise.data.concurrent.OnCloseRun;
 import Enterprise.data.concurrent.UpdateService;
-import Enterprise.data.impl.SourceableEntryImpl;
 import Enterprise.data.intface.CreationEntry;
 import Enterprise.data.intface.SourceableEntry;
 import Enterprise.gui.anime.controller.AnimeController;
 import Enterprise.gui.book.controller.BookController;
 import Enterprise.gui.controller.Controller;
+import Enterprise.gui.general.BasicModes;
 import Enterprise.gui.general.GuiPaths;
 import Enterprise.gui.general.ItemFactory;
-import Enterprise.gui.general.Mode;
 import Enterprise.gui.general.PostSingleton;
 import Enterprise.gui.manga.controller.MangaController;
 import Enterprise.gui.novel.controller.NovelController;
 import Enterprise.gui.series.controller.SeriesController;
-import Enterprise.modules.Anime;
-import Enterprise.modules.Module;
-import Enterprise.modules.Novel;
+import Enterprise.modules.BasicModules;
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
@@ -46,7 +43,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
-import static Enterprise.modules.Module.*;
+import static Enterprise.modules.BasicModules.*;
 
 /**
  * This Class is the Controller of the Main Window of the File {@code Enterprise.fxml}.
@@ -167,15 +164,15 @@ public class EnterpriseController implements Initializable, Controller {
     }
 
     /**
-     * Loads the content of the specified {@link Module} to the specified {@link Pane}
+     * Loads the content of the specified {@link BasicModules} to the specified {@link Pane}
      * and binds it to the Container Pane.
      *
      * @param module module to load
      * @param pane Pane to load the Content in
      * @throws IOException if content could not be loaded
      */
-    private void loadContent(Module module, Pane pane) throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource(GuiPaths.getPath(module, Mode.CONTENT)));
+    private void loadContent(BasicModules module, Pane pane) throws IOException {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource(GuiPaths.getPath(module, BasicModes.CONTENT)));
 
         Pane pane1;
         pane1 = loader.load();
@@ -206,7 +203,6 @@ public class EnterpriseController implements Initializable, Controller {
 
     }
 
-    @Override
     public void paneFocus() {
         for (Node node : root.getChildren()) {
             if (node instanceof Pane) {
@@ -214,11 +210,6 @@ public class EnterpriseController implements Initializable, Controller {
             }
         }
         root.setOnMouseClicked(event -> root.requestFocus());
-    }
-
-    @Override
-    public void setModuleEntry() {
-
     }
 
     private int indexFirstSep;
@@ -245,29 +236,29 @@ public class EnterpriseController implements Initializable, Controller {
     /**
      * Clears all columns except the {@code indexColumn} of the {@code entryTable}
      * of the specified String.
-     * @param oldTab string representing a tabName of {@link Module}.
-     * @see Module#tabName()
+     * @param oldTab string representing a tabName of {@link BasicModules}.
+     * @see BasicModules#tabName()
      */
     private void onOldTab(String oldTab) {
         if (ANIME.tabName().equalsIgnoreCase(oldTab)) {
-            AnimeController controller = (AnimeController) ControlComm.getInstance().getController(ANIME, Mode.CONTENT);
+            AnimeController controller = (AnimeController) ControlComm.getInstance().getController(ANIME, BasicModes.CONTENT);
             controller.clearColumns();
         }
         if (BOOK.tabName().equalsIgnoreCase(oldTab)) {
-            BookController controller = (BookController) ControlComm.getInstance().getController(BOOK, Mode.CONTENT);
+            BookController controller = (BookController) ControlComm.getInstance().getController(BOOK, BasicModes.CONTENT);
             //controller.clearColumns();
             // TODO: 30.07.2017 implement BOOK, MANGA and SERIES first
         }
         if (MANGA.tabName().equalsIgnoreCase(oldTab)) {
-            MangaController controller = (MangaController) ControlComm.getInstance().getController(MANGA, Mode.CONTENT);
+            MangaController controller = (MangaController) ControlComm.getInstance().getController(MANGA, BasicModes.CONTENT);
             //controller.clearColumns();
         }
         if (NOVEL.tabName().equalsIgnoreCase(oldTab)) {
-            NovelController controller = (NovelController) ControlComm.getInstance().getController(NOVEL, Mode.CONTENT);
+            NovelController controller = (NovelController) ControlComm.getInstance().getController(NOVEL, BasicModes.CONTENT);
             controller.clearColumns();
         }
         if (SERIES.tabName().equalsIgnoreCase(oldTab)) {
-            SeriesController controller = (SeriesController) ControlComm.getInstance().getController(SERIES, Mode.CONTENT);
+            SeriesController controller = (SeriesController) ControlComm.getInstance().getController(SERIES, BasicModes.CONTENT);
             //controller.clearColumns();
         }
     }
@@ -319,15 +310,15 @@ public class EnterpriseController implements Initializable, Controller {
 
     /**
      * Starts the {@link GetCall} to get all {@link CreationEntry}s from the source of data.
-     * Separates the Entries according to their {@link Module}s.
-     * Makes the {@link Enterprise.data.intface.Sourceable} available for the {@link ScheduledScraper}.
+     * Separates the Entries according to their {@link BasicModules}s.
+     * Makes the {@link Enterprise.data.intface.Sourceable}s available for the {@link ScheduledScraper}.
      */
     private void getDataFromDB() {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         Future<List<? extends CreationEntry>> future = executor.submit(new GetCall());
 
-        List<SourceableEntry> animeEntries = Anime.getInstance().getEntries();
-        List<SourceableEntry> novelEntries = Novel.getInstance().getEntries();
+        List<CreationEntry> animeEntries = ANIME.getEntries();
+        List<CreationEntry> novelEntries = NOVEL.getEntries();
 
         List<? extends CreationEntry> futureEntries;
         try {
@@ -335,16 +326,16 @@ public class EnterpriseController implements Initializable, Controller {
 
                 for (CreationEntry creationEntry : futureEntries) {
 
-                    if (creationEntry instanceof SourceableEntry && creationEntry.getModule() == Module.ANIME) {
-                        animeEntries.add((SourceableEntryImpl) creationEntry);
+                    if (creationEntry instanceof SourceableEntry && creationEntry.getModule() == ANIME) {
+                        animeEntries.add(creationEntry);
                     }
-                    if (creationEntry instanceof SourceableEntry && creationEntry.getModule() == Module.NOVEL) {
-                        novelEntries.add((SourceableEntryImpl) creationEntry);
+                    if (creationEntry instanceof SourceableEntry && creationEntry.getModule() == NOVEL) {
+                        novelEntries.add(creationEntry);
                     }
                 }
 
-            novelEntries.forEach(novelEntry -> PostSingleton.getInstance().addSearchEntries(novelEntry.getSourceable()));
-            animeEntries.forEach(animeEntry -> PostSingleton.getInstance().addSearchEntries(animeEntry.getSourceable()));
+            novelEntries.forEach(novelEntry -> PostSingleton.getInstance().addSearchEntries(((SourceableEntry) novelEntry).getSourceable()));
+            animeEntries.forEach(animeEntry -> PostSingleton.getInstance().addSearchEntries(((SourceableEntry) animeEntry).getSourceable()));
 
         } catch (InterruptedException | ExecutionException e) {
             logger.log(Level.SEVERE, "error occurred while getting data from the database", e);
@@ -353,9 +344,10 @@ public class EnterpriseController implements Initializable, Controller {
     }
 
     private UpdateService service;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        ControlComm.getInstance().setController(this);
+        ControlComm.getInstance().setEnterpriseController(this);
         getDataFromDB();
 
         //starts the UpdateService

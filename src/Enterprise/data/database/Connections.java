@@ -120,4 +120,16 @@ class Connections{
             logConnectionError(e);
         }
     }
+
+    static void getConAuto(ConHandlerVoid<Connection> connectionRFunction) {
+        try (Connection connection = connection()) {
+            try {
+                connectionRFunction.handle(connection);
+            } catch (SQLException e) {
+                logger.log(Level.SEVERE, e.getMessage(), e);
+            }
+        } catch (SQLException e) {
+            logConnectionError(e);
+        }
+    }
 }

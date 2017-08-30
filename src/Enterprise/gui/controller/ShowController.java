@@ -1,7 +1,12 @@
 package Enterprise.gui.controller;
 
-import Enterprise.modules.EnterpriseSegments;
+import Enterprise.ControlComm;
 import Enterprise.data.intface.CreationEntry;
+import Enterprise.gui.general.BasicModes;
+import Enterprise.gui.general.GuiPaths;
+import Enterprise.gui.general.Mode;
+import Enterprise.misc.EntrySingleton;
+import Enterprise.modules.Module;
 import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -25,10 +30,36 @@ import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
 /**
- * The basic {@link Controller} of all {@code Controller}  with {@link Enterprise.gui.general.Mode#SHOW}.
+ * The basic {@link Controller} of all {@code Controller}  with {@link BasicModes#SHOW}.
  * Provides common fields and functionality.
  */
-public abstract class ShowController<E extends CreationEntry, R extends EnterpriseSegments> implements Controller {
+public abstract class ShowController<E extends CreationEntry, R extends Enum<R> & Module> extends AbstractController<R, BasicModes> implements Controller {
+
+    @Override
+    final protected void setMode() {
+        mode = BasicModes.SHOW;
+    }
+
+    /**
+     * Creates the Window with the content specified by the
+     * {@link Mode} and {@link Module} of each Controller.
+     */
+    protected Stage loadStage() {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource(GuiPaths.getPath(module, mode)));
+        Parent root = null;
+        try {
+            root = loader.load();
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "could not load file", e);
+            e.printStackTrace();
+        }
+
+        Stage stage = new Stage();
+        if (root != null) {
+            stage.setScene(new Scene(root));
+        }
+        return stage;
+    }
 
     protected Logger logger = Logger.getLogger(this.getClass().getPackage().getName());
 
@@ -43,8 +74,6 @@ public abstract class ShowController<E extends CreationEntry, R extends Enterpri
             throw new RuntimeException();
         }
     }
-
-    protected R moduleEntry;
 
     @FXML
     protected TextArea commentArea;
@@ -90,42 +119,25 @@ public abstract class ShowController<E extends CreationEntry, R extends Enterpri
     protected E entryData;
 
     /**
-     * Creates the Window with the Content from the given {@code loader}.
-     *
-     * @param loader {@link FXMLLoader} which will load the content
-     */
-    protected Stage setWindow(FXMLLoader loader) {
-        Parent root = null;
-        try {
-            root = loader.load();
-        } catch (IOException e) {
-            logger.log(Level.SEVERE, "could not load file", e);
-            e.printStackTrace();
-        }
-
-        Stage stage = new Stage();
-        if (root != null) {
-            stage.setScene(new Scene(root));
-        }
-        return stage;
-    }
-
-    /**
      * Binds the {@code property} to the {@link Text#textProperty()}
      * of the given {@code Text} unidirectional.
      *
      * @param text text to bind to
      * @param property property which provides the content
      */
-    protected void bindToText(Text text, StringProperty property) {
+    void bindToText(Text text, StringProperty property) {
         text.textProperty().bind(property);
     }
 
     /**
-     * Opens a new Window of {@link Enterprise.modules.Module} of this instance
-     * and in {@link Enterprise.gui.general.Mode#EDIT}.
+     * Opens a new Window of {@link Module} of this instance
+     * and in {@link BasicModes#EDIT}.
      */
-    protected abstract void openEdit();
+    @FXML
+    protected void openEdit() {
+        EntrySingleton.getInstance().setEntry(entryData);
+        ControlComm.getInstance().getController(module, mode).open();
+    }
 
     /**
      * Binds the entry to the nodes of this instance.
@@ -139,6 +151,7 @@ public abstract class ShowController<E extends CreationEntry, R extends Enterpri
         bindToText(creator, entryData.getCreator().nameProperty() );
         bindToText(title,entryData.getCreation().titleProperty());
         bindToText(dateLastCreation,entryData.getCreation().dateLastPortionProperty());
+        bindToText(keyWords, entryData.getUser().keyWordsProperty());
 
         //binds integer properties to nodes
         processedCreation.textProperty().bindBidirectional(entryData.getUser().processedPortionProperty(), new NumberStringConverter(new DecimalFormat("")));
@@ -152,6 +165,7 @@ public abstract class ShowController<E extends CreationEntry, R extends Enterpri
         File imageFile = new File(entryData.getCreation().getCoverPath());
         Image image = new Image(imageFile.toURI().toString());
         coverImage.setImage(image);
+
     }
 
     /**

@@ -4,13 +4,12 @@ import Enterprise.gui.general.PostList;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
-import org.jsoup.select.Elements;
-import scrape.sources.novels.NovelPosts;
 import scrape.sources.Post;
 import scrape.sources.Source;
 import scrape.sources.SourceList;
+import scrape.sources.novels.NovelPosts;
 
-import java.util.*;
+import java.util.List;
 
 /**
  * Created by Dominik on 22.07.2017.

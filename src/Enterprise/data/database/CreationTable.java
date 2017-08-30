@@ -11,7 +11,7 @@ import java.util.Iterator;
 /**
  * DAO class responsible for the table holding the data of {@code Creation}entries.
  */
-public class CreationTable extends AbstractDataTable<Creation> implements DataTable<Creation> {
+class CreationTable extends AbstractDataTable<Creation> implements DataTable<Creation> {
     private static final String titleC;
     private static final String seriesC;
     private static final String dateLastPortionC;

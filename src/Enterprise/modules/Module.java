@@ -1,43 +1,18 @@
 package Enterprise.modules;
 
+import Enterprise.data.intface.CreationEntry;
+
+import java.util.List;
+
 /**
- * Created by Dominik on 10.07.2017.
- * Part of OgameBot.
+ *
  */
-public enum Module {
-    ANIME,
-    BOOK,
-    MANGA,
-    NOVEL,
-    SERIES,
-    ENTERPRISE;
+public interface Module {
+    String tabName();
 
-    public String tabName() {
-        String tabName;
-        switch (this) {
-            case ANIME:
-                tabName = "anime";
-                break;
-            case BOOK:
-                tabName = "Bücher";
-                break;
-            case MANGA:
-                tabName = "manga";
-                break;
-            case NOVEL:
-                tabName = "Novel";
-                break;
-            case SERIES:
-                tabName = "Serien";
-                break;
-            default:
-                tabName = "N/A";
-        }
-        return tabName;
-    }
+    boolean deleteEntry(CreationEntry entry);
 
-    @Override
-    public String toString() {
-        return super.toString().toLowerCase();
-    }
+    List<CreationEntry> getEntries();
+
+    boolean addEntry(CreationEntry entry);
 }

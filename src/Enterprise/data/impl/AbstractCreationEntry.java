@@ -5,7 +5,7 @@ import Enterprise.data.intface.Creation;
 import Enterprise.data.intface.CreationEntry;
 import Enterprise.data.intface.DataBase;
 import Enterprise.data.intface.User;
-import Enterprise.modules.Module;
+import Enterprise.modules.BasicModules;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,7 +16,7 @@ import java.util.Map;
 abstract class AbstractCreationEntry extends EnterpriseEntry {
     User user;
     Creation creation;
-    Module module;
+    BasicModules module;
 
     private Map<DataBase, Integer> references = new HashMap<>();
 

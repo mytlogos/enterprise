@@ -4,8 +4,9 @@ import Enterprise.data.Default;
 import Enterprise.data.EnterpriseEntry;
 import Enterprise.data.Person;
 import Enterprise.data.intface.*;
+import Enterprise.misc.DataAccess;
+import Enterprise.misc.SQLUpdate;
 import Enterprise.misc.SetList;
-import Enterprise.misc.SQL;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -20,16 +21,21 @@ import java.util.logging.Level;
  * Implementation of Creator
  * @see Creator
  */
+@DataAccess(daoClass = "CreatorTable")
 public class SimpleCreator extends EnterpriseEntry implements DataBase,Comparable<Creator>, Creator {
     private int creatorId;
     private static int idCounter = 1;
 
-    @SQL
+    @SQLUpdate(stateGet = "isNameChanged", valueGet = "getName", columnField = "nameC")
     private StringProperty name = new SimpleStringProperty();
-    @SQL
+
+    @SQLUpdate(stateGet = "isSortNameChanged", valueGet = "getSortName", columnField = "sortNameC")
     private StringProperty sortName = new SimpleStringProperty();
-    @SQL
+
+    @SQLUpdate(stateGet = "isStatusChanged", valueGet = "getStatus", columnField = "statusC")
     private StringProperty status = new SimpleStringProperty();
+
+    // TODO: 30.08.2017 implement
     private Person personalInfo;
 
     private List<Creation> creatorWorks = new SetList<>();

@@ -16,7 +16,7 @@ public class Utils {
      * @param arrays integer arrays to merge
      * @return integerArray - the merged array
      */
-    public static int[] addArrays(int[]... arrays) {
+    public static int[] addIntArrays(int[]... arrays) {
         int position = 0;
         int arraySize = 0;
         for (int[] array : arrays) {

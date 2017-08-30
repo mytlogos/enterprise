@@ -1,8 +1,10 @@
 package Enterprise.data.intface;
 
+import Enterprise.misc.SQLUpdate;
+
 /**
  * Classes, which will be saved into the Database, need to implement this Interface
- * Fields which will be saved into Database, need to be marked with the {@link Enterprise.misc.SQL} Annotation
+ * Fields which will be saved into Database, need to be marked with the {@link SQLUpdate} Annotation
  * <p>
  * Fields annotated with @SQL need to have corresponding Getter Methods, and StateChanged Getter Methods,
  * because {@link Enterprise.data.database.AbstractDataTable} creates the UpdateStatements through

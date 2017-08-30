@@ -1,16 +1,22 @@
 package Enterprise.gui.controller;
 
-import Enterprise.gui.general.Mode;
-import Enterprise.modules.EnterpriseSegments;
+import Enterprise.ControlComm;
+import Enterprise.data.OpEntryCarrier;
 import Enterprise.data.intface.CreationEntry;
+import Enterprise.gui.general.BasicModes;
+import Enterprise.gui.general.Columns;
+import Enterprise.misc.EntrySingleton;
+import Enterprise.modules.BasicModules;
 import Enterprise.modules.Module;
+import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
+import javafx.scene.layout.HBox;
 import javafx.util.Callback;
 
 import java.io.IOException;
@@ -20,10 +26,13 @@ import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
 /**
- * The basic controller for all controller with {@link Mode#CONTENT}.
+ * The basic controller for all controller with {@link BasicModes#CONTENT}.
  * Provides common fields and functionality.
  */
-public abstract class ModuleController<E extends CreationEntry, R extends EnterpriseSegments> implements Controller {
+public abstract class ModuleController<E extends CreationEntry, R extends Enum<R> & Module> extends AbstractController<R, BasicModes> {
+
+    @FXML
+    protected HBox addBox;
 
     protected Logger logger = Logger.getLogger(this.getClass().getPackage().getName());
 
@@ -39,8 +48,6 @@ public abstract class ModuleController<E extends CreationEntry, R extends Enterp
         }
     }
 
-    protected R moduleEntry;
-
     @FXML
     protected TextField titleField;
     @FXML
@@ -50,33 +57,68 @@ public abstract class ModuleController<E extends CreationEntry, R extends Enterp
 
     @FXML
     protected TableColumn<E, Number> indexColumn;
-
-    protected TableColumn<E, String> titleColumn;
-
-    protected TableColumn<E, String> creatorNameColumn;
-
-    protected TableColumn<E, Number> presentColumn;
-
-    protected TableColumn<E, Number> processedColumn;
-
-    protected TableColumn<E, String> ownStatusColumn;
-
-    protected TableColumn<E, String> seriesColumn;
-
-    protected TableColumn<E, String> lastEpColumn;
-
-    protected TableColumn<E, Number> ratingColumn;
-
-    protected TableColumn<E, String> creatorSortNameColumn;
-
-    protected TableColumn<E, String> workStatColumn;
-
-    protected TableColumn<E, String> commentColumn;
+    @FXML
+    protected MenuItem fullAdd;
+    @FXML
+    protected MenuItem edit;
+    @FXML
+    protected MenuItem delete;
+    private TableColumn<E, String> titleColumn;
+    private TableColumn<E, String> creatorNameColumn;
+    private TableColumn<E, Number> presentColumn;
+    private TableColumn<E, Number> processedColumn;
+    private TableColumn<E, String> ownStatusColumn;
+    private TableColumn<E, String> seriesColumn;
+    private TableColumn<E, String> lastEpColumn;
+    private TableColumn<E, Number> ratingColumn;
+    private TableColumn<E, String> creatorSortNameColumn;
 
     @FXML
     protected Button addBtn;
     @FXML
     protected Button editBtn;
+    private TableColumn<E, String> workStatColumn;
+    private TableColumn<E, String> commentColumn;
+    private TableColumn<E, String> keyWordsColumn;
+
+    @Override
+    final protected void setMode() {
+        mode = BasicModes.CONTENT;
+    }
+
+    /**
+     * Loads all {@link CreationEntry}s from the specific {@link Module}.
+     */
+    protected void loadData() {
+        Platform.runLater(() -> module.getEntries().forEach(entry -> entryTable.getItems().add((E) entry)));
+    }
+
+    /**
+     * Adds the keyWords column to the {@code entryTable TableView}
+     * after going through the {@link #stringColumnFactory(String, double, Callback)}.
+     */
+    public void showKeyWordsColumn() {
+        keyWordsColumn = stringColumnFactory(Columns.getKeyWords(module), 80,
+                data -> data.getValue().getUser().keyWordsProperty());
+        //'shows' the column in the TableView
+        entryTable.getColumns().add(keyWordsColumn);
+    }
+
+    /**
+     * Removes the keyWords Column from the {@code entryTable TableView}.
+     */
+    public void hideKeyWordsColumn() {
+        entryTable.getColumns().remove(keyWordsColumn);
+    }
+
+    /**
+     * Opens a new Window with {@link BasicModes} {@code ADD} and {@link Module}
+     * specified by the subclass.
+     */
+    @FXML
+    protected void openFullAdd() {
+        ControlComm.getInstance().getController(module, BasicModes.ADD).open();
+    }
 
     /**
      * Adds a {@link CreationEntry} to the {@code entryTable TableView}.
@@ -91,6 +133,116 @@ public abstract class ModuleController<E extends CreationEntry, R extends Enterp
                                             + entryTable + "; entry: " + entry);
         }
 
+    }
+
+    /**
+     * Adds the simplified Version of a {@link Enterprise.data.intface.CreationEntry}
+     * to the {@code entryTable} and the corresponding Module entry list.
+     * Simplified meaning, that only the title and creator are provided through user input,
+     * while the rest is set to default.
+     */
+    @FXML
+    protected void add() {
+        E entry = getSimpleEntry();
+
+        if (module.addEntry(entry)) {
+            //make it available to add it to the database
+            OpEntryCarrier.getInstance().addNewEntry(entry);
+            addEntry(entry);
+
+            //clears the TextFields for the next user input
+            creatorField.clear();
+            titleField.clear();
+        } else {
+            System.out.println("adding the entry failed");
+
+            //alerts that this entry does already exist
+            new Alert(Alert.AlertType.ERROR, "Eintrag existiert schon!").show();
+        }
+    }
+
+    /**
+     * Deletes the selected Row from the list of the TableView and the corresponding Module Entry List.
+     */
+    @FXML
+    protected void deleteSelected() {
+        E entry = entryTable.getSelectionModel().getSelectedItem();
+
+        if (entryTable.getItems().remove(entry) && module.deleteEntry(entry)) {
+            System.out.println(entry + " deleted");
+
+        } else {
+            logger.log(Level.WARNING, "row could not be deleted"
+                    + "TableView: " + entryTable.getItems()
+                    + "Entry" + entry);
+            System.out.println("Löschen fehlgeschlagen!");
+        }
+    }
+
+    /**
+     * Disables the 'small add' Button, if
+     * {@code titleField} and {@code creatorField} are empty.
+     */
+    protected void lockAddBtn() {
+        addBtn.disableProperty().bind(titleField.textProperty().isEmpty().and(creatorField.textProperty().isEmpty()));
+    }
+
+    /**
+     * Opens a new Window in {@link BasicModes#EDIT} and the module specified by subclass.
+     * Makes the data of the selected row available to the new Window.
+     */
+    @FXML
+    protected void openEdit() {
+        EntrySingleton.getInstance().setEntry(entryTable.getSelectionModel().getSelectedItem());
+        ControlComm.getInstance().getController(module, BasicModes.EDIT).open();
+    }
+
+    /**
+     * Deletes a row of the {@code entryTable}, if the DELETE key was pressed,
+     * while a row was selected.
+     * This method makes the deleted row available for deleting.
+     *
+     * @param event {@code KeyEvent} which will be filtered
+     */
+    @FXML
+    protected void deleteRow(KeyEvent event) {
+        if (event.getCode() == KeyCode.DELETE) {
+
+            E entry = entryTable.getSelectionModel().getSelectedItem();
+            // TODO: 30.08.2017 make list of BasicModules the underlying list
+            if (entryTable.getItems().remove(entry) && module.deleteEntry(entry)) {
+                System.out.println(entry + " deleted");
+            } else {
+                System.out.println("Löschen fehlgeschlagen!");
+            }
+        }
+    }
+
+    protected abstract E getSimpleEntry();
+
+    /**
+     * Registers listeners to the rows of the {@code entryTable TableView}.
+     * The registered Listener opens a new Window in {@link BasicModes} {@code SHOW} and the corresponding {@link BasicModules}.
+     * <p>
+     * Makes the data of the selected row available to the new Window.
+     * </p>
+     */
+    protected void setRowListener() {
+        entryTable.setRowFactory(tv -> {
+            TableRow<E> row = new TableRow<>();
+
+            row.setOnMouseClicked(event -> {
+
+                if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2 && (!row.isEmpty())) {
+
+                    EntrySingleton.getInstance().setEntry(entryTable.getSelectionModel().getSelectedItem());
+                    ControlComm.getInstance().getController(module, BasicModes.SHOW).open();
+
+                }
+
+            });
+            return row;
+        });
     }
 
     /**
@@ -117,25 +269,10 @@ public abstract class ModuleController<E extends CreationEntry, R extends Enterp
     }
 
     /**
-     * Registers listeners to the rows of the {@code entryTable TableView}.
-     * The registered Listener opens a new Window in {@link Mode} {@code SHOW} and the corresponding {@link Module}.
-     * <p>
-     * Makes the data of the selected row available to the new Window.
-     * </p>
-     */
-    protected abstract void setRowListener();
-
-    /**
      * Sets the value of textProperty of several {@link javafx.scene.text.Text}
      * and {@link javafx.scene.control.Label}.
      */
     protected abstract void setGui();
-
-    /**
-     * Loads all {@link CreationEntry}s from the specific subclass of
-     * {@link EnterpriseSegments}.
-     */
-    protected abstract void loadData();
 
     /**
      * Creates a {@link TableColumn} with {@code Number} as it´s value type.
@@ -147,7 +284,7 @@ public abstract class ModuleController<E extends CreationEntry, R extends Enterp
      * @param callback callback to add to the {@code CelValueFactory} of the  {@code TableColumn}
      * @return column - a complete {@code TableColumn}
      */
-    protected TableColumn<E, Number> numberColumnFactory(
+    private TableColumn<E, Number> numberColumnFactory(
             String columnName, double prefWidth,
             Callback<TableColumn.CellDataFeatures<E, Number>, ObservableValue<Number>> callback) {
 
@@ -170,7 +307,7 @@ public abstract class ModuleController<E extends CreationEntry, R extends Enterp
      * @param callback callback to add to the {@code CelValueFactory} of the  {@code TableColumn}
      * @return column - a complete {@code TableColumn}
      */
-    protected TableColumn<E, String> stringColumnFactory(String columnName, double prefWidth, Callback<TableColumn.CellDataFeatures<E, String>, ObservableValue<String>> callback) {
+    TableColumn<E, String> stringColumnFactory(String columnName, double prefWidth, Callback<TableColumn.CellDataFeatures<E, String>, ObservableValue<String>> callback) {
         TableColumn<E, String> column = new TableColumn<>();
         column.setPrefWidth(prefWidth);
         column.setMinWidth(40);
@@ -184,67 +321,101 @@ public abstract class ModuleController<E extends CreationEntry, R extends Enterp
      * Adds the title column to the {@code entryTable TableView}
      * after going through the {@link #stringColumnFactory(String, double, Callback)}.
      */
-    public abstract void showTitleColumn();
+    public void showTitleColumn() {
+        titleColumn = stringColumnFactory(Columns.getTitle(module), 210, data -> data.getValue().getCreation().titleProperty());
+        entryTable.getColumns().add(titleColumn);
+    }
 
     /**
      * Adds the creator column to the {@code entryTable TableView}
      * after going through the {@link #stringColumnFactory(String, double, Callback)}.
      */
-    public abstract void showCreatorColumn();
+    public void showCreatorColumn() {
+        creatorNameColumn = stringColumnFactory(Columns.getCreatorName(module), 80, data -> data.getValue().getCreator().nameProperty());
+        entryTable.getColumns().add(creatorNameColumn);
+    }
 
     /**
      * Adds the present column to the {@code entryTable TableView}
      * after going through the {@link #numberColumnFactory(String, double, Callback)}.
      */
-    public abstract void showPresentColumn();
+    public void showPresentColumn() {
+        presentColumn = numberColumnFactory(Columns.getNumPortion(module), 120, data -> data.getValue().getCreation().numPortionProperty());
+        entryTable.getColumns().add(presentColumn);
+    }
 
     /**
      * Adds the processed column to the {@code entryTable TableView}
      * after going through the {@link #numberColumnFactory(String, double, Callback)}.
      */
-    public abstract void showProcessedColumn();
+    public void showProcessedColumn() {
+        processedColumn = numberColumnFactory(Columns.getProcessed(module), 125, data -> data.getValue().getUser().processedPortionProperty());
+        entryTable.getColumns().add(processedColumn);
+    }
 
     /**
      * Adds the ownStatus column to the {@code entryTable TableView}
      * after going through the {@link #stringColumnFactory(String, double, Callback)}.
      */
-    public abstract void showOwnStatusColumn();
+    public void showOwnStatusColumn() {
+        ownStatusColumn = stringColumnFactory(Columns.getOwnStat(module), 80, data -> data.getValue().getUser().ownStatusProperty());
+        entryTable.getColumns().add(ownStatusColumn);
+    }
 
     /**
      * Adds the series column to the {@code entryTable TableView}
      * after going through the {@link #stringColumnFactory(String, double, Callback)}.
      */
-    public abstract void showSeriesColumn();
+    public void showSeriesColumn() {
+        seriesColumn = stringColumnFactory(Columns.getSeries(module), 80, data -> data.getValue().getCreation().seriesProperty());
+        entryTable.getColumns().add(seriesColumn);
+    }
 
     /**
      * Adds the lastEp column to the {@code entryTable TableView}
      * after going through the {@link #stringColumnFactory(String, double, Callback)}.
      */
-    public abstract void showLastPortionColumn();
+    public void showLastPortionColumn() {
+        lastEpColumn = stringColumnFactory(Columns.getLastPortion(module), 80, data -> data.getValue().getCreation().dateLastPortionProperty());
+        entryTable.getColumns().add(lastEpColumn);
+    }
 
     /**
      * Adds the rating column to the {@code entryTable TableView}
      * after going through the {@link #numberColumnFactory(String, double, Callback)}.
      */
-    public abstract void showRatingColumn();
+    public void showRatingColumn() {
+        ratingColumn = numberColumnFactory(Columns.getRating(module), 80, data -> data.getValue().getUser().ratingProperty());
+        entryTable.getColumns().add(ratingColumn);
+    }
+
 
     /**
      * Adds the creatorSort column to the {@code entryTable TableView}
      * after going through the {@link #stringColumnFactory(String, double, Callback)}.
      */
-    public abstract void showCreatorSortColumn();
+    public void showCreatorSortColumn() {
+        creatorSortNameColumn = stringColumnFactory(Columns.getCreatorSort(module), 80, data -> data.getValue().getCreator().sortNameProperty());
+        entryTable.getColumns().add(creatorSortNameColumn);
+    }
 
     /**
      * Adds the workStat column to the {@code entryTable TableView}
      * after going through the {@link #stringColumnFactory(String, double, Callback)}.
      */
-    public abstract void showWorkStatColumn();
+    public void showWorkStatColumn() {
+        workStatColumn = stringColumnFactory(Columns.getWorkStat(module), 80, data -> data.getValue().getCreation().workStatusProperty());
+        entryTable.getColumns().add(workStatColumn);
+    }
 
     /**
      * Adds the comment column to the {@code entryTable TableView}
      * after going through the {@link #stringColumnFactory(String, double, Callback)}.
      */
-    public abstract void showCommentColumn();
+    public void showCommentColumn() {
+        commentColumn = stringColumnFactory(Columns.getComment(module), 80, data -> data.getValue().getUser().commentProperty());
+        entryTable.getColumns().add(commentColumn);
+    }
 
     /**
      * Removes the title Column from the {@code entryTable TableView}.

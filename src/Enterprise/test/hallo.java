@@ -6,9 +6,9 @@ import javafx.application.Application;
 import javafx.stage.Stage;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
-import scrape.sources.*;
-import scrape.sources.novels.NovelPosts;
+import scrape.sources.Post;
+import scrape.sources.Source;
+import scrape.sources.SourceList;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -17,9 +17,11 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.sql.*;
+import java.sql.SQLException;
 import java.text.ParseException;
-import java.time.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
@@ -147,8 +149,8 @@ public class hallo extends Application {
                 System.out.println(contentText);
     }
 
-    public static String getUrl(String url){
-        URL urlObj = null;
+    private static String getUrl(String url) {
+        URL urlObj;
         try{
             urlObj = new URL(url);
         }
@@ -156,8 +158,8 @@ public class hallo extends Application {
             System.out.println("The url was malformed!");
             return "";
         }
-        URLConnection urlCon = null;
-        BufferedReader in = null;
+        URLConnection urlCon;
+        BufferedReader in;
         String outputText = "";
         try{
             urlCon = urlObj.openConnection();

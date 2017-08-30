@@ -1,62 +1,25 @@
 package Enterprise.gui.novel.controller;
 
 import Enterprise.ControlComm;
-import Enterprise.gui.general.Mode;
-import Enterprise.data.impl.SourceableEntryImpl;
-import Enterprise.modules.Module;
-import Enterprise.gui.general.GuiPaths;
-import Enterprise.gui.controller.ShowController;
+import Enterprise.data.intface.SourceableEntry;
+import Enterprise.gui.controller.SourceableShowController;
+import Enterprise.gui.general.BasicModes;
 import Enterprise.misc.EntrySingleton;
-import Enterprise.modules.Novel;
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
+import Enterprise.modules.BasicModules;
 import javafx.fxml.Initializable;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import scrape.sources.Source;
 
 import java.net.URL;
 import java.util.ResourceBundle;
 
 /**
  * This class is the Controller for {@code showNovel.fxml} with
- * {@link Module#NOVEL} and {@link Mode#SHOW}.
+ * {@link BasicModules#NOVEL} and {@link BasicModes#SHOW}.
  */
-public class ShowNovelController extends ShowController<SourceableEntryImpl,Novel> implements Initializable {
-    @FXML
-    private Text translator;
-    @FXML
-    private TableView<Source> sourceTable;
-
-    @FXML
-    private TableColumn<Source, String> sourceColumn;
-
-    @FXML
-    private TableColumn<Source, String> urlColumn;
-
+public class ShowNovelController extends SourceableShowController<BasicModules> implements Initializable {
     @Override
-    public void initialize(URL location, ResourceBundle resources) {
-
-        entryData = (SourceableEntryImpl) EntrySingleton.getInstance().getEntry();
-        ControlComm.getInstance().setController(this);
-
-        readySourceColumns();
-        loadEntry();
-    }
-
-    @FXML @Override
-    protected void openEdit() {
-        EntrySingleton.getInstance().setEntry(entryData);
-        ControlComm.getInstance().getController(Module.NOVEL, Mode.EDIT).open();
-
-    }
-
-    @FXML @Override
     public void open() {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource(GuiPaths.getPath(Module.NOVEL, Mode.SHOW)));
-        Stage stage = setWindow(loader);
+        Stage stage = loadStage();
 
         stage.setTitle("Novel Details");
         stage.setResizable(false);
@@ -64,29 +27,20 @@ public class ShowNovelController extends ShowController<SourceableEntryImpl,Nove
         stage.show();
     }
 
-    @Override
     public void paneFocus() {
-// TODO: 25.08.2017 do this
+
     }
 
     @Override
-    public void setModuleEntry() {
-        moduleEntry = Novel.getInstance();
-    }
-
-    /**
-     * Sets the fields providing data for the Columns.
-     */
-    private void readySourceColumns() {
-        sourceColumn.setCellValueFactory(param -> param.getValue().sourceNameProperty());
-        urlColumn.setCellValueFactory(param -> param.getValue().urlProperty());
+    protected void setModule() {
+        module = BasicModules.NOVEL;
     }
 
     @Override
-    protected void bindEntry() {
-        super.bindEntry();
-        bindToText(translator,entryData.getSourceable().translatorProperty());
-        bindToText(keyWords,entryData.getUser().keyWordsProperty());
-        sourceTable.setItems(entryData.getSourceable().getSourceList());
+    public void initialize(URL location, ResourceBundle resources) {
+        entryData = (SourceableEntry) EntrySingleton.getInstance().getEntry();
+        ControlComm.getInstance().setController(this, module, mode);
+
+        loadEntry();
     }
 }

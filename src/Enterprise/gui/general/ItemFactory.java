@@ -1,11 +1,11 @@
 package Enterprise.gui.general;
 
 import Enterprise.ControlComm;
+import Enterprise.gui.anime.controller.AnimeController;
 import Enterprise.gui.controller.ModuleController;
 import Enterprise.gui.controller.SourceableModuleCont;
-import Enterprise.modules.Module;
-import Enterprise.gui.anime.controller.AnimeController;
 import Enterprise.gui.novel.controller.NovelController;
+import Enterprise.modules.BasicModules;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.control.CheckMenuItem;
 
@@ -22,23 +22,23 @@ public class ItemFactory {
 
     /**
      * Generates a {@code List} of {@link CheckMenuItem}s with specifications for
-     * the {@link Module#ANIME} and default behavior in the form of
+     * the {@link BasicModules#ANIME} and default behavior in the form of
      * listeners are added to the {@link CheckMenuItem#selectedProperty()}.
      *
      * @return items {@code List} of {@code CheckMenuItems}
      */
     public List<CheckMenuItem> getAnimeMenuItems() {
-        AnimeController controller = (AnimeController) ControlComm.getInstance().getController(Module.ANIME, Mode.CONTENT);
+        AnimeController controller = (AnimeController) ControlComm.getInstance().getController(BasicModules.ANIME, BasicModes.CONTENT);
 
-        List<CheckMenuItem> items = getCheckMenuItems(controller, Module.ANIME);
-        getSourceableCheckMenuItems(controller, items, Module.ANIME);
+        List<CheckMenuItem> items = getCheckMenuItems(controller, BasicModules.ANIME);
+        getSourceableCheckMenuItems(controller, items, BasicModules.ANIME);
 
         return items;
     }
 
     /**
      * Generates a {@code List} of {@link CheckMenuItem}s with specifications for
-     * the {@link Module#BOOK} and default behavior in the form of
+     * the {@link BasicModules#BOOK} and default behavior in the form of
      * listeners are added to the {@link CheckMenuItem#selectedProperty()}.
      *
      * @return items {@code List} of {@code CheckMenuItems}
@@ -49,7 +49,7 @@ public class ItemFactory {
 
     /**
      * Generates a {@code List} of {@link CheckMenuItem}s with specifications for
-     * the {@link Module#MANGA} and default behavior in the form of
+     * the {@link BasicModules#MANGA} and default behavior in the form of
      * listeners are added to the {@link CheckMenuItem#selectedProperty()}.
      *
      * @return items {@code List} of {@code CheckMenuItems}
@@ -60,24 +60,24 @@ public class ItemFactory {
 
     /**
      * Generates a {@code List} of {@link CheckMenuItem}s with specifications for
-     * the {@link Module#NOVEL} and default behavior in the form of
+     * the {@link BasicModules#NOVEL} and default behavior in the form of
      * listeners are added to the {@link CheckMenuItem#selectedProperty()}.
      *
      * @return items {@code List} of {@code CheckMenuItems}
      */
     public List<CheckMenuItem> getNovelMenuItems() {
-        NovelController controller = (NovelController) ControlComm.getInstance().getController(Module.NOVEL, Mode.CONTENT);
+        NovelController controller = (NovelController) ControlComm.getInstance().getController(BasicModules.NOVEL, BasicModes.CONTENT);
 
 
-        List<CheckMenuItem> items = getCheckMenuItems(controller, Module.NOVEL);
-        getSourceableCheckMenuItems(controller, items, Module.NOVEL);
+        List<CheckMenuItem> items = getCheckMenuItems(controller, BasicModules.NOVEL);
+        getSourceableCheckMenuItems(controller, items, BasicModules.NOVEL);
 
         return items;
     }
 
     /**
      * Generates a {@code List} of {@link CheckMenuItem}s with specifications for
-     * the {@link Module#SERIES} and default behavior in the form of
+     * the {@link BasicModules#SERIES} and default behavior in the form of
      * listeners are added to the {@link CheckMenuItem#selectedProperty()}.
      *
      * @return items {@code List} of {@code CheckMenuItems}
@@ -94,7 +94,7 @@ public class ItemFactory {
      * @param items {@code List} of items to add to
      * @param module {@code Module} to specify the text of the items
      */
-    private void getSourceableCheckMenuItems(SourceableModuleCont controller, List<CheckMenuItem> items, Module module) {
+    private void getSourceableCheckMenuItems(SourceableModuleCont controller, List<CheckMenuItem> items, BasicModules module) {
         CheckMenuItem tlGroup = getTranslatorItem(controller, Columns.getTranslator(module));
         CheckMenuItem keyWords = getKeyWordsItem(controller, Columns.getKeyWords(module));
 
@@ -109,7 +109,7 @@ public class ItemFactory {
      * @param module {@code Module} to specify the text of the items
      * @return list of {@code CheckMenuItems}
      */
-    private List<CheckMenuItem> getCheckMenuItems(ModuleController controller, Module module) {
+    private List<CheckMenuItem> getCheckMenuItems(ModuleController controller, BasicModules module) {
         CheckMenuItem title = getTitleItem(controller, Columns.getTitle(module));
         CheckMenuItem series = getSeriesItem(controller, Columns.getSeries(module));
         CheckMenuItem lastEp = getLastPortionItem(controller, Columns.getLastPortion(module));

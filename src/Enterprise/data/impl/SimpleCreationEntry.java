@@ -2,7 +2,7 @@ package Enterprise.data.impl;
 
 import Enterprise.data.OpEntryCarrier;
 import Enterprise.data.intface.*;
-import Enterprise.modules.Module;
+import Enterprise.modules.BasicModules;
 import javafx.beans.property.BooleanProperty;
 
 import java.util.logging.Level;
@@ -20,9 +20,9 @@ public class SimpleCreationEntry extends AbstractCreationEntry implements Creati
      * @param user {@link User} which processes said {@link Creation}
      * @param creation Creation to be processed
      * @param creator {@link Creator} of said Creation
-     * @param module {@link Module} of this {@code SimpleCreationEntry}
+     * @param module {@link BasicModules} of this {@code SimpleCreationEntry}
      */
-    public SimpleCreationEntry(User user, Creation creation, Creator creator, Module module) {
+    public SimpleCreationEntry(User user, Creation creation, Creator creator, BasicModules module) {
         this.user = user;
         this.creation = creation;
         this.creation.setCreator(creator);
@@ -137,7 +137,7 @@ public class SimpleCreationEntry extends AbstractCreationEntry implements Creati
     }
 
     @Override
-    public Module getModule() {
+    public BasicModules getModule() {
         return module;
     }
 

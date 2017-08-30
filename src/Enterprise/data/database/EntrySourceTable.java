@@ -1,5 +1,6 @@
 package Enterprise.data.database;
 
+import Enterprise.data.intface.Entry;
 import Enterprise.data.intface.Sourceable;
 import Enterprise.misc.SetList;
 import scrape.sources.Source;
@@ -113,7 +114,6 @@ public class EntrySourceTable extends AbstractSubRelation<Sourceable> {
     @Override
     public boolean insert(Collection<? extends Sourceable> entries,Connection connection) throws SQLException {
         boolean inserted = false;
-
         validate(entries, connection);
 
         try (PreparedStatement stmt = connection.prepareStatement(getInsert())) {
@@ -214,29 +214,19 @@ public class EntrySourceTable extends AbstractSubRelation<Sourceable> {
      */
     public boolean updateEntries(Collection<Sourceable> entries) throws SQLException {
         List<Source> deletedSources = new ArrayList<>();
-        List<Source> addedSources = new ArrayList<>();
 
         entries.forEach(sourceable ->
                 sourceable.getSourceList().
                         stream().
                         filter(Source::isDead).
                         forEach(deletedSources::add));
-        entries.forEach(sourceable ->
-                addedSources.addAll(
-                        sourceable.getSourceList().getAddedSources()));
+
 
         boolean deleted = false;
         boolean updated = false;
-        boolean added = false;
+        boolean inserted = Connections.getConnection(connection -> insert(entries, connection));
 
         try (Connection connection = Connections.connection()) {
-            for (Sourceable entry : entries) {
-                insertNewParts(entry, entry.getSourceList(), connection);
-                insert(entries, connection);
-            }
-            if (!addedSources.isEmpty()) {
-                added = SourceTable.getInstance().insert(addedSources, connection);
-            }
             if (!deletedSources.isEmpty()) {
                 deleted = SourceTable.getInstance().deleteSources(deletedSources, connection);
             }
@@ -245,17 +235,28 @@ public class EntrySourceTable extends AbstractSubRelation<Sourceable> {
             }
         }
 
-        if (!deletedSources.isEmpty() == deleted
-                && !addedSources.isEmpty() == added
-                && !entries.isEmpty() == updated) {
+        boolean deleteUpdate = isUpdated(deletedSources, deleted);
+        boolean entryUpdate = isUpdated(entries, updated);
+        boolean insertUpdate = isUpdated(entries, inserted);
+
+        if (deleteUpdate || entryUpdate || insertUpdate) {
             return true;
         } else {
             throw new SQLException("incongruent data : "
                     + "\ndeletedSources: " + !deletedSources.isEmpty() + " deleted: " + deleted
-                    + "\naddedSources: " + !addedSources.isEmpty() + " added: " + added
                     + "\nentries available: " + !entries.isEmpty()
             );
         }
+    }
+
+    private boolean isUpdated(Collection<? extends Entry> list, boolean bool) throws SQLException {
+        boolean updated;
+        if (!list.isEmpty() == bool) {
+            updated = !list.isEmpty();
+        } else {
+            throw new SQLException("incongruous data");
+        }
+        return updated;
     }
 
     @Override

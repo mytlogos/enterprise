@@ -2,7 +2,7 @@ package Enterprise.gui.book.controller;
 
 import Enterprise.data.intface.CreationEntry;
 import Enterprise.gui.controller.EditController;
-import Enterprise.modules.Book;
+import Enterprise.modules.BasicModules;
 import javafx.stage.Stage;
 
 /**
@@ -10,15 +10,15 @@ import javafx.stage.Stage;
  * Part of OgameBot.
  * // TODO: 25.08.2017 do the javadoc and functionality
  */
-public class EditBookController extends EditController<CreationEntry, Book> {
+public class EditBookController extends EditController<CreationEntry, BasicModules> {
     @Override
     public void open() {
 
     }
 
     @Override
-    public void setModuleEntry() {
-
+    protected void setModule() {
+        module = BasicModules.BOOK;
     }
 
     @Override

@@ -13,17 +13,4 @@ public interface Controller {
     void open();
 
     //public abstract void close() throws IOException;
-
-    /**
-     * Sets the focus on the Pane, which handled
-     * the MouseClicked event.
-     */
-    void paneFocus();
-
-    /**
-     * Gets the corresponding subclass instance
-     * of {@link Enterprise.modules.EnterpriseSegments}
-     * and sets a reference to the instance to a field.
-     */
-    void setModuleEntry();
 }

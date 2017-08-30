@@ -1,8 +1,6 @@
 package Enterprise;
 
 import Enterprise.gui.general.GuiPaths;
-import Enterprise.gui.general.Mode;
-import Enterprise.modules.Module;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -14,7 +12,7 @@ EnterpriseStart extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception{
-        FXMLLoader loader = new FXMLLoader(getClass().getResource(GuiPaths.getPath(Module.ENTERPRISE,Mode.CONTENT)));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource(GuiPaths.getMainPath()));
         Parent root = loader.load();
 
         primaryStage.setTitle("Enterprise");

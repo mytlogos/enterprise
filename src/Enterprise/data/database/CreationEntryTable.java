@@ -4,7 +4,7 @@ import Enterprise.data.impl.SimpleCreationEntry;
 import Enterprise.data.impl.SourceableEntryImpl;
 import Enterprise.data.intface.*;
 import Enterprise.misc.SetList;
-import Enterprise.modules.Module;
+import Enterprise.modules.BasicModules;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -176,24 +176,22 @@ public class CreationEntryTable extends AbstractTable<CreationEntry> {
      * @return true, if any row was affected
      */
     public boolean updateEntries(List<? extends CreationEntry> entries) {
-        boolean creatorsUpdated = false;
-        boolean creationsUpdated = false;
-        boolean usersUpdated = false;
+        boolean creatorsUpdated;
+        boolean creationsUpdated;
+        boolean usersUpdated;
         boolean sourceablesUpdated = false;
 
 
-        try {
             creatorsUpdated = checkForCreatorUpdates(entries);
             creationsUpdated = checkForCreationUpdates(entries);
             usersUpdated = checkForUserUpdates(entries);
+        try {
             sourceablesUpdated = checkForSourceableUpdates(entries);
-
         } catch (SQLException e) {
-            logger.log(Level.SEVERE, "error occurred while updating the database", e);
-            e.printStackTrace();
+            logger.log(Level.SEVERE, e.getMessage(), e);
         }
 
-        return true;
+        return creationsUpdated || creatorsUpdated || usersUpdated || sourceablesUpdated;
     }
 
     /**
@@ -316,7 +314,7 @@ public class CreationEntryTable extends AbstractTable<CreationEntry> {
         int creatorId = rs.getInt(creatorIdC);
         int sourceableId = rs.getInt(sourceableIdC);
         String modl  = rs.getString(moduleC);
-        Module module = Module.valueOf(modl);
+        BasicModules module = BasicModules.valueOf(modl);
 
         //delegates getUser to UserTable DAO
         User user = UserTable.getInstance().getEntry(userId, connection);
@@ -418,9 +416,8 @@ public class CreationEntryTable extends AbstractTable<CreationEntry> {
      *
      * @param entries {@code Collection} of {@code CreationEntry}s, to be updated
      * @return updated - integer {@code Array} holding the number of affected rows per statements per position
-     * @throws SQLException if there was an error in updating the Database
      */
-    private boolean checkForCreatorUpdates(Collection<? extends CreationEntry> entries) throws SQLException {
+    private boolean checkForCreatorUpdates(Collection<? extends CreationEntry> entries) {
         Collection<Creator> creators = new ArrayList<>();
 
         for (CreationEntry entry : entries) {
@@ -429,7 +426,7 @@ public class CreationEntryTable extends AbstractTable<CreationEntry> {
                 creators.add(creator);
             }
         }
-        return CreatorTable.getInstance().updateEntries(creators);
+        return !creators.isEmpty() && CreatorTable.getInstance().updateEntries(creators);
     }
 
     /**
@@ -455,7 +452,6 @@ public class CreationEntryTable extends AbstractTable<CreationEntry> {
      *
      * @param entries {@code Collection} of {@code CreationEntry}s, to be updated
      * @return updated - integer {@code Array} holding the number of affected rows per statements per position
-     * @throws SQLException if there was an error in updating the Database
      */
     private boolean checkForSourceableUpdates(Collection<? extends CreationEntry> entries) throws SQLException {
         Collection<Sourceable> sourceables = new ArrayList<>();

@@ -1,8 +1,8 @@
 package Enterprise.gui.controller;
 
-import Enterprise.gui.general.Mode;
-import Enterprise.modules.EnterpriseSegments;
 import Enterprise.data.intface.CreationEntry;
+import Enterprise.gui.general.BasicModes;
+import Enterprise.modules.Module;
 import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -17,14 +17,19 @@ import java.text.DecimalFormat;
 
 /**
  * This class holds the common functionality and shareable fields
- * of all Controllers of the {@link Mode} {@code EDIT}.
+ * of all Controllers of the {@link BasicModes} {@code EDIT}.
  */
-public abstract class EditController<E extends CreationEntry, R extends EnterpriseSegments> extends ModifyEntry<R> {
+public abstract class EditController<E extends CreationEntry, R extends Enum<R> & Module> extends ModifyEntry<R, BasicModes> {
 
     protected E creationEntry;
 
     @FXML
     protected Button endEditBtn;
+
+    @Override
+    protected final void setMode() {
+        mode = BasicModes.EDIT;
+    }
 
     /**
      * Fires an {@link WindowEvent#WINDOW_CLOSE_REQUEST} event for this stage.
@@ -64,6 +69,8 @@ public abstract class EditController<E extends CreationEntry, R extends Enterpri
         commentArea.textProperty().bindBidirectional(creationEntry.getUser().commentProperty());
 
         coverImage.setImage(new Image(new File(creationEntry.getCreation().getCoverPath()).toURI().toString()));
+
+        keyWords.textProperty().bindBidirectional(creationEntry.getUser().keyWordsProperty());
     }
 
     /**
@@ -73,7 +80,7 @@ public abstract class EditController<E extends CreationEntry, R extends Enterpri
      * @param box {@code ComboBox} to bind
      * @param property {@code Property} to bind
      */
-    protected void bindToComboBox(ComboBox<String> box, StringProperty property) {
+    void bindToComboBox(ComboBox<String> box, StringProperty property) {
         box.valueProperty().bindBidirectional(property);
     }
 
@@ -84,7 +91,7 @@ public abstract class EditController<E extends CreationEntry, R extends Enterpri
      * @param box {@code ComboBox} to unbind
      * @param property {@code Property} to unbind
      */
-    protected void unbindFromComboBox(ComboBox<String> box, StringProperty property) {
+    void unbindFromComboBox(ComboBox<String> box, StringProperty property) {
         box.valueProperty().unbindBidirectional(property);
     }
 
@@ -116,5 +123,13 @@ public abstract class EditController<E extends CreationEntry, R extends Enterpri
 
         creationEntry.getUser().ownStatusProperty().unbind();
         creationEntry.getCreator().statusProperty().unbind();
+
+        if (coverPath != null) {
+            if (!creationEntry.getCreation().getCoverPath().equalsIgnoreCase(coverPath)) {
+                creationEntry.getCreation().setCoverPath(coverPath);
+            }
+        }
+
+        keyWords.textProperty().unbindBidirectional(creationEntry.getUser().keyWordsProperty());
     }
 }

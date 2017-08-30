@@ -2,7 +2,7 @@ package Enterprise.gui.manga.controller;
 
 import Enterprise.data.intface.SourceableEntry;
 import Enterprise.gui.controller.EditController;
-import Enterprise.modules.Manga;
+import Enterprise.modules.BasicModules;
 import javafx.stage.Stage;
 
 /**
@@ -10,15 +10,16 @@ import javafx.stage.Stage;
  * Part of OgameBot.
  * // TODO: 25.08.2017 do the javadoc and functionality
  */
-public class EditMangaController extends EditController<SourceableEntry,Manga> {
+public class EditMangaController extends EditController<SourceableEntry, BasicModules> {
+
     @Override
     public void open() {
 
     }
 
     @Override
-    public void setModuleEntry() {
-
+    protected void setModule() {
+        module = BasicModules.MANGA;
     }
 
     @Override

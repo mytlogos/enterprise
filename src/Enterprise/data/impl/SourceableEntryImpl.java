@@ -3,7 +3,7 @@ package Enterprise.data.impl;
 import Enterprise.data.OpEntryCarrier;
 import Enterprise.data.intface.*;
 import Enterprise.misc.SetList;
-import Enterprise.modules.Module;
+import Enterprise.modules.BasicModules;
 import javafx.beans.property.BooleanProperty;
 
 import java.util.List;
@@ -29,7 +29,7 @@ public class SourceableEntryImpl extends AbstractCreationEntry implements Source
      * @param sourceable sourceable to be set to this entry
      * @param module module to be set to this entry
      */
-    public SourceableEntryImpl(User user, Creation creation, Creator creator, Sourceable sourceable, Module module) {
+    public SourceableEntryImpl(User user, Creation creation, Creator creator, Sourceable sourceable, BasicModules module) {
         this.user = user;
         this.creation = creation;
         this.module = module;
@@ -49,7 +49,7 @@ public class SourceableEntryImpl extends AbstractCreationEntry implements Source
      * A constructor of {@code SourceableEntryImpl} for testing purposes
      * @param module module of this entry
      */
-    public SourceableEntryImpl(Module module) {
+    public SourceableEntryImpl(BasicModules module) {
         this(new SimpleUser(), new SimpleCreation(), new SimpleCreator(), new SimpleSourceable(), module);
 
     }
@@ -154,7 +154,7 @@ public class SourceableEntryImpl extends AbstractCreationEntry implements Source
     }
 
     @Override
-    public Module getModule() {
+    public BasicModules getModule() {
         return module;
     }
 

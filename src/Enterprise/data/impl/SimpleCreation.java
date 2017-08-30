@@ -4,7 +4,8 @@ import Enterprise.data.CreationRelation;
 import Enterprise.data.Default;
 import Enterprise.data.EnterpriseEntry;
 import Enterprise.data.intface.*;
-import Enterprise.misc.SQL;
+import Enterprise.misc.DataAccess;
+import Enterprise.misc.SQLUpdate;
 import javafx.beans.property.*;
 
 import java.net.URI;
@@ -13,27 +14,33 @@ import java.util.logging.Level;
 
 /**
  * Class representing an Entertainment-Object, like a Series, Novel
+ *
  * @see Creation
  */
-public class SimpleCreation extends EnterpriseEntry implements DataBase, Creation{
+@DataAccess(daoClass = "CreationTable")
+public class SimpleCreation extends EnterpriseEntry implements DataBase, Creation {
     private int creationId;
     private static int idCounter = 1;
 
-    @SQL
+    @SQLUpdate(stateGet = "isTitleChanged", valueGet = "getTitle", columnField = "titleC")
     private StringProperty title = new SimpleStringProperty();
-    @SQL
+
+    @SQLUpdate(stateGet = "isSeriesChanged", valueGet = "getSeries", columnField = "seriesC")
     private StringProperty series = new SimpleStringProperty();
-    @SQL
+
+    @SQLUpdate(stateGet = "isDateLastPortionChanged", valueGet = "getDateLastPortion", columnField = "dateLastPortionC")
     private StringProperty dateLastPortion = new SimpleStringProperty();
-    @SQL
+
+    @SQLUpdate(stateGet = "isNumPortionChanged", valueGet = "getNumPortion", columnField = "numPortionC")
     private IntegerProperty numPortion = new SimpleIntegerProperty();
 
-    @SQL
+    @SQLUpdate(stateGet = "isCoverPathChanged", valueGet = "getCoverPath", columnField = "coverPathC")
     private StringProperty coverPath = new SimpleStringProperty();
-    private CreationRelation relation;
 
-    @SQL
+    @SQLUpdate(stateGet = "isWorkStatusChanged", valueGet = "getWorkStatus", columnField = "workStatusC")
     private StringProperty workStatus = new SimpleStringProperty();
+
+    private CreationRelation relation;
     private Creator creator;
 
     private BooleanProperty titleChanged = new SimpleBooleanProperty(false);
@@ -57,16 +64,16 @@ public class SimpleCreation extends EnterpriseEntry implements DataBase, Creatio
     /**
      * The constructor of this {@code SimpleCreation}
      *
-     * @param series series of this {@code SimpleCreation}
-     * @param title title of this {@code SimpleCreation}
-     * @param coverPath coverPath of this {@code SimpleCreation}
-     * @param numPortion number of Portions of this {@code SimpleCreation}
+     * @param series          series of this {@code SimpleCreation}
+     * @param title           title of this {@code SimpleCreation}
+     * @param coverPath       coverPath of this {@code SimpleCreation}
+     * @param numPortion      number of Portions of this {@code SimpleCreation}
      * @param dateLastPortion String representation of the date of the last published portion  of this {@code SimpleCreation}
-     * @param creatorStat status of the Creator about this {@code SimpleCreation}
+     * @param creatorStat     status of the Creator about this {@code SimpleCreation}
      */
     public SimpleCreation(String series, String title, String coverPath, int numPortion,
                           String dateLastPortion, String creatorStat) {
-        this(Default.VALUE, series, title, coverPath, numPortion, dateLastPortion,creatorStat);
+        this(Default.VALUE, series, title, coverPath, numPortion, dateLastPortion, creatorStat);
     }
 
     /**
@@ -76,20 +83,21 @@ public class SimpleCreation extends EnterpriseEntry implements DataBase, Creatio
      */
     public SimpleCreation(String title) {
         this(Default.VALUE, Default.STRING, title, Default.IMAGE,
-                Default.VALUE, Default.STRING,Default.STRING);
+                Default.VALUE, Default.STRING, Default.STRING);
     }
 
     // TODO: 23.08.2017 use builder pattern maybe
+
     /**
-     *  The constructor of {@code SimpleCreation}.
+     * The constructor of {@code SimpleCreation}.
      *
-     * @param id id of this {@code SimpleCreation}
-     * @param series series of this {@code SimpleCreation}
-     * @param title title of this {@code SimpleCreation}
-     * @param coverPath coverPath of this {@code SimpleCreation}
-     * @param numPortion number of Portions of this {@code SimpleCreation}
+     * @param id              id of this {@code SimpleCreation}
+     * @param series          series of this {@code SimpleCreation}
+     * @param title           title of this {@code SimpleCreation}
+     * @param coverPath       coverPath of this {@code SimpleCreation}
+     * @param numPortion      number of Portions of this {@code SimpleCreation}
      * @param dateLastPortion String representation of the date of the last published portion  of this {@code SimpleCreation}
-     * @param workStatus status of the Creator about this {@code SimpleCreation}
+     * @param workStatus      status of the Creator about this {@code SimpleCreation}
      */
     public SimpleCreation(int id, String series, String title, String coverPath,
                           int numPortion, String dateLastPortion, String workStatus) {

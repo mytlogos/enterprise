@@ -1,7 +1,8 @@
 package Enterprise.data;
 
 import Enterprise.data.intface.DataBase;
-import Enterprise.misc.SQL;
+import Enterprise.misc.DataAccess;
+import Enterprise.misc.SQLUpdate;
 import com.sun.istack.internal.NotNull;
 import javafx.beans.property.Property;
 
@@ -9,10 +10,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Reflection class.
@@ -31,7 +29,7 @@ import java.util.Set;
  * </p>
  * <p>
  * The {@code ClassSpy} searches in an object derived from {@link DataBase}
- * for fields annotated with the {@link SQL} annotation.
+ * for fields annotated with the {@link SQLUpdate} annotation.
  * </p>
  * <p>
  * It searches afterwards for Getter Methods with a specific scheme and a "{@code getId}" method.
@@ -96,40 +94,39 @@ public class ClassSpy {
 
     /**
      * Gets the Update SQL Statements by reflecting several classes.
+     * The {@link DataBase} object is required to have fields annotated with
+     * {@link SQLUpdate}.
      *
      * @param o an implementation of the {@code DataBase} interface
      * @param tableName name of the table which will be updated
      * @param idColumn name of the Column with the primary key
      * @return updateString - {@code Set} of Strings of complete SQL statements
+     * @throws IllegalArgumentException if no fields annotated with {@code SQLUpdate} were found in
+     *                                  the parameter o
      */
     public Set<String> updateStrings(@NotNull DataBase o, @NotNull String tableName, @NotNull String idColumn) {
         if (tableName != null && !tableName.isEmpty()) {
             this.tableName = tableName;
         } else {
-            throw new NullPointerException("tableName darf nicht null sein!");
+            throw new NullPointerException("tableName needs to be non-null and non-empty");
         }
         if (idColumn != null && !idColumn.isEmpty()) {
             this.idColumn = idColumn;
         } else {
-            throw new NullPointerException("idColumn darf nicht null sein!");
-        }
-        if (o == null) {
-            throw new NullPointerException("Database Objekt darf nicht null sein!");
+            throw new NullPointerException("idColumn needs to be non-null and non-empty");
         }
 
-        List<Field> fieldList = getFieldsByAnnotation(o, SQL.class);
+        Objects.requireNonNull(o, "database object needs to be non-null");
 
+        List<Field> fieldList = getFieldsByAnnotation(o, SQLUpdate.class);
         Set<String> statements = new HashSet<>();
-        List<DataObjectMethods> methodsList = new ArrayList<>();
 
-        for (Field field : fieldList) {
-            Method booleanMethod = getMethod(o, field, "is", "Changed");
-            Method contentGetter = getMethod(o, field, "get", FixType.PREFIX);
-            Method idGetter = getMethod(o, "getId");
-            String columnName = getColumnName(o, field.getName());
-
-            methodsList.add(new DataObjectMethods(booleanMethod, contentGetter, idGetter, o, columnName));
+        if (fieldList.isEmpty()) {
+            throw new IllegalArgumentException("database object " + o +
+                    " does not seem to have the required SQLUpdate annotation");
         }
+
+        List<DataObjectMethods> methodsList = getDataObjectMethods(o, fieldList);
 
         methodsList.forEach(methods -> {
             String updateString = setString(methods);
@@ -139,6 +136,21 @@ public class ClassSpy {
         });
 
         return statements;
+    }
+
+    private List<DataObjectMethods> getDataObjectMethods(@NotNull DataBase o, List<Field> fieldList) {
+        List<DataObjectMethods> methodsList = new ArrayList<>();
+        for (Field field : fieldList) {
+            SQLUpdate sql = field.getAnnotation(SQLUpdate.class);
+
+            Method booleanMethod = getMethod(o, sql.stateGet());
+            Method contentGetter = getMethod(o, sql.valueGet());
+            Method idGetter = getMethod(o, "getId");
+            String columnName = getColumnName(o, sql);
+
+            methodsList.add(new DataObjectMethods(booleanMethod, contentGetter, idGetter, o, columnName));
+        }
+        return methodsList;
     }
 
     /**
@@ -166,35 +178,45 @@ public class ClassSpy {
 
     /**
      * Gets the name of the column of the value field
-     * by reflecting the corresponding DAO class.
+     * by reflecting the class specified by the {@link DataAccess}
+     * annotation of the class of parameter {@code o}.
      *
      * @param o implementation of the {@code DataBase} interface
-     * @param field name of the value field which will update the table
+     * @param sqlUpdate annotation of the field to update the database with
      * @return columnName - the name of the column which will be updated
      */
-    private String getColumnName(DataBase o, String field) {
+    private String getColumnName(DataBase o, SQLUpdate sqlUpdate) {
         String columnName = "";
         Class<?> tableClass = null;
-        for (Class<?> aClass : o.getClass().getInterfaces()) {
-            if (o.getClass().getSimpleName().contains(aClass.getSimpleName())) {
-                try {
-                    tableClass = Class.forName("Enterprise.data.database." + aClass.getSimpleName() + "Table");
-                    break;
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                }
-            }
+        DataAccess access = o.getClass().getAnnotation(DataAccess.class);
+
+        if (access == null) {
+            throw new IllegalArgumentException("the class of the database " +
+                    "object does not seem to be annotated with the DataAccess Annotation");
+        }
+
+        //load dao class
+        try {
+            tableClass = Class.forName("Enterprise.data.database." + access.daoClass());
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
         }
 
         if (tableClass != null) {
             try {
-                Field tableField = tableClass.getDeclaredField(field + "C");
+                //load specified field
+                Field tableField = tableClass.getDeclaredField(sqlUpdate.columnField());
                 tableField.setAccessible(true);
 
+                //load getInstance method, to get an object of the dao class
                 Method getInstance = tableClass.getDeclaredMethod("getInstance", (Class<?>[]) null);
+                //set accessible to true, to invoke the method without throwing an exception
                 getInstance.setAccessible(true);
+                //get the value
                 columnName = (String) tableField.get(getInstance.invoke(null, (Object[]) null));
+
             } catch (NoSuchFieldException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
+                // TODO: 30.08.2017 log this
                 e.printStackTrace();
             }
         }
@@ -310,6 +332,7 @@ public class ClassSpy {
      */
     private String setString(DataObjectMethods methods) {
         String setString;
+
         String columnName = methods.getColumnName();
 
         String changedString = getStringFromMethod(methods.getBooleanMethod(), methods.getObject());
@@ -439,6 +462,7 @@ public class ClassSpy {
 
         for (Field field : fields) {
             if (Property.class.isAssignableFrom(field.getType())) {
+//                field.getAnnotation(annotateClass);
                 for (Annotation annotation : field.getAnnotations()) {
                     if (annotateClass.isAssignableFrom(annotation.annotationType())) {
                         annotateFields.add(field);

@@ -1,6 +1,7 @@
 package Enterprise.data.intface;
 
 import Enterprise.data.ClassSpy;
+import Enterprise.misc.SQLUpdate;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -53,7 +54,7 @@ public interface DataTable<E extends DataBase> extends Table<E> {
      * to get the necessary data from the different classes.
      * To succeed with the {@code Reflection}, several restraints one the fields and methods are necessary.
      * This method uses the {@link ClassSpy} for {@code Reflection}, which looks, in this case,
-     * for fields who are annotated with {@link Enterprise.misc.SQL}.
+     * for fields who are annotated with {@link SQLUpdate}.
      * At the moment these fields need to have a data type
      * which derives from {@link javafx.beans.property.Property}.
      *
@@ -79,7 +80,7 @@ public interface DataTable<E extends DataBase> extends Table<E> {
      * to get the necessary data from the different classes.
      * To succeed with the {@code Reflection}, several restraints one the fields and methods are necessary.
      * This method uses the {@link ClassSpy} for {@code Reflection}, which looks, in this case,
-     * for fields who are annotated with {@link Enterprise.misc.SQL}.
+     * for fields who are annotated with {@link SQLUpdate}.
      * At the moment these fields need to have a data type
      * which derives from {@link javafx.beans.property.Property}.
      *

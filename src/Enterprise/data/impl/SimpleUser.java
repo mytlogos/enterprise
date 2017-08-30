@@ -5,7 +5,8 @@ import Enterprise.data.EnterpriseEntry;
 import Enterprise.data.intface.DataTable;
 import Enterprise.data.intface.Table;
 import Enterprise.data.intface.User;
-import Enterprise.misc.SQL;
+import Enterprise.misc.DataAccess;
+import Enterprise.misc.SQLUpdate;
 import javafx.beans.property.*;
 
 import java.util.logging.Level;
@@ -14,21 +15,27 @@ import java.util.logging.Level;
  * Implementation of User
  * @see User
  */
+@DataAccess(daoClass = "UserTable")
 public class SimpleUser extends EnterpriseEntry implements User{
     private int userId;
     private static int idCounter = 1;
 
-    @SQL
+    @SQLUpdate(stateGet = "isOwnStatusChanged", valueGet = "getOwnStats", columnField = "ownStatusC")
     private StringProperty ownStatus = new SimpleStringProperty();
-    @SQL
+
+    @SQLUpdate(stateGet = "isCommentChanged", valueGet = "getComment", columnField = "commentC")
     private StringProperty comment = new SimpleStringProperty();
-    @SQL
+
+    @SQLUpdate(stateGet = "isRatingChanged", valueGet = "getRating", columnField = "ratingC")
     private IntegerProperty rating = new SimpleIntegerProperty();
-    @SQL
+
+    @SQLUpdate(stateGet = "isProcessedPortionChanged", valueGet = "getProcessedPortion", columnField = "processedPortionC")
     private IntegerProperty processedPortion = new SimpleIntegerProperty();
-    @SQL
+
+    @SQLUpdate(stateGet = "isListChanged", valueGet = "getList", columnField = "listC")
     private StringProperty list = new SimpleStringProperty();
-    @SQL
+
+    @SQLUpdate(stateGet = "isKeyWordsChanged", valueGet = "getKeyWords", columnField = "keyWordsC")
     private StringProperty keyWords = new SimpleStringProperty();
 
     private BooleanProperty ownStatusChanged = new SimpleBooleanProperty(false);
@@ -281,14 +288,16 @@ public class SimpleUser extends EnterpriseEntry implements User{
 
         SimpleUser that = (SimpleUser) o;
 
-        if (ownStatus != null ? !ownStatus.get().equals(that.ownStatus.get()) : that.ownStatus != null) return false;
-        if (comment != null ? !comment.get().equals(that.comment.get()) : that.comment != null) return false;
-        if (rating != null ? !(rating.get() == that.rating.get()) : that.rating != null) return false;
-        if (processedPortion != null ? !(processedPortion.get() == that.processedPortion.get()) : that.processedPortion != null) {
-            return false;
-        }
-        if (list != null ? !list.get().equals(that.list.get()) : that.list != null) return false;
-        return keyWords != null ? keyWords.get().equals(that.keyWords.get()) : that.keyWords == null;
+        return (ownStatus != null ? ownStatus.get().equals(that.ownStatus.get()) :
+                that.ownStatus == null) && (comment != null ? comment.get().equals(that.comment.get()) :
+
+                that.comment == null) && (rating != null ? rating.get() == that.rating.get() :
+                that.rating == null) && (processedPortion != null ? processedPortion.get() == that.processedPortion.get() :
+
+                that.processedPortion == null) && (list != null ? list.get().equals(that.list.get()) :
+                that.list == null) && (keyWords != null ? keyWords.get().equals(that.keyWords.get()) :
+
+                that.keyWords == null);
     }
 
     @Override

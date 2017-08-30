@@ -1,5 +1,6 @@
 package Enterprise.gui.general;
 
+import Enterprise.modules.BasicModules;
 import Enterprise.modules.Module;
 
 /**
@@ -16,11 +17,11 @@ public class Columns {
      * @return string - name of the column
      */
     public static String getTitle(Module module) {
-        return module == Module.ANIME ? AnimeColumns.TITLE :
-                module == Module.BOOK ? BookColumns.TITLE :
-                        module == Module.MANGA ? MangaColumns.TITLE :
-                                module == Module.NOVEL ? NovelColumns.TITLE :
-                                        module == Module.SERIES ? SeriesColumns.TITLE :
+        return module == BasicModules.ANIME ? AnimeColumns.TITLE :
+                module == BasicModules.BOOK ? BookColumns.TITLE :
+                        module == BasicModules.MANGA ? MangaColumns.TITLE :
+                                module == BasicModules.NOVEL ? NovelColumns.TITLE :
+                                        module == BasicModules.SERIES ? SeriesColumns.TITLE :
                                                 "";
     }
 
@@ -31,11 +32,11 @@ public class Columns {
      * @return string - name of the column
      */
     public static String getSeries(Module module) {
-        return module == Module.ANIME ? AnimeColumns.SERIES :
-                module == Module.BOOK ? BookColumns.SERIES :
-                        module == Module.MANGA ? MangaColumns.SERIES :
-                                module == Module.NOVEL ? NovelColumns.SERIES :
-                                        module == Module.SERIES ? SeriesColumns.SERIES :
+        return module == BasicModules.ANIME ? AnimeColumns.SERIES :
+                module == BasicModules.BOOK ? BookColumns.SERIES :
+                        module == BasicModules.MANGA ? MangaColumns.SERIES :
+                                module == BasicModules.NOVEL ? NovelColumns.SERIES :
+                                        module == BasicModules.SERIES ? SeriesColumns.SERIES :
                                                 "";
     }
 
@@ -46,11 +47,11 @@ public class Columns {
      * @return string - name of the column
      */
     public static String getLastPortion(Module module) {
-        return module == Module.ANIME ? AnimeColumns.LASTEP :
-                module == Module.BOOK ? BookColumns.LASTEP :
-                        module == Module.MANGA ? MangaColumns.LASTEP :
-                                module == Module.NOVEL ? NovelColumns.LASTPORTION :
-                                        module == Module.SERIES ? SeriesColumns.LASTEP :
+        return module == BasicModules.ANIME ? AnimeColumns.LASTEP :
+                module == BasicModules.BOOK ? BookColumns.LASTEP :
+                        module == BasicModules.MANGA ? MangaColumns.LASTEP :
+                                module == BasicModules.NOVEL ? NovelColumns.LASTPORTION :
+                                        module == BasicModules.SERIES ? SeriesColumns.LASTEP :
                                                 "";
     }
 
@@ -61,11 +62,11 @@ public class Columns {
      * @return string - name of the column
      */
     public static String getNumPortion(Module module) {
-        return module == Module.ANIME ? AnimeColumns.NUMEP :
-                module == Module.BOOK ? BookColumns.NUMEP:
-                        module == Module.MANGA ? MangaColumns.NUMEP:
-                                module == Module.NOVEL ? NovelColumns.NUMPORTION:
-                                        module == Module.SERIES ? SeriesColumns.NUMEP:
+        return module == BasicModules.ANIME ? AnimeColumns.NUMEP :
+                module == BasicModules.BOOK ? BookColumns.NUMEP :
+                        module == BasicModules.MANGA ? MangaColumns.NUMEP :
+                                module == BasicModules.NOVEL ? NovelColumns.NUMPORTION :
+                                        module == BasicModules.SERIES ? SeriesColumns.NUMEP :
                                                 "";
     }
 
@@ -76,11 +77,11 @@ public class Columns {
      * @return string - name of the column
      */
     public static String getProcessed(Module module) {
-        return module == Module.ANIME ? AnimeColumns.SEENEP :
-                module == Module.BOOK ? BookColumns.SEENEP:
-                        module == Module.MANGA ? MangaColumns.SEENEP:
-                                module == Module.NOVEL ? NovelColumns.SEENPORTION:
-                                        module == Module.SERIES ? SeriesColumns.SEENEP:
+        return module == BasicModules.ANIME ? AnimeColumns.SEENEP :
+                module == BasicModules.BOOK ? BookColumns.SEENEP :
+                        module == BasicModules.MANGA ? MangaColumns.SEENEP :
+                                module == BasicModules.NOVEL ? NovelColumns.SEENPORTION :
+                                        module == BasicModules.SERIES ? SeriesColumns.SEENEP :
                                                 "";
     }
 
@@ -91,11 +92,11 @@ public class Columns {
      * @return string - name of the column
      */
     public static String getRating(Module module) {
-        return module == Module.ANIME ? AnimeColumns.RATING :
-                module == Module.BOOK ? BookColumns.RATING:
-                        module == Module.MANGA ? MangaColumns.RATING:
-                                module == Module.NOVEL ? NovelColumns.RATING:
-                                        module == Module.SERIES ? SeriesColumns.RATING:
+        return module == BasicModules.ANIME ? AnimeColumns.RATING :
+                module == BasicModules.BOOK ? BookColumns.RATING :
+                        module == BasicModules.MANGA ? MangaColumns.RATING :
+                                module == BasicModules.NOVEL ? NovelColumns.RATING :
+                                        module == BasicModules.SERIES ? SeriesColumns.RATING :
                                                 "";
     }
 
@@ -106,11 +107,11 @@ public class Columns {
      * @return string - name of the column
      */
     public static String getCreatorName(Module module) {
-        return module == Module.ANIME ? AnimeColumns.AUTHORNAME:
-                module == Module.BOOK ? BookColumns.AUTHORNAME:
-                        module == Module.MANGA ? MangaColumns.AUTHORNAME:
-                                module == Module.NOVEL ? NovelColumns.AUTHORNAME:
-                                        module == Module.SERIES ? SeriesColumns.AUTHORNAME:
+        return module == BasicModules.ANIME ? AnimeColumns.AUTHORNAME :
+                module == BasicModules.BOOK ? BookColumns.AUTHORNAME :
+                        module == BasicModules.MANGA ? MangaColumns.AUTHORNAME :
+                                module == BasicModules.NOVEL ? NovelColumns.AUTHORNAME :
+                                        module == BasicModules.SERIES ? SeriesColumns.AUTHORNAME :
                                                 "";
     }
 
@@ -121,11 +122,11 @@ public class Columns {
      * @return string - name of the column
      */
     public static String getCreatorSort(Module module) {
-        return module == Module.ANIME ? AnimeColumns.AUTHORSORT :
-                module == Module.BOOK ? BookColumns.AUTHORSORT:
-                        module == Module.MANGA ? MangaColumns.AUTHORSORT:
-                                module == Module.NOVEL ? NovelColumns.AUTHORSORT:
-                                        module == Module.SERIES ? SeriesColumns.AUTHORSORT:
+        return module == BasicModules.ANIME ? AnimeColumns.AUTHORSORT :
+                module == BasicModules.BOOK ? BookColumns.AUTHORSORT :
+                        module == BasicModules.MANGA ? MangaColumns.AUTHORSORT :
+                                module == BasicModules.NOVEL ? NovelColumns.AUTHORSORT :
+                                        module == BasicModules.SERIES ? SeriesColumns.AUTHORSORT :
                                                 "";
     }
 
@@ -136,11 +137,11 @@ public class Columns {
      * @return string - name of the column
      */
     public static String getWorkStat(Module module) {
-        return module == Module.ANIME ? AnimeColumns.AUTHORSTAT :
-                module == Module.BOOK ? BookColumns.AUTHORSTAT:
-                        module == Module.MANGA ? MangaColumns.WORKSTAT:
-                                module == Module.NOVEL ? NovelColumns.WORKSTAT:
-                                        module == Module.SERIES ? SeriesColumns.AUTHORSTAT:
+        return module == BasicModules.ANIME ? AnimeColumns.AUTHORSTAT :
+                module == BasicModules.BOOK ? BookColumns.AUTHORSTAT :
+                        module == BasicModules.MANGA ? MangaColumns.WORKSTAT :
+                                module == BasicModules.NOVEL ? NovelColumns.WORKSTAT :
+                                        module == BasicModules.SERIES ? SeriesColumns.AUTHORSTAT :
                                                 "";
     }
 
@@ -151,11 +152,11 @@ public class Columns {
      * @return string - name of the column
      */
     public static String getOwnStat(Module module) {
-        return module == Module.ANIME ? AnimeColumns.OWNSTAT :
-                module == Module.BOOK ? BookColumns.OWNSTAT:
-                        module == Module.MANGA ? MangaColumns.OWNSTAT:
-                                module == Module.NOVEL ? NovelColumns.OWNSTAT:
-                                        module == Module.SERIES ? SeriesColumns.OWNSTAT:
+        return module == BasicModules.ANIME ? AnimeColumns.OWNSTAT :
+                module == BasicModules.BOOK ? BookColumns.OWNSTAT :
+                        module == BasicModules.MANGA ? MangaColumns.OWNSTAT :
+                                module == BasicModules.NOVEL ? NovelColumns.OWNSTAT :
+                                        module == BasicModules.SERIES ? SeriesColumns.OWNSTAT :
                                                 "";
     }
 
@@ -166,11 +167,11 @@ public class Columns {
      * @return string - name of the column
      */
     public static String getComment(Module module) {
-        return module == Module.ANIME ? AnimeColumns.COMMENT :
-                module == Module.BOOK ? BookColumns.COMMENT:
-                        module == Module.MANGA ? MangaColumns.COMMENT:
-                                module == Module.NOVEL ? NovelColumns.COMMENT:
-                                        module == Module.SERIES ? SeriesColumns.COMMENT:
+        return module == BasicModules.ANIME ? AnimeColumns.COMMENT :
+                module == BasicModules.BOOK ? BookColumns.COMMENT :
+                        module == BasicModules.MANGA ? MangaColumns.COMMENT :
+                                module == BasicModules.NOVEL ? NovelColumns.COMMENT :
+                                        module == BasicModules.SERIES ? SeriesColumns.COMMENT :
                                                 "";
     }
 
@@ -183,9 +184,9 @@ public class Columns {
      * @return string - name of the column
      */
     public static String getTranslator(Module module) {
-        return module == Module.ANIME ? AnimeColumns.TRANSLATOR :
-                        module == Module.MANGA ? MangaColumns.TRANSLATOR:
-                                module == Module.NOVEL ? NovelColumns.TRANSLATOR:
+        return module == BasicModules.ANIME ? AnimeColumns.TRANSLATOR :
+                module == BasicModules.MANGA ? MangaColumns.TRANSLATOR :
+                        module == BasicModules.NOVEL ? NovelColumns.TRANSLATOR :
                                                 "";
     }
 
@@ -198,14 +199,14 @@ public class Columns {
      * @return string - name of the column
      */
     public static String getKeyWords(Module module) {
-        return module == Module.ANIME ? AnimeColumns.KEYWORDS :
-                        module == Module.MANGA ? MangaColumns.KEYWORDS:
-                                module == Module.NOVEL ? NovelColumns.KEYWORDS:
+        return module == BasicModules.ANIME ? AnimeColumns.KEYWORDS :
+                module == BasicModules.MANGA ? MangaColumns.KEYWORDS :
+                        module == BasicModules.NOVEL ? NovelColumns.KEYWORDS :
                                                 "";
     }
 
     /**
-     * The data for the Columns of {@link Module#ANIME}.
+     * The data for the Columns of {@link BasicModules#ANIME}.
      */
     private static class AnimeColumns {
         private static final String TITLE = "Titel";
@@ -224,7 +225,7 @@ public class Columns {
     }
 
     /**
-     * The data for the Columns of {@link Module#BOOK}.
+     * The data for the Columns of {@link BasicModules#BOOK}.
      */
     private static class BookColumns {
         private static final String TITLE = "Titel";
@@ -241,26 +242,7 @@ public class Columns {
     }
 
     /**
-     * The data for the Columns of {@link Module#MANGA}.
-     */
-    private class MangaColumns {
-        private static final String TITLE = "Titel";
-        private static final String SERIES = "Reihe";
-        private static final String LASTEP = "Datum letztes Kapitels";
-        private static final String NUMEP = "Anzahl Kapitel";
-        private static final String SEENEP = "Gelesene Kapitel";
-        private static final String RATING = "Bewertung";
-        private static final String AUTHORNAME = "Autor/-en";
-        private static final String AUTHORSORT = "Autorensortierung";
-        private static final String WORKSTAT = "Status des Autors";
-        private static final String OWNSTAT = "Eigener Status";
-        private static final String COMMENT = "Kommentar";
-        private static final String TRANSLATOR = "Übersetzer";
-        private static final String KEYWORDS = "Stichwörter";
-    }
-
-    /**
-     * The data for the Columns of {@link Module#NOVEL}.
+     * The data for the Columns of {@link BasicModules#NOVEL}.
      */
     private static class NovelColumns {
         private static final String TITLE = "Titel";
@@ -279,7 +261,7 @@ public class Columns {
     }
 
     /**
-     * The data for the Columns of {@link Module#SERIES}.
+     * The data for the Columns of {@link BasicModules#SERIES}.
      */
     private static class SeriesColumns {
         private static final String TITLE = "Titel";
@@ -293,5 +275,24 @@ public class Columns {
         private static final String AUTHORSTAT = "Status des Autors";
         private static final String OWNSTAT = "Eigener Status";
         private static final String COMMENT = "Kommentar";
+    }
+
+    /**
+     * The data for the Columns of {@link BasicModules#MANGA}.
+     */
+    private class MangaColumns {
+        private static final String TITLE = "Titel";
+        private static final String SERIES = "Reihe";
+        private static final String LASTEP = "Datum letztes Kapitels";
+        private static final String NUMEP = "Anzahl Kapitel";
+        private static final String SEENEP = "Gelesene Kapitel";
+        private static final String RATING = "Bewertung";
+        private static final String AUTHORNAME = "Autor/-en";
+        private static final String AUTHORSORT = "Autorensortierung";
+        private static final String WORKSTAT = "Status des Autors";
+        private static final String OWNSTAT = "Eigener Status";
+        private static final String COMMENT = "Kommentar";
+        private static final String TRANSLATOR = "Übersetzer";
+        private static final String KEYWORDS = "Stichwörter";
     }
 }

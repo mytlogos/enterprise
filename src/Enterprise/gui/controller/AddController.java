@@ -2,25 +2,46 @@ package Enterprise.gui.controller;
 
 import Enterprise.data.Default;
 import Enterprise.data.impl.SimpleCreation;
+import Enterprise.data.impl.SimpleCreationEntry;
 import Enterprise.data.impl.SimpleCreator;
 import Enterprise.data.impl.SimpleUser;
 import Enterprise.data.intface.Creation;
+import Enterprise.data.intface.CreationEntry;
 import Enterprise.data.intface.Creator;
 import Enterprise.data.intface.User;
-import Enterprise.modules.EnterpriseSegments;
+import Enterprise.gui.general.BasicModes;
+import Enterprise.modules.BasicModules;
+import Enterprise.modules.Module;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import javafx.scene.control.TextField;
 
 /**
  * This class holds common functionality and fields of the several Controllers of Mode {@code ADD}.
  */
-public abstract class AddController<E extends EnterpriseSegments> extends ModifyEntry<E> implements InputLimiter {
+public abstract class AddController<E extends Enum<E> & Module> extends ModifyEntry<E, BasicModes> implements InputLimiter {
     @FXML
     protected Button addBtn;
-    @FXML
-    protected TextField keyWords;
 
+    protected CreationEntry getCreationEntry(BasicModules module) {
+        Creator creator = null;
+        Creation creation = null;
+        User user = null;
+        try {
+            creator = getCreator();
+            creation = getCreation();
+            user = getUser();
+        } catch (IllegalArgumentException e) {
+            // TODO: 24.08.2017 show error message
+            e.printStackTrace();
+        }
+
+        return new SimpleCreationEntry(user, creation, creator, module);
+    }
+
+    @Override
+    protected final void setMode() {
+        mode = BasicModes.ADD;
+    }
 
     /**
      * Creates a {@link Enterprise.data.intface.CreationEntry} and adds it to the

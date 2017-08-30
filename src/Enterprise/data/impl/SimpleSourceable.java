@@ -6,7 +6,8 @@ import Enterprise.data.intface.DataTable;
 import Enterprise.data.intface.Sourceable;
 import Enterprise.data.intface.Table;
 import Enterprise.data.intface.User;
-import Enterprise.misc.SQL;
+import Enterprise.misc.DataAccess;
+import Enterprise.misc.SQLUpdate;
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -20,6 +21,7 @@ import java.util.logging.Level;
  * Implementation of Sourceable
  * @see Sourceable
  */
+@DataAccess(daoClass = "SourceableTable")
 public class SimpleSourceable extends EnterpriseEntry implements Sourceable{
     private int sourceableId;
     private static int idCounter = 1;
@@ -27,7 +29,8 @@ public class SimpleSourceable extends EnterpriseEntry implements Sourceable{
     private SourceList sourceList = new SourceList();
 
     private User user;
-    @SQL
+
+    @SQLUpdate(stateGet = "isTranslatorChanged", valueGet = "getTranslato", columnField = "translatorC")
     private StringProperty translator = new SimpleStringProperty();
 
     private BooleanProperty sourceListChanged = new SimpleBooleanProperty(false);
@@ -192,8 +195,7 @@ public class SimpleSourceable extends EnterpriseEntry implements Sourceable{
 
         SimpleSourceable that = (SimpleSourceable) o;
 
-        if (!user.equals(that.user)) return false;
-        return translator.get().equals(that.translator.get());
+        return user.equals(that.user) && translator.get().equals(that.translator.get());
     }
 
     @Override

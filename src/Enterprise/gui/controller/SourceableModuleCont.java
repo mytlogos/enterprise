@@ -1,7 +1,8 @@
 package Enterprise.gui.controller;
 
-import Enterprise.data.intface.CreationEntry;
-import Enterprise.modules.EnterpriseSegments;
+import Enterprise.data.intface.SourceableEntry;
+import Enterprise.gui.general.Columns;
+import Enterprise.modules.Module;
 import javafx.scene.control.TableColumn;
 import javafx.util.Callback;
 
@@ -9,33 +10,24 @@ import javafx.util.Callback;
  * This class represents an corresponding extension of {@code ModuleController}
  * for all controller which handle {@link Enterprise.data.intface.SourceableEntry}s.
  */
-public abstract class SourceableModuleCont<E extends CreationEntry, R extends EnterpriseSegments> extends ModuleController<E,R> {
-    protected TableColumn<E, String> translatorColumn;
-    protected TableColumn<E, String> keyWordsColumn;
-
-    /**
-     * Adds the keyWords column to the {@code entryTable TableView}
-     * after going through the {@link #stringColumnFactory(String, double, Callback)}.
-     */
-    public abstract void showKeyWordsColumn();
+public abstract class SourceableModuleCont<R extends Enum<R> & Module> extends ModuleController<SourceableEntry, R> {
+    private TableColumn<SourceableEntry, String> translatorColumn;
 
     /**
      * Adds the translator column to the {@code entryTable TableView}
      * after going through the {@link #stringColumnFactory(String, double, Callback)}.
      */
-    public abstract void showTranslatorColumn();
+    public void showTranslatorColumn() {
+        translatorColumn = stringColumnFactory(Columns.getTranslator(module), 80,
+                data -> data.getValue().getSourceable().translatorProperty());
+        //'shows' the column in the TableView
+        entryTable.getColumns().add(translatorColumn);
+    }
 
     /**
      * Removes the Translator Column from the {@code entryTable TableView}.
      */
     public void hideTranslatorColumn() {
         entryTable.getColumns().remove(translatorColumn);
-    }
-
-    /**
-     * Removes the keyWords Column from the {@code entryTable TableView}.
-     */
-    public void hideKeyWordsColumn() {
-        entryTable.getColumns().remove(keyWordsColumn);
     }
 }

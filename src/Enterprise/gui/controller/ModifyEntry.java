@@ -1,8 +1,12 @@
 package Enterprise.gui.controller;
 
 import Enterprise.data.Default;
+import Enterprise.gui.general.BasicModes;
 import Enterprise.gui.general.GlobalItemValues;
-import Enterprise.modules.EnterpriseSegments;
+import Enterprise.gui.general.GuiPaths;
+import Enterprise.gui.general.Mode;
+import Enterprise.modules.BasicModules;
+import Enterprise.modules.Module;
 import com.sun.javafx.collections.ObservableListWrapper;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -36,12 +40,11 @@ import java.util.logging.SimpleFormatter;
 /**
  * This class represents a paramount parent of all {@code Controller},
  * who modify (/create) {@link Enterprise.data.intface.CreationEntry}s,
- * also {@code Controller}s with {@link Enterprise.gui.general.Mode#EDIT}
- * or {@link Enterprise.gui.general.Mode#ADD}.
+ * also {@code Controller}s with {@link BasicModes#EDIT}
+ * or {@link BasicModes#ADD}.
  * Provides shared functionality.
  */
-abstract class ModifyEntry<E extends EnterpriseSegments> implements InputLimiter, Controller {
-    protected E moduleEntry;
+abstract class ModifyEntry<E extends Enum<E> & Module, R extends Enum<R> & Mode> extends AbstractController<E, R> implements InputLimiter, Controller {
 
     protected Logger logger = Logger.getLogger(this.getClass().getPackage().getName());
 
@@ -103,14 +106,16 @@ abstract class ModifyEntry<E extends EnterpriseSegments> implements InputLimiter
     @FXML
     protected Button addLocalCoverBtn;
 
-    protected String coverPath;
+    @FXML
+    protected TextField keyWords;
+    String coverPath;
 
     /**
-     * Creates the Window with the Content from the given {@code loader}.
-     *
-     * @param loader {@link FXMLLoader} which will load the content
+     * Creates the Window with the content specified by the
+     * {@link Mode} and {@link Module} of each Controller.
      */
-    protected Stage setWindow(FXMLLoader loader) {
+    protected Stage loadStage() {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource(GuiPaths.getPath(module, mode)));
         try {
             root = loader.load();
         } catch (IOException e) {
@@ -126,7 +131,7 @@ abstract class ModifyEntry<E extends EnterpriseSegments> implements InputLimiter
     }
 
     /**
-     * Sets visible text to several Nodes depending on the {@link Enterprise.modules.Module}.
+     * Sets visible text to several Nodes depending on the {@link BasicModules}.
      */
     protected abstract void setData(Stage stage);
 
@@ -213,7 +218,7 @@ abstract class ModifyEntry<E extends EnterpriseSegments> implements InputLimiter
      * @param box {@code ComboBox} to get the item from
      * @return string - returns {@link Default#STRING} if no item was selected
      */
-    protected String validateStringInput(ComboBox<String> box) {
+    String validateStringInput(ComboBox<String> box) {
         String input;
         if (box.getSelectionModel().getSelectedItem() == null || box.getSelectionModel().getSelectedItem().isEmpty()) {
             input = Default.STRING;
@@ -229,7 +234,7 @@ abstract class ModifyEntry<E extends EnterpriseSegments> implements InputLimiter
      * @param field field to get the input from
      * @return string - returns {@link Default#STRING} if field was empty
      */
-    protected String validateStringInput(TextField field) {
+    String validateStringInput(TextField field) {
         String input;
         if (field.getText().isEmpty()) {
             input = Default.STRING;
@@ -245,7 +250,7 @@ abstract class ModifyEntry<E extends EnterpriseSegments> implements InputLimiter
      * @param field field to get the input from
      * @return string - returns {@link Default#STRING} if field was empty
      */
-    protected String validateStringInput(TextArea field) {
+    String validateStringInput(TextArea field) {
         String input;
         if (field.getText().isEmpty()) {
             input = Default.STRING;
@@ -261,7 +266,7 @@ abstract class ModifyEntry<E extends EnterpriseSegments> implements InputLimiter
      *
      * @param combo box to add the the user input to
      */
-    protected void comboAdd(ComboBox<String> combo) {
+    void comboAdd(ComboBox<String> combo) {
         combo.setOnAction(event -> {
             String string = combo.getEditor().getText();
             if (!combo.getItems().contains(string)) {
@@ -278,7 +283,7 @@ abstract class ModifyEntry<E extends EnterpriseSegments> implements InputLimiter
      * @param combo box to get the items from
      * @param strings list to add the items to
      */
-    protected void getComboOnClose(ComboBox<String> combo, List<String> strings) {
+    void getComboOnClose(ComboBox<String> combo, List<String> strings) {
         Platform.runLater(()-> {
             Stage stage = (Stage) combo.getScene().getWindow();
             stage.setOnCloseRequest(event -> strings.addAll(combo.getItems()));
@@ -293,7 +298,7 @@ abstract class ModifyEntry<E extends EnterpriseSegments> implements InputLimiter
      * @param combo box to add the items to
      * @param list list of items to add
      */
-    protected void setCombo(ComboBox<String> combo, List<String> list) {
+    void setCombo(ComboBox<String> combo, List<String> list) {
         combo.itemsProperty().set(new ObservableListWrapper<>(list));
     }
 
@@ -339,9 +344,10 @@ abstract class ModifyEntry<E extends EnterpriseSegments> implements InputLimiter
         limitToLength(dateLastCreation,100);
         inputLimitToInt(presentCreations,10);
         inputLimitToInt(processedCreations,10);
+        limitToLength(keyWords, 100);
+
     }
 
-    @Override
     public void paneFocus() {
         for (Node node : root.getChildren()) {
             if (node instanceof Pane) {
