@@ -24,44 +24,29 @@ import java.util.*;
  * These are provided through this class {@link #updateStrings(DataBase, String, String)}.
  * </p>
  * <p>
- * Note that this class can only function properly, if several name constraints
- * of several classes and methods are kept.
+ * The {@code ReflectUpdate} searches in an object derived from {@link DataBase}
+ * for fields annotated with the {@link SQLUpdate}.
+ * The class of the field to update needs to be annotated with {@link DataAccess} specifying
+ * the corresponding DAO class.
  * </p>
  * <p>
- * The {@code ClassSpy} searches in an object derived from {@link DataBase}
- * for fields annotated with the {@link SQLUpdate} annotation.
- * </p>
- * <p>
- * It searches afterwards for Getter Methods with a specific scheme and a "{@code getId}" method.
- * </p>
- * The scheme for the Getter Methods are the following:
- * <p>
- * StateChanged-Getter with boolean return type:
- * </p>
- * <p>
- * "is" + name of the Field + "Changed"
- * </p>
- * Field value getter with the return type of the field:
- * <p>
- * "get" + name of the Field.
- * </p>
- * It is noted that the first letter of the name of the Field is capitalized in the methods.
- * The next step it is taking, is searching for an corresponding named Data Access Object.
- * It searches for the name of the Interface,
- * which the class itself implements and contains in his own name.
- * Subsequently it searches in the package {@code Enterprise.data.database} after
- * a class, which has the name: 'interfaceName' + "Table".
- * That class has the name of the column of the field, as an field with the specific scheme:
- * <p>
- * name of the Field + "C"
+ * It searches for the methods specified in {@code stateGet, valueGet} and the default
+ * {@code getId} method in the class of the field.
+ * Afterwards it searches for the field specified by {@code columnField} of the {@code SQLUpdate}
+ * annotation in the class specified in {@code daoClass} of the {@code DataAccess} annotation,
+ * which needs to be located in the {@code Enterprise.data.database} package.
+ * It will consequently invoke the methods and depending von the value returned by the
+ * "stateGet" method, construct the SQL statements with the values of the other methods and the
+ * {@code columnField} or else it will skip this field.
  * </p>
  * Example:
  * <pre>
  * {@code
  * //value class
- *    class DMOImplementation implements DMO{
+ *    {@literal @}DataAccess("DMOTable")
+ *    class DMOImplementation {
  *         //field which will be saved into database
- *        {@literal @}SQL
+ *        {@literal @}SQLUpdate(stateGet = "isNameChanged", valueGet = "getName", columnField = "nameC")
  *        String name;
  *
  *         //stateChanged flag
@@ -84,11 +69,8 @@ import java.util.*;
  *    }
  * }
  * </pre>
- *
- *
  */
-public class ClassSpy {
-
+public class ReflectUpdate {
     private String tableName;
     private String idColumn;
 
@@ -461,8 +443,8 @@ public class ClassSpy {
         List<Field> annotateFields = new ArrayList<>();
 
         for (Field field : fields) {
+            //check if field type is subtype of Property
             if (Property.class.isAssignableFrom(field.getType())) {
-//                field.getAnnotation(annotateClass);
                 for (Annotation annotation : field.getAnnotations()) {
                     if (annotateClass.isAssignableFrom(annotation.annotationType())) {
                         annotateFields.add(field);

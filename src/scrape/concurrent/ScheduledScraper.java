@@ -1,6 +1,7 @@
 package scrape.concurrent;
 
 import Enterprise.gui.general.PostSingleton;
+import Enterprise.misc.Log;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
 import javafx.util.Duration;
@@ -13,10 +14,8 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.*;
-import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
 
 /**
  * Scheduled Service, which searches for content in the internet specified in the {@code searchMap}.
@@ -34,18 +33,7 @@ import java.util.logging.SimpleFormatter;
  */
 public class ScheduledScraper extends ScheduledService<List<Post>> {
 
-    private Logger logger = Logger.getLogger(this.getClass().getPackage().getName());
-
-    {
-        try {
-            FileHandler fileHandler = new FileHandler("log\\" + this.getClass().getPackage().getName() + ".log", true);
-            fileHandler.setFormatter(new SimpleFormatter());
-            logger.addHandler(fileHandler);
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException();
-        }
-    }
+    private Logger logger = Log.packageLogger(this);
 
     private Map<List<String>, SourceList> searchMap = new HashMap<>();
 

@@ -1,5 +1,7 @@
 package Enterprise.test;
 
+import Enterprise.misc.Log;
+
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.FileVisitResult;
@@ -10,9 +12,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
-import java.util.logging.FileHandler;
 import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
 
 /**
  * Created by Dominik on 08.08.2017.
@@ -20,18 +20,8 @@ import java.util.logging.SimpleFormatter;
  */
 public class tester {
     static Connection con;
-    static Logger logger = Logger.getLogger(tester.class.getName());
+    static Logger logger = Log.classLogger(tester.class);
 
-    static {
-        try {
-            FileHandler fileHandler = new FileHandler("log\\handler.log",true);
-            fileHandler.setFormatter(new SimpleFormatter());
-            logger.addHandler(fileHandler);
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException();
-        }
-    }
 
     public static void main(String... aArgs) throws IOException, URISyntaxException, SQLException {
 /*

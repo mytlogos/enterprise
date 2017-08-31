@@ -2,13 +2,11 @@ package Enterprise.data.database;
 
 import Enterprise.data.intface.DataBase;
 import Enterprise.data.intface.Table;
+import Enterprise.misc.Log;
 
-import java.io.IOException;
 import java.sql.*;
 import java.util.Collection;
-import java.util.logging.FileHandler;
 import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
 
 /**
  * This class represents a table in a SQL database.
@@ -18,19 +16,7 @@ abstract class AbstractTable<E extends DataBase> implements Table<E> {
     static final String INTEGER = "INTEGER";
     static final String TEXT = "TEXT";
 
-    Logger logger = Logger.getLogger(this.getClass().getPackage().getName());
-
-    {
-        try {
-            //creates a FileHandler for this Package and adds it to this logger
-            FileHandler fileHandler = new FileHandler("log\\" + this.getClass().getPackage().getName() + ".log", true);
-            fileHandler.setFormatter(new SimpleFormatter());
-            logger.addHandler(fileHandler);
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException();
-        }
-    }
+    Logger logger = Log.packageLogger(this);
 
     /**
      * The constructor of {@code AbstractTable}.

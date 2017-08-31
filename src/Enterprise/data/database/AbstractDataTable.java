@@ -1,6 +1,6 @@
 package Enterprise.data.database;
 
-import Enterprise.data.ClassSpy;
+import Enterprise.data.ReflectUpdate;
 import Enterprise.data.intface.DataBase;
 import Enterprise.data.intface.DataTable;
 import Enterprise.misc.SetList;
@@ -40,6 +40,7 @@ abstract class AbstractDataTable<E extends DataBase> extends AbstractTable<E> im
         createTable();
     }
 
+    @Override
     public boolean updateEntry(E entry) {
         return Connections.getConnection((connection) -> updateEntry(entry, connection));
     }
@@ -48,7 +49,7 @@ abstract class AbstractDataTable<E extends DataBase> extends AbstractTable<E> im
     public boolean updateEntry(E entry, Connection connection) throws SQLException {
         validate(entry, connection);
         boolean updated = false;
-        ClassSpy classSpy = new ClassSpy();
+        ReflectUpdate classSpy = new ReflectUpdate();
         Set<String> statements = classSpy.updateStrings(entry, getTableName(), tableId);
 
         int[] affected;
@@ -279,11 +280,11 @@ abstract class AbstractDataTable<E extends DataBase> extends AbstractTable<E> im
      *
      * @param entries {@code Collection} to be updated
      * @return statements - {@code Set} of complete SQL statements
-     * @see ClassSpy#updateStrings(DataBase, String, String)
+     * @see ReflectUpdate#updateStrings(DataBase, String, String)
      */
     Set<String> updateStrings(Collection<? extends E> entries) {
         Set<String> statements = new HashSet<>();
-        ClassSpy classSpy = new ClassSpy();
+        ReflectUpdate classSpy = new ReflectUpdate();
 
         for (E entry : entries) {
             statements.addAll(classSpy.updateStrings(entry, getTableName(), tableId));

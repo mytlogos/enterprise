@@ -1,30 +1,20 @@
 package Enterprise.data.concurrent;
 
-import java.io.IOException;
-import java.util.concurrent.*;
-import java.util.logging.FileHandler;
+import Enterprise.misc.Log;
+
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
 
 /**
  * Runnable which executes several Operations, before the program terminates
  */
 public class OnCloseRun implements Runnable {
 
-    private Logger logger = Logger.getLogger(this.getClass().getPackage().getName());
-
-    {
-        try {
-            //creates a FileHandler for this Package and adds it to this logger
-            FileHandler fileHandler = new FileHandler("log\\" + this.getClass().getPackage().getName() + ".log",true);
-            fileHandler.setFormatter(new SimpleFormatter());
-            logger.addHandler(fileHandler);
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException();
-        }
-    }
+    private Logger logger = Log.packageLogger(this);
 
     private ExecutorService pool;
 

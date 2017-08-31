@@ -1,6 +1,6 @@
 package scrape.concurrent;
 
-import Enterprise.data.concurrent.AddCall;
+import Enterprise.misc.Log;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import scrape.sources.Post;
@@ -12,28 +12,15 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.*;
-import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
 
 /**
  * A one-time executing Scraper for testing purposes.
  */
 public class ScrapeService extends Service<List<Post>> {
 
-    private Logger logger = Logger.getLogger(AddCall.class.getPackage().getName());
-
-    {
-        try {
-            FileHandler fileHandler = new FileHandler("log\\concurrent.log",true);
-            fileHandler.setFormatter(new SimpleFormatter());
-            logger.addHandler(fileHandler);
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException();
-        }
-    }
+    private Logger logger = Log.packageLogger(this);
 
     private Map<List<String>, SourceList> searchMap = new HashMap<>();
 

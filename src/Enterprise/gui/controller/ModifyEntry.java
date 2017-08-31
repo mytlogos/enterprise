@@ -5,6 +5,7 @@ import Enterprise.gui.general.BasicModes;
 import Enterprise.gui.general.GlobalItemValues;
 import Enterprise.gui.general.GuiPaths;
 import Enterprise.gui.general.Mode;
+import Enterprise.misc.Log;
 import Enterprise.modules.BasicModules;
 import Enterprise.modules.Module;
 import com.sun.javafx.collections.ObservableListWrapper;
@@ -32,10 +33,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
-import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
 
 /**
  * This class represents a paramount parent of all {@code Controller},
@@ -46,19 +45,7 @@ import java.util.logging.SimpleFormatter;
  */
 abstract class ModifyEntry<E extends Enum<E> & Module, R extends Enum<R> & Mode> extends AbstractController<E, R> implements InputLimiter, Controller {
 
-    protected Logger logger = Logger.getLogger(this.getClass().getPackage().getName());
-
-    {
-        try {
-            //creates a FileHandler for the Package of 'this' object and adds it to this logger
-            FileHandler fileHandler = new FileHandler("log\\" + this.getClass().getPackage().getName() + ".log", true);
-            fileHandler.setFormatter(new SimpleFormatter());
-            logger.addHandler(fileHandler);
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException();
-        }
-    }
+    protected Logger logger = Log.packageLogger(this);
 
     @FXML
     protected AnchorPane root;

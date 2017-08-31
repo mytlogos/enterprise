@@ -3,36 +3,22 @@ package Enterprise.data.concurrent;
 import Enterprise.data.OpEntryCarrier;
 import Enterprise.data.database.CreationEntryTable;
 import Enterprise.data.intface.CreationEntry;
+import Enterprise.misc.Log;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
 import javafx.util.Duration;
 
-import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
 
 /**
  * Scheduled Service for periodically updating and adding new Entries to the underlying database.
  */
 public class UpdateService extends ScheduledService<Boolean> {
 
-    private Logger logger = Logger.getLogger(this.getClass().getPackage().getName());
-
-    {
-        try {
-            //creates a FileHandler for this Package and adds it to this logger
-            FileHandler fileHandler = new FileHandler("log\\" + this.getClass().getPackage().getName() + ".log",true);
-            fileHandler.setFormatter(new SimpleFormatter());
-            logger.addHandler(fileHandler);
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException();
-        }
-    }
+    private Logger logger = Log.packageLogger(this);
 
     /**
      * The constructor of {@code UpdateService}.

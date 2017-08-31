@@ -441,6 +441,7 @@ public class EntrySourceTable extends AbstractSubRelation<Sourceable> {
 
         return sourceableInserted && sourceInserted;
     }
+
     /**
      * Inserts new Parts of the {@code Sourceable} Component. New {@code sources} or itself.
      *
@@ -455,14 +456,5 @@ public class EntrySourceTable extends AbstractSubRelation<Sourceable> {
         boolean sourceableInserted = SourceableTable.getInstance().insert(entries, connection);
 
         return sourceableInserted && sourceInserted;
-    }
-
-    /**
-     * Returns a SQL statement of an SELECT operation.
-     * @param id id of the SOURCEID column which should be filtered after
-     * @return string - a complete sql statement
-     */
-    private String getFromSourceId(int id) {
-        return "Select * from " + getTableName() + " where " + sourceId + " = " + id;
     }
 }

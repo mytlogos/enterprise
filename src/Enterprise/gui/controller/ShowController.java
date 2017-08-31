@@ -6,6 +6,7 @@ import Enterprise.gui.general.BasicModes;
 import Enterprise.gui.general.GuiPaths;
 import Enterprise.gui.general.Mode;
 import Enterprise.misc.EntrySingleton;
+import Enterprise.misc.Log;
 import Enterprise.modules.Module;
 import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
@@ -24,10 +25,8 @@ import javafx.util.converter.NumberStringConverter;
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
-import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
 
 /**
  * The basic {@link Controller} of all {@code Controller}  with {@link BasicModes#SHOW}.
@@ -61,19 +60,7 @@ public abstract class ShowController<E extends CreationEntry, R extends Enum<R> 
         return stage;
     }
 
-    protected Logger logger = Logger.getLogger(this.getClass().getPackage().getName());
-
-    {
-        try {
-            //creates a FileHandler for this Package and adds it to this logger
-            FileHandler fileHandler = new FileHandler("log\\" + this.getClass().getPackage().getName() + ".log", true);
-            fileHandler.setFormatter(new SimpleFormatter());
-            logger.addHandler(fileHandler);
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException();
-        }
-    }
+    protected Logger logger = Log.packageLogger(this);
 
     @FXML
     protected TextArea commentArea;

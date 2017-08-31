@@ -2,15 +2,13 @@ package Enterprise.data.database;
 
 import Enterprise.data.intface.ConHandler;
 import Enterprise.data.intface.ConHandlerVoid;
+import Enterprise.misc.Log;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
 
 /**
  * Utility class providing the {@link Connection} to the underlying database.
@@ -30,19 +28,7 @@ class Connections{
         throw new IllegalStateException();
     }
 
-    private static Logger logger = Logger.getLogger(Connections.class.getPackage().getName());
-
-    static  {
-        try {
-            //creates a FileHandler for this Package and adds it to this logger
-            FileHandler fileHandler = new FileHandler("log\\" + Connections.class.getPackage().getName() + ".log", true);
-            fileHandler.setFormatter(new SimpleFormatter());
-            logger.addHandler(fileHandler);
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException();
-        }
-    }
+    private static Logger logger = Log.packageLogger(Connections.class);
 
     /**
      * Logs the thrown Exception in case of connection error.

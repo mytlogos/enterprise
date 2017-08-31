@@ -1,0 +1,76 @@
+# Created by .ignore support plugin (hsz.mobi)
+### Java template
+# Compiled class file
+*.class
+
+# Log file
+*.log
+
+# BlueJ files
+*.ctxt
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Package Files #
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+.gitignore
+.idea/artifacts/
+.idea/compiler.xml
+.idea/description.html
+.idea/dictionaries/
+.idea/encodings.xml
+.idea/gradle.xml
+.idea/inspectionProfiles/
+.idea/libraries/
+.idea/misc.xml
+.idea/uiDesigner.xml
+.idea/vcs.xml
+.idea/workspace.xml
+log/
+out/production/Enterprise/
+out/production/ReadingList/Enterprise/gui/controller/AbstractController.class
+out/production/ReadingList/Enterprise/gui/controller/SourceableEditController.class
+out/production/ReadingList/Enterprise/gui/controller/SourceableShowController.class
+out/production/ReadingList/Enterprise/gui/general/BasicModes.class
+out/production/ReadingList/Enterprise/gui/general/GuiPaths$1.class
+out/production/ReadingList/Enterprise/gui/general/GuiPaths$Main$1.class
+out/production/ReadingList/Enterprise/gui/general/GuiPaths$Main.class
+out/production/ReadingList/Enterprise/misc/DataAccess.class
+out/production/ReadingList/Enterprise/misc/SQLUpdate.class
+out/production/ReadingList/Enterprise/modules/BasicModules$1.class
+out/production/ReadingList/Enterprise/modules/BasicModules$2.class
+out/production/ReadingList/Enterprise/modules/BasicModules$3.class
+out/production/ReadingList/Enterprise/modules/BasicModules$4.class
+out/production/ReadingList/Enterprise/modules/BasicModules$5.class
+out/production/ReadingList/Enterprise/modules/BasicModules.class
+out/production/ReadingList/Enterprise/test/ExtendWindow.class
+out/production/ReadingList/Enterprise/test/extendWindow.fxml
+out/production/ReadingList/Enterprise/test/mapclass$enumClass.class
+out/production/ReadingList/Enterprise/test/mapclass.class
+sousetsuka-testchapter.html
+sousetsuka-testchapter2.html
+sousetsuka-testchapter3.html
+sousetsuka-testchapter4.html
+sousetsuka-testchapter5.html
+sousetsuka-testchapter6.html
+sousetsuka-testchapter7.html
+sousetsuka-testchapter8.html
+src/Enterprise/deprecate/
+src/Enterprise/gui/dialogs/
+src/Enterprise/lib/
+src/Enterprise/test/ExtendWindow.java
+src/Enterprise/test/extendWindow.fxml
+src/Enterprise/test/mapclass.java
+src/scrape/sources/anime/
+src/scrape/sources/manga/
+src/scrape/src/
+untitled/

@@ -6,6 +6,7 @@ import Enterprise.data.intface.CreationEntry;
 import Enterprise.gui.general.BasicModes;
 import Enterprise.gui.general.Columns;
 import Enterprise.misc.EntrySingleton;
+import Enterprise.misc.Log;
 import Enterprise.modules.BasicModules;
 import Enterprise.modules.Module;
 import javafx.application.Platform;
@@ -19,11 +20,8 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.layout.HBox;
 import javafx.util.Callback;
 
-import java.io.IOException;
-import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
 
 /**
  * The basic controller for all controller with {@link BasicModes#CONTENT}.
@@ -31,55 +29,6 @@ import java.util.logging.SimpleFormatter;
  */
 public abstract class ModuleController<E extends CreationEntry, R extends Enum<R> & Module> extends AbstractController<R, BasicModes> {
 
-    @FXML
-    protected HBox addBox;
-
-    protected Logger logger = Logger.getLogger(this.getClass().getPackage().getName());
-
-    {
-        try {
-            //creates a FileHandler for this Package and adds it to this logger
-            FileHandler fileHandler = new FileHandler("log\\" + this.getClass().getPackage().getName() + ".log", true);
-            fileHandler.setFormatter(new SimpleFormatter());
-            logger.addHandler(fileHandler);
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException();
-        }
-    }
-
-    @FXML
-    protected TextField titleField;
-    @FXML
-    protected TextField creatorField;
-    @FXML
-    protected TableView<E> entryTable;
-
-    @FXML
-    protected TableColumn<E, Number> indexColumn;
-    @FXML
-    protected MenuItem fullAdd;
-    @FXML
-    protected MenuItem edit;
-    @FXML
-    protected MenuItem delete;
-    private TableColumn<E, String> titleColumn;
-    private TableColumn<E, String> creatorNameColumn;
-    private TableColumn<E, Number> presentColumn;
-    private TableColumn<E, Number> processedColumn;
-    private TableColumn<E, String> ownStatusColumn;
-    private TableColumn<E, String> seriesColumn;
-    private TableColumn<E, String> lastEpColumn;
-    private TableColumn<E, Number> ratingColumn;
-    private TableColumn<E, String> creatorSortNameColumn;
-
-    @FXML
-    protected Button addBtn;
-    @FXML
-    protected Button editBtn;
-    private TableColumn<E, String> workStatColumn;
-    private TableColumn<E, String> commentColumn;
-    private TableColumn<E, String> keyWordsColumn;
 
     @Override
     final protected void setMode() {
@@ -493,4 +442,41 @@ public abstract class ModuleController<E extends CreationEntry, R extends Enum<R
     public void hideCommentColumn() {
         entryTable.getColumns().remove(commentColumn);
     }
+
+
+    protected Logger logger = Log.packageLogger(this);
+
+    @FXML
+    protected HBox addBox;
+    @FXML
+    protected TextField titleField;
+    @FXML
+    protected TextField creatorField;
+    @FXML
+    protected TableView<E> entryTable;
+
+    @FXML
+    protected TableColumn<E, Number> indexColumn;
+    @FXML
+    protected MenuItem fullAdd;
+    @FXML
+    protected MenuItem edit;
+    @FXML
+    protected MenuItem delete;
+    @FXML
+    protected Button addBtn;
+    @FXML
+    protected Button editBtn;
+    private TableColumn<E, String> titleColumn;
+    private TableColumn<E, String> creatorNameColumn;
+    private TableColumn<E, Number> presentColumn;
+    private TableColumn<E, Number> processedColumn;
+    private TableColumn<E, String> ownStatusColumn;
+    private TableColumn<E, String> seriesColumn;
+    private TableColumn<E, String> lastEpColumn;
+    private TableColumn<E, Number> ratingColumn;
+    private TableColumn<E, String> creatorSortNameColumn;
+    private TableColumn<E, String> workStatColumn;
+    private TableColumn<E, String> commentColumn;
+    private TableColumn<E, String> keyWordsColumn;
 }

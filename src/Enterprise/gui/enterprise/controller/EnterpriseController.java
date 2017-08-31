@@ -16,6 +16,7 @@ import Enterprise.gui.general.PostSingleton;
 import Enterprise.gui.manga.controller.MangaController;
 import Enterprise.gui.novel.controller.NovelController;
 import Enterprise.gui.series.controller.SeriesController;
+import Enterprise.misc.Log;
 import Enterprise.modules.BasicModules;
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
@@ -38,10 +39,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
 
 import static Enterprise.modules.BasicModules.*;
 
@@ -50,19 +49,7 @@ import static Enterprise.modules.BasicModules.*;
  */
 public class EnterpriseController implements Initializable, Controller {
 
-    private Logger logger = Logger.getLogger(this.getClass().getSimpleName());
-
-    {
-        try {
-            //creates a FileHandler for this Class and adds it to this logger
-            FileHandler fileHandler = new FileHandler("log\\" + this.getClass().getSimpleName() + ".log", true);
-            fileHandler.setFormatter(new SimpleFormatter());
-            logger.addHandler(fileHandler);
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException();
-        }
-    }
+    private Logger logger = Log.classLogger(this);
 
     @FXML
     private Tab animeTab;

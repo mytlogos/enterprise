@@ -1,12 +1,11 @@
 package Enterprise.data;
 
 import Enterprise.data.intface.Entry;
-import javafx.beans.property.*;
+import Enterprise.misc.Log;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 
-import java.io.IOException;
-import java.util.logging.FileHandler;
 import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
 
 /**
  * Basic implementation of {@code Entry}.
@@ -17,19 +16,7 @@ import java.util.logging.SimpleFormatter;
  */
 public abstract class EnterpriseEntry implements Entry {
 
-    protected Logger logger = Logger.getLogger(this.getClass().getSimpleName());
-    {
-        try {
-            //handler for this class and all subclasses
-            FileHandler fileHandler = new FileHandler(
-                    "log\\" + this.getClass().getSimpleName() + ".log", true);
-            fileHandler.setFormatter(new SimpleFormatter());
-            logger.addHandler(fileHandler);
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException();
-        }
-    }
+    protected Logger logger = Log.classLogger(this);
 
 
     private boolean dead = false;

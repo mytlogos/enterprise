@@ -1,6 +1,6 @@
 package Enterprise.data.intface;
 
-import Enterprise.data.ClassSpy;
+import Enterprise.data.ReflectUpdate;
 import Enterprise.misc.SQLUpdate;
 
 import java.sql.Connection;
@@ -53,7 +53,7 @@ public interface DataTable<E extends DataBase> extends Table<E> {
      * For this operation, this method uses {@code Reflection}
      * to get the necessary data from the different classes.
      * To succeed with the {@code Reflection}, several restraints one the fields and methods are necessary.
-     * This method uses the {@link ClassSpy} for {@code Reflection}, which looks, in this case,
+     * This method uses the {@link ReflectUpdate} for {@code Reflection}, which looks, in this case,
      * for fields who are annotated with {@link SQLUpdate}.
      * At the moment these fields need to have a data type
      * which derives from {@link javafx.beans.property.Property}.
@@ -61,7 +61,7 @@ public interface DataTable<E extends DataBase> extends Table<E> {
      * @param entry {@code Entry} to be updated
      * @param connection {@code Connection} used for this {@code Transaction}
      * @return updated - integer {@code Array} holding the number of affected rows per statements per position
-     * @see ClassSpy
+     * @see ReflectUpdate
      */
     boolean updateEntry(E entry, Connection connection) throws SQLException;
 
@@ -79,7 +79,7 @@ public interface DataTable<E extends DataBase> extends Table<E> {
      * For this operation, this method uses {@code Reflection}
      * to get the necessary data from the different classes.
      * To succeed with the {@code Reflection}, several restraints one the fields and methods are necessary.
-     * This method uses the {@link ClassSpy} for {@code Reflection}, which looks, in this case,
+     * This method uses the {@link ReflectUpdate} for {@code Reflection}, which looks, in this case,
      * for fields who are annotated with {@link SQLUpdate}.
      * At the moment these fields need to have a data type
      * which derives from {@link javafx.beans.property.Property}.

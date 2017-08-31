@@ -1,6 +1,7 @@
 package Enterprise.gui.enterprise.controller;
 
 import Enterprise.gui.general.PostSingleton;
+import Enterprise.misc.Log;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -21,10 +22,8 @@ import scrape.sources.Post;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
-import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
 
 /**
  * This class is for presenting the scraped Posts in a new Window.
@@ -33,7 +32,7 @@ import java.util.logging.SimpleFormatter;
 public class PostView implements Initializable{
 
     private static Stage stage = null;
-    private Logger logger = Logger.getLogger(this.getClass().getSimpleName());
+    private Logger logger = Log.classLogger(this);
 
     @FXML
     private VBox root;
@@ -103,18 +102,6 @@ public class PostView implements Initializable{
                 }
             }
         );
-    }
-
-    {
-        try {
-            //creates a FileHandler for this Class and adds it to this logger
-            FileHandler fileHandler = new FileHandler("log\\" + this.getClass().getSimpleName() + ".log", true);
-            fileHandler.setFormatter(new SimpleFormatter());
-            logger.addHandler(fileHandler);
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException();
-        }
     }
 
     public void open() {
