@@ -74,3 +74,13 @@ src/scrape/sources/anime/
 src/scrape/sources/manga/
 src/scrape/src/
 untitled/
+/out/
+out/production/ReadingList/Enterprise/gui/anime/fxml/
+out/production/ReadingList/Enterprise/gui/book/fxml/
+out/production/ReadingList/Enterprise/gui/enterprise/fxml/
+out/production/ReadingList/Enterprise/gui/manga/fxml/
+out/production/ReadingList/Enterprise/gui/novel/fxml/
+out/production/ReadingList/Enterprise/gui/series/fxml/
+out/production/ReadingList/Enterprise/test/DisplayPost.fxml
+out/production/ReadingList/Enterprise/test/TableView.fxml
+out/production/ReadingList/scrape/sources/Sourcery.fxml
