@@ -1,12 +1,15 @@
 package scrape.sources;
 
+import Enterprise.data.Cache;
+import Enterprise.data.Default;
 import Enterprise.data.EnterpriseEntry;
 import Enterprise.data.intface.DataBase;
-import Enterprise.data.Default;
 import Enterprise.data.intface.DataTable;
 import Enterprise.data.intface.Sourceable;
 import Enterprise.data.intface.Table;
-import javafx.beans.property.*;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
 import javafx.collections.SetChangeListener;
@@ -41,23 +44,11 @@ public class Source extends EnterpriseEntry implements DataBase,Comparable<Sourc
     private final ObservableSet<Sourceable> creationEntries = FXCollections.observableSet();
     private final Set<Sourceable> deletedEntries = new HashSet<>();
 
-    private final BooleanProperty newSource = new SimpleBooleanProperty(false);
-
     private static int counter = 0;
     private int id;
 
 
-    /**
-     * The no argument constructor of {@code Source}.
-     */
-    public Source() {
-        sourceName = new SimpleStringProperty(Default.STRING);
-        url = new SimpleStringProperty(Default.STRING);
-        sourceType = SourceType.START;
-        this.id = counter;
-        counter++;
-        newSource.set(true);
-    }
+    private static Cache<String, Source> sourceCache = new Cache<>();
 
     /**
      * The constructor of {@code Source}.
@@ -66,7 +57,7 @@ public class Source extends EnterpriseEntry implements DataBase,Comparable<Sourc
      * @param type the type of the source
      * @throws URISyntaxException if url is invalid
      */
-    public Source(String url, SourceType type) throws URISyntaxException {
+    private Source(String url, SourceType type) throws URISyntaxException {
         this(url, type, Default.VALUE);
     }
 
@@ -78,30 +69,28 @@ public class Source extends EnterpriseEntry implements DataBase,Comparable<Sourc
      * @param id the database id
      * @throws URISyntaxException if url is invalid
      */
-    public Source(String url, SourceType type, int id) throws URISyntaxException {
-        if (url.isEmpty()) {
-            throw new IllegalArgumentException("url darf nicht leer sein!");
+    private Source(String url, SourceType type, int id) throws URISyntaxException {
+        if (url == null || url.isEmpty()) {
+            throw new IllegalArgumentException("url is invalid: " + url);
         } else {
             URI uri = new URI(url);
             sourceName.set(uri.getHost());
             this.url.set(uri.toString());
         }
+        this.id = id;
         sourceType = type;
 
-        // TODO: 26.08.2017 maybe change it to database incrementation
-        if (id == 0) {
-            this.id = counter;
-            counter++;
-        } else {
-            this.id = id;
-            if (counter <= id) {
-                counter = id;
-                counter++;
-            }
-        }
         setListener();
-        newSource.set(true);
     }
+
+    public static Source createSource(int id, String url, SourceType type) throws URISyntaxException {
+        return sourceCache.checkCache(new Source(url, type, id), source -> source.url.get());
+    }
+
+    public static Source createSource(String url, SourceType type) throws URISyntaxException {
+        return createSource(Default.VALUE, url, type);
+    }
+
     @Override
     public int getId() {
         return id;
@@ -111,6 +100,9 @@ public class Source extends EnterpriseEntry implements DataBase,Comparable<Sourc
     public void setId(int id, Table table) {
         if (!(table instanceof DataTable)) {
             throw new IllegalAccessError();
+        }
+        if (id <= 0) {
+            throw new IllegalArgumentException();
         }
         this.id = id;
     }

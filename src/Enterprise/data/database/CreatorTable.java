@@ -1,16 +1,13 @@
 package Enterprise.data.database;
 
 import Enterprise.data.Person;
-import Enterprise.data.impl.SimpleCreator;
-import Enterprise.data.intface.Creation;
+import Enterprise.data.impl.CreatorImpl;
 import Enterprise.data.intface.Creator;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * DAO class of {@link Creator}.
@@ -87,10 +84,14 @@ public class CreatorTable extends AbstractDataTable<Creator> {
         String stat = rs.getString(statusC);
         // TODO: 12.08.2017 implement personTable
         Person person = new Person();
-        // TODO: 12.08.2017 get Works
-        List<Creation> works = new ArrayList<>();
 
-        entry = new SimpleCreator(authorId,name,sortName,stat,person,works);
+        entry = new CreatorImpl.CreatorBuilder(name).
+                setId(authorId).
+                setSortName(sortName).
+                setStatus(stat).
+                setPerson(person).
+                build();
+
         entry.setEntryOld();
         return entry;
     }

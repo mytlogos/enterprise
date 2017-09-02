@@ -53,7 +53,6 @@ public class OnCloseRun implements Runnable {
             added = addFuture.get();
         } catch (InterruptedException | ExecutionException e) {
             logger.log(Level.SEVERE, "Problem in executing the on-Close-operations", e);
-            e.printStackTrace();
         }
 
         //holds this thread alive, awaiting the termination of the executioner

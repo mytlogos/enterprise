@@ -270,23 +270,27 @@ public class EntrySourceTable extends AbstractSubRelation<Sourceable> {
 
         validate(entry, connection);
 
-        try (PreparedStatement statement = connection.prepareStatement(getDelete())) {
-            List<Source> sourceList = entry.getSourceList().getDeletedSources();
-            for (Source source : sourceList) {
-                setData(entry, statement, source);
-                statement.addBatch();
-            }
-
-            // TODO: 24.08.2017 do sth about this
-            if (statement.executeBatch().length > 0) {
-                deleted = true;
-            }
-        }
+        List<Source> sourceList = entry.getSourceList().getDeletedSources();
         boolean deadRemoved = removeDead(entry, connection);
-        if (deleted == deadRemoved) {
-            return true;
+        if (!sourceList.isEmpty()) {
+            try (PreparedStatement statement = connection.prepareStatement(getDelete())) {
+                for (Source source : sourceList) {
+                    setData(entry, statement, source);
+                    statement.addBatch();
+                }
+
+                // TODO: 24.08.2017 do sth about this
+                if (statement.executeBatch().length > 0) {
+                    deleted = true;
+                }
+            }
+            if (deleted == deadRemoved) {
+                return true;
+            } else {
+                throw new SQLException("inconsistent data");
+            }
         } else {
-            throw new SQLException("inconsistent data");
+            return deadRemoved;
         }
     }
 
@@ -343,7 +347,8 @@ public class EntrySourceTable extends AbstractSubRelation<Sourceable> {
         List<Source> globalSources = SourceList.getDeletedGlobalSources();
         sourceDelete = SourceTable.getInstance().delete(globalSources, connection);
 
-        return sourceableDelete && sourceDelete;
+        return globalSources.isEmpty() ? sourceableDelete : sourceableDelete && sourceDelete;
+
     }
 
     @Override

@@ -110,31 +110,32 @@ abstract class AbstractDataTable<E extends DataBase> extends AbstractTable<E> im
     public boolean insert(E entry) {
         return Connections.getConnection(connection -> insert(entry, connection));
     }
-
     @Override
     public boolean insert(E entry, Connection connection) {
         boolean inserted = false;
+        if (!entry.isNewEntry()) {
+            return false;
+        }
         try {
             validate(entry, connection);
             try(PreparedStatement stmt = connection.prepareStatement(getInsert())) {
-                if (entry.isNewEntry()) {
-                    setInsertData(entry, stmt);
-                    int updated = stmt.executeUpdate();
+                setInsertData(entry, stmt);
+                int updated = stmt.executeUpdate();
 
-                    ResultSet set = stmt.getGeneratedKeys();
+                ResultSet set = stmt.getGeneratedKeys();
 
-                    //sets the id of the entry
-                    if (set != null && set.next()) {
-                        entry.setId(set.getInt(1), this);
-                    } else{
-                        System.out.println("could not set id");
-                    }
-
-                    // TODO: 15.07.2017 do sth about execute/executeUpdate
-                    if (updated > 0) {
-                        inserted = true;
-                    }
+                //sets the id of the entry
+                if (set != null && set.next()) {
+                    entry.setId(set.getInt(1), this);
+                } else {
+                    System.out.println("could not set id");
                 }
+
+                // TODO: 15.07.2017 do sth about execute/executeUpdate
+                if (updated > 0) {
+                    inserted = true;
+                }
+                entry.setEntryOld();
             }
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "error occurred while inserting", e);

@@ -1,9 +1,9 @@
 package Enterprise.gui.controller;
 
 import Enterprise.data.Default;
-import Enterprise.data.impl.SimpleCreation;
+import Enterprise.data.impl.CreationImpl;
+import Enterprise.data.impl.CreatorImpl;
 import Enterprise.data.impl.SimpleCreationEntry;
-import Enterprise.data.impl.SimpleCreator;
 import Enterprise.data.impl.SimpleUser;
 import Enterprise.data.intface.Creation;
 import Enterprise.data.intface.CreationEntry;
@@ -64,7 +64,7 @@ public abstract class AddController<E extends Enum<E> & Module> extends ModifyEn
         String wnStatus = validateStringInput(ownStatus);
         String comment = validateStringInput(commentArea);
 
-        return new SimpleUser(wnStatus,comment,ratng, Default.STRING,readChapter,kyWords);
+        return new SimpleUser(wnStatus, comment, ratng, Default.LIST, readChapter, kyWords);
     }
     
     /**
@@ -81,10 +81,16 @@ public abstract class AddController<E extends Enum<E> & Module> extends ModifyEn
         String workStat = validateStringInput(workStatus);
 
         Creation creation;
+        CreationImpl.CreationImplBuilder builder = new CreationImpl.CreationImplBuilder(ttl).
+                setSeries(srs).
+                setNumPortion(numberChapters).
+                setDateLastPortion(dtLstChapter).
+                setWorkStatus(workStat);
+
         if(coverPath != null && !coverPath.isEmpty()){
-            creation = new SimpleCreation(srs, ttl, coverPath, numberChapters, dtLstChapter, workStat);
+            creation = builder.setCoverPath(coverPath).build();
         }else{
-            creation = new SimpleCreation(srs, ttl, Default.IMAGE, numberChapters, dtLstChapter, workStat);
+            creation = builder.build();
         }
         return creation;
     }
@@ -98,6 +104,6 @@ public abstract class AddController<E extends Enum<E> & Module> extends ModifyEn
         //parameter for Creator
         String author = validateStringInput(creator);
         String authorSort = validateStringInput(creatorSort);
-        return new SimpleCreator(author, authorSort);
+        return new CreatorImpl.CreatorBuilder(author).setSortName(authorSort).build();
     }
 }

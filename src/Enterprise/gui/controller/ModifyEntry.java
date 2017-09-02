@@ -20,8 +20,8 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.jsoup.Connection;
@@ -48,8 +48,9 @@ abstract class ModifyEntry<E extends Enum<E> & Module, R extends Enum<R> & Mode>
     protected Logger logger = Log.packageLogger(this);
 
     @FXML
-    protected AnchorPane root;
-
+    protected Pane root;
+    @FXML
+    protected Text label;
     @FXML // fx:id="collection"
     protected ComboBox<String> collection; // Value injected by FXMLLoader
 
@@ -114,6 +115,8 @@ abstract class ModifyEntry<E extends Enum<E> & Module, R extends Enum<R> & Mode>
         if (root != null) {
             stage.setScene(new Scene(root));
         }
+        ModifyEntry modifyEntry = loader.getController();
+        modifyEntry.setData(stage);
         return stage;
     }
 
@@ -313,7 +316,6 @@ abstract class ModifyEntry<E extends Enum<E> & Module, R extends Enum<R> & Mode>
         getComboOnClose(workStatus,GlobalItemValues.getInstance().getWorkStatus());
         getComboOnClose(ownStatus,GlobalItemValues.getInstance().getOwnStatus());
         getComboOnClose(collection,GlobalItemValues.getInstance().getCollections());
-
     }
 
     /**

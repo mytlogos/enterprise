@@ -8,11 +8,12 @@ import Enterprise.data.intface.CreationEntry;
 import Enterprise.data.intface.SourceableEntry;
 import Enterprise.gui.anime.controller.AnimeController;
 import Enterprise.gui.book.controller.BookController;
+import Enterprise.gui.controller.ContentController;
 import Enterprise.gui.controller.Controller;
 import Enterprise.gui.general.BasicModes;
 import Enterprise.gui.general.GuiPaths;
 import Enterprise.gui.general.ItemFactory;
-import Enterprise.gui.general.PostSingleton;
+import Enterprise.gui.general.PostManager;
 import Enterprise.gui.manga.controller.MangaController;
 import Enterprise.gui.novel.controller.NovelController;
 import Enterprise.gui.series.controller.SeriesController;
@@ -29,6 +30,8 @@ import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
+import javafx.stage.Window;
+import javafx.stage.WindowEvent;
 import scrape.concurrent.ScheduledScraper;
 
 import java.io.IOException;
@@ -79,26 +82,42 @@ public class EnterpriseController implements Initializable, Controller {
     private Menu viewMenu;
     @FXML
     private Menu columnMenu;
-
     @FXML
     private SeparatorMenuItem separator1;
-
     @FXML
     private SeparatorMenuItem separator2;
     @FXML
     private Button showPostsBtn;
-
+    @FXML
+    private MenuItem saveItem;
+    @FXML
+    private MenuItem openListItem;
+    @FXML
+    private MenuItem newListItem;
+    @FXML
+    private MenuItem closeListItem;
+    @FXML
+    private MenuItem deleteListItem;
+    @FXML
+    private MenuItem closeItem;
+    @FXML
+    private MenuItem aboutItem;
+    @FXML
+    private ToggleButton enableMoving;
+    @FXML
+    private ComboBox<String> moveToBox;
 
     private boolean openPostView = false;
     private Stage postView = null;
+
     /**
      * Shows Posts scraped from {@link ScheduledScraper} in a new Window.
      */
     @FXML
     void showPosts() {
         try {
-            PostView view = new PostView();
-            postView = view.open(root.getScene().getWindow());
+
+            PostView.getInstance().open(root.getScene().getWindow());
         } catch (IOException e) {
             logger.log(Level.SEVERE, "could not open postView", e);
         }
@@ -108,6 +127,80 @@ public class EnterpriseController implements Initializable, Controller {
         } else {
             showPostsBtn.setText("Schließe Posts");
         }
+    }
+
+    @FXML
+    void movingMode() {
+
+    }
+
+    /**
+     *
+     */
+    @FXML
+    void closeList() {
+
+    }
+
+    /**
+     * Requests the window the close.
+     */
+    @FXML
+    void closeProgram() {
+        Window window = root.getScene().getWindow();
+        window.fireEvent(new WindowEvent(window, WindowEvent.WINDOW_CLOSE_REQUEST));
+    }
+
+    /**
+     *
+     */
+    @FXML
+    void deleteList() {
+
+    }
+
+    /**
+     *
+     */
+    @FXML
+    void newList() {
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.showAndWait();
+
+        String newList = dialog.getResult();
+        String tabName = tabPane.getSelectionModel().getSelectedItem().getText();
+
+        for (BasicModules basicModules : BasicModules.values()) {
+            if (basicModules.tabName().equals(tabName)) {
+                ContentController controller = (ContentController) ControlComm.getInstance().getController(basicModules, BasicModes.CONTENT);
+                controller.addList(newList);
+                break;
+            }
+        }
+    }
+
+    /**
+     *
+     */
+    @FXML
+    void openLists() {
+
+    }
+
+    /**
+     * Saves the data in the database.
+     */
+    @FXML
+    void saveData() {
+        service.start();
+    }
+
+    /**
+     * Opens the {@code About} window.
+     */
+    @FXML
+    void openAbout() {
+
     }
 
     /**
@@ -180,7 +273,7 @@ public class EnterpriseController implements Initializable, Controller {
             service.cancel();
             Thread thread = new Thread(new OnCloseRun());
             thread.start();
-            PostSingleton.getInstance().cancelScheduledScraper();
+            PostManager.getInstance().cancelScheduledScraper();
             System.out.println("Fenster wird geschlossen!");
         }));
     }
@@ -304,9 +397,6 @@ public class EnterpriseController implements Initializable, Controller {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         Future<List<? extends CreationEntry>> future = executor.submit(new GetCall());
 
-        List<CreationEntry> animeEntries = ANIME.getEntries();
-        List<CreationEntry> novelEntries = NOVEL.getEntries();
-
         List<? extends CreationEntry> futureEntries;
         try {
             futureEntries = future.get();
@@ -314,19 +404,18 @@ public class EnterpriseController implements Initializable, Controller {
                 for (CreationEntry creationEntry : futureEntries) {
 
                     if (creationEntry instanceof SourceableEntry && creationEntry.getModule() == ANIME) {
-                        animeEntries.add(creationEntry);
+                        ANIME.addEntry(creationEntry);
                     }
                     if (creationEntry instanceof SourceableEntry && creationEntry.getModule() == NOVEL) {
-                        novelEntries.add(creationEntry);
+                        NOVEL.addEntry(creationEntry);
                     }
                 }
 
-            novelEntries.forEach(novelEntry -> PostSingleton.getInstance().addSearchEntries(((SourceableEntry) novelEntry).getSourceable()));
-            animeEntries.forEach(animeEntry -> PostSingleton.getInstance().addSearchEntries(((SourceableEntry) animeEntry).getSourceable()));
+            ANIME.getEntries().forEach(novelEntry -> PostManager.getInstance().addSearchEntries(((SourceableEntry) novelEntry).getSourceable()));
+            NOVEL.getEntries().forEach(animeEntry -> PostManager.getInstance().addSearchEntries(((SourceableEntry) animeEntry).getSourceable()));
 
         } catch (InterruptedException | ExecutionException e) {
             logger.log(Level.SEVERE, "error occurred while getting data from the database", e);
-            e.printStackTrace();
         }
     }
 
@@ -341,7 +430,7 @@ public class EnterpriseController implements Initializable, Controller {
         service = new UpdateService();
         service.start();
         //starts the ScheduledScraper
-        PostSingleton.getInstance().startScheduledScraper();
+        PostManager.getInstance().startScheduledScraper();
 
         //ready the Graphical Content
         setTabPaneListeners();
@@ -366,5 +455,13 @@ public class EnterpriseController implements Initializable, Controller {
 
         Platform.runLater(this::setViewMenu);
 
+    }
+
+    public Stage getStage() {
+        if (root != null) {
+            return (Stage) root.getScene().getWindow();
+        } else {
+            throw new IllegalStateException();
+        }
     }
 }

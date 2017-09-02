@@ -16,6 +16,8 @@ public class GlobalItemValues {
     private List<String> workStatus = new SetList<>();
     private List<String> translators = new SetList<>();
 
+    private List<String> listNames = new SetList<>();
+
 
     private static final GlobalItemValues instance = new GlobalItemValues();
 
@@ -27,6 +29,10 @@ public class GlobalItemValues {
 
     public static GlobalItemValues getInstance() {
         return instance;
+    }
+
+    public List<String> getListNames() {
+        return listNames;
     }
 
     public List<String> getTranslators() {

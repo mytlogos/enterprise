@@ -5,6 +5,7 @@ import javafx.collections.FXCollections;
 import scrape.sources.Post;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * This class is an extension {@code SimpleListProperty} to display {@link Post}s in real-Time.
@@ -18,6 +19,16 @@ public class PostList extends SimpleListProperty<Post> {
      */
     public PostList() {
         super(FXCollections.observableArrayList());
+    }
+
+    /**
+     * The constructor of this {@code PostList}.
+     * Sets the parameter list as the underlying list.
+     *
+     * @param list list with data
+     */
+    public PostList(List<Post> list) {
+        super(FXCollections.observableArrayList(list));
     }
 
     @Override

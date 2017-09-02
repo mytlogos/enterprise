@@ -2,10 +2,11 @@ package Enterprise.gui.general;
 
 import Enterprise.ControlComm;
 import Enterprise.gui.anime.controller.AnimeController;
-import Enterprise.gui.controller.ModuleController;
-import Enterprise.gui.controller.SourceableModuleCont;
+import Enterprise.gui.controller.ContentController;
+import Enterprise.gui.controller.SourceableContentCont;
 import Enterprise.gui.novel.controller.NovelController;
 import Enterprise.modules.BasicModules;
+import Enterprise.modules.Module;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.control.CheckMenuItem;
 
@@ -94,22 +95,20 @@ public class ItemFactory {
      * @param items {@code List} of items to add to
      * @param module {@code Module} to specify the text of the items
      */
-    private void getSourceableCheckMenuItems(SourceableModuleCont controller, List<CheckMenuItem> items, BasicModules module) {
+    private void getSourceableCheckMenuItems(SourceableContentCont controller, List<CheckMenuItem> items, BasicModules module) {
         CheckMenuItem tlGroup = getTranslatorItem(controller, Columns.getTranslator(module));
-        CheckMenuItem keyWords = getKeyWordsItem(controller, Columns.getKeyWords(module));
-
         items.add(tlGroup);
-        items.add(keyWords);
     }
 
     /**
      * Creates a {@code List} of all {@link CheckMenuItem}s corresponding to the columns
-     * inherent to all {@link ModuleController}s.
+     * inherent to all {@link ContentController}s.
      * @param controller to specify specific behaviour for the {@link CheckMenuItem#selectedProperty()}
      * @param module {@code Module} to specify the text of the items
      * @return list of {@code CheckMenuItems}
      */
-    private List<CheckMenuItem> getCheckMenuItems(ModuleController controller, BasicModules module) {
+    private List<CheckMenuItem> getCheckMenuItems(ContentController controller, BasicModules module) {
+
         CheckMenuItem title = getTitleItem(controller, Columns.getTitle(module));
         CheckMenuItem series = getSeriesItem(controller, Columns.getSeries(module));
         CheckMenuItem lastEp = getLastPortionItem(controller, Columns.getLastPortion(module));
@@ -124,6 +123,7 @@ public class ItemFactory {
 
         CheckMenuItem ownStatus = getOwnStatItem(controller, Columns.getOwnStat(module));
         CheckMenuItem comment = getCommentItem(controller, Columns.getComment(module));
+        CheckMenuItem keyWords = getKeyWordsItem(controller, Columns.getKeyWords(module));
 
         List<CheckMenuItem> items = new ArrayList<>();
         items.add(title);
@@ -137,6 +137,8 @@ public class ItemFactory {
         items.add(creatorStatus);
         items.add(ownStatus);
         items.add(comment);
+        items.add(keyWords);
+
         return items;
     }
 
@@ -150,13 +152,33 @@ public class ItemFactory {
      * @param itemName text of the item
      * @return item - the complete {@code CheckMenuItem}
      */
-    private CheckMenuItem getTitleItem(ModuleController controller, String itemName) {
+    private CheckMenuItem getTitleItem(ContentController controller, String itemName) {
         return checkMenuItemFactory(itemName, true,
                 (observable, oldValue, newValue) -> {
                     if (newValue) {
                         controller.showTitleColumn();
                     } else {
                         controller.hideTitleColumn();
+                    }
+                });
+    }
+
+    private List<CheckMenuItem> getCheckMenuItems(Module module, List<Column> columns) {
+        ContentController controller = (ContentController) ControlComm.getInstance().getController(module, BasicModes.CONTENT);
+
+        List<CheckMenuItem> items = new ArrayList<>();
+        columns.forEach(column -> items.add(getItem(controller, column)));
+
+        return items;
+    }
+
+    private CheckMenuItem getItem(ContentController controller, Column column) {
+        return checkMenuItemFactory(column.getName(), column.getDefaultSelect(),
+                (observable, oldValue, newValue) -> {
+                    if (newValue) {
+                        controller.getColumnManager().showColumn(column);
+                    } else {
+                        controller.getColumnManager().hideColumn(column);
                     }
                 });
     }
@@ -171,7 +193,7 @@ public class ItemFactory {
      * @param itemName text of the item
      * @return item - the complete {@code CheckMenuItem}
      */
-    private CheckMenuItem getSeriesItem(ModuleController controller, String itemName) {
+    private CheckMenuItem getSeriesItem(ContentController controller, String itemName) {
         return checkMenuItemFactory(itemName, true,
                 (observable, oldValue, newValue) -> {
                     if (newValue) {
@@ -192,7 +214,7 @@ public class ItemFactory {
      * @param itemName text of the item
      * @return item - the complete {@code CheckMenuItem}
      */
-    private CheckMenuItem getLastPortionItem(ModuleController controller, String itemName) {
+    private CheckMenuItem getLastPortionItem(ContentController controller, String itemName) {
         return checkMenuItemFactory(itemName, false,
                 (observable, oldValue, newValue) -> {
                     if (newValue) {
@@ -213,7 +235,7 @@ public class ItemFactory {
      * @param itemName text of the item
      * @return item - the complete {@code CheckMenuItem}
      */
-    private CheckMenuItem getPresentItem(ModuleController controller, String itemName) {
+    private CheckMenuItem getPresentItem(ContentController controller, String itemName) {
         return checkMenuItemFactory(itemName, true,
                 (observable, oldValue, newValue) -> {
                     if (newValue) {
@@ -234,7 +256,7 @@ public class ItemFactory {
      * @param itemName text of the item
      * @return item - the complete {@code CheckMenuItem}
      */
-    private CheckMenuItem getProcessedItem(ModuleController controller, String itemName) {
+    private CheckMenuItem getProcessedItem(ContentController controller, String itemName) {
         return checkMenuItemFactory(itemName, true,
                 (observable, oldValue, newValue) -> {
                     if (newValue) {
@@ -255,7 +277,7 @@ public class ItemFactory {
      * @param itemName text of the item
      * @return item - the complete {@code CheckMenuItem}
      */
-    private CheckMenuItem getRatingItem(ModuleController controller, String itemName) {
+    private CheckMenuItem getRatingItem(ContentController controller, String itemName) {
         return checkMenuItemFactory(itemName, true,
                 (observable, oldValue, newValue) -> {
                     if (newValue) {
@@ -276,7 +298,7 @@ public class ItemFactory {
      * @param itemName text of the item
      * @return item - the complete {@code CheckMenuItem}
      */
-    private CheckMenuItem getCreatorNameItem(ModuleController controller, String itemName) {
+    private CheckMenuItem getCreatorNameItem(ContentController controller, String itemName) {
         return checkMenuItemFactory(itemName, true,
                 (observable, oldValue, newValue) -> {
                     if (newValue) {
@@ -297,7 +319,7 @@ public class ItemFactory {
      * @param itemName text of the item
      * @return item - the complete {@code CheckMenuItem}
      */
-    private CheckMenuItem getCreatorSortItem(ModuleController controller, String itemName) {
+    private CheckMenuItem getCreatorSortItem(ContentController controller, String itemName) {
         return checkMenuItemFactory(itemName, false,
                 (observable, oldValue, newValue) -> {
                     if (newValue) {
@@ -318,7 +340,7 @@ public class ItemFactory {
      * @param itemName text of the item
      * @return item - the complete {@code CheckMenuItem}
      */
-    private CheckMenuItem getWorkStatItem(ModuleController controller, String itemName) {
+    private CheckMenuItem getWorkStatItem(ContentController controller, String itemName) {
         return checkMenuItemFactory(itemName, false,
                 (observable, oldValue, newValue) -> {
                     if (newValue) {
@@ -339,7 +361,7 @@ public class ItemFactory {
      * @param itemName text of the item
      * @return item - the complete {@code CheckMenuItem}
      */
-    private CheckMenuItem getOwnStatItem(ModuleController controller, String itemName) {
+    private CheckMenuItem getOwnStatItem(ContentController controller, String itemName) {
         return checkMenuItemFactory(itemName, true,
                 (observable, oldValue, newValue) -> {
                     if (newValue) {
@@ -360,7 +382,7 @@ public class ItemFactory {
      * @param itemName text of the item
      * @return item - the complete {@code CheckMenuItem}
      */
-    private CheckMenuItem getCommentItem(ModuleController controller, String itemName) {
+    private CheckMenuItem getCommentItem(ContentController controller, String itemName) {
         return checkMenuItemFactory(itemName, false,
                 (observable, oldValue, newValue) -> {
                     if (newValue) {
@@ -381,7 +403,7 @@ public class ItemFactory {
      * @param itemName text of the item
      * @return item - the complete {@code CheckMenuItem}
      */
-    private CheckMenuItem getTranslatorItem(SourceableModuleCont controller, String itemName) {
+    private CheckMenuItem getTranslatorItem(SourceableContentCont controller, String itemName) {
         return checkMenuItemFactory(itemName, false,
                 (observable, oldValue, newValue) -> {
                     if (newValue) {
@@ -402,7 +424,7 @@ public class ItemFactory {
      * @param itemName text of the item
      * @return item - the complete {@code CheckMenuItem}
      */
-    private CheckMenuItem getKeyWordsItem(SourceableModuleCont controller, String itemName) {
+    private CheckMenuItem getKeyWordsItem(ContentController controller, String itemName) {
         return checkMenuItemFactory(itemName, false,
                 (observable, oldValue, newValue) -> {
                     if (newValue) {

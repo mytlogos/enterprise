@@ -230,9 +230,7 @@ public class CreationEntryTable extends AbstractTable<CreationEntry> {
     public boolean delete(CreationEntry entry) {
         return Connections.getConnection(connection -> {
             try (PreparedStatement statement = connection.prepareStatement(getDelete())) {
-                connection.setAutoCommit(false);
-
-                removeDead(entry, statement.getConnection());
+                removeDead(entry, connection);
 
                 setDeleteData(entry, statement);
 
@@ -245,7 +243,7 @@ public class CreationEntryTable extends AbstractTable<CreationEntry> {
     }
 
     final String getDelete() {
-        return "Delete from " + getTableName() + " where " + userIdC + " = ? and " + creationIdC + " = ? and " + creatorIdC + " = ?";
+        return "Delete from " + getTableName() + " where " + userIdC + " = ?";
     }
 
     /**
@@ -259,9 +257,12 @@ public class CreationEntryTable extends AbstractTable<CreationEntry> {
     public boolean delete(Collection<? extends CreationEntry> entries) {
         return Connections.getConnection(connection -> {
             boolean deleted = false;
+            if (entries.isEmpty()) {
+                return false;
+            }
             try (PreparedStatement statement = connection.prepareStatement(getDelete())) {
                 for (CreationEntry entry : entries) {
-                    removeDead(entry, statement.getConnection());
+                    removeDead(entry, connection);
 
                     setDeleteData(entry, statement);
 
@@ -270,6 +271,7 @@ public class CreationEntryTable extends AbstractTable<CreationEntry> {
                     System.out.println("Einige Einträge von " + entry.getClass().getSimpleName() + " ID " + entry.getUser().getId() + " wurden gelöscht!");
                 }
 
+                // FIXME: 01.09.2017 id in database and creatorId does not match, fault lies in cache and ?
                 if (!Arrays.asList(statement.executeBatch()).isEmpty()) {
                     deleted = true;
                 }
@@ -324,7 +326,7 @@ public class CreationEntryTable extends AbstractTable<CreationEntry> {
         Creator creator = CreatorTable.getInstance().getEntry(creatorId, connection);
 
         CreationEntry entry;
-        if (sourceableId != 0) {
+        if (sourceableId > 0) {
             Sourceable sourceable = SourceableTable.getInstance().getEntry(sourceableId, connection);
 
             entry = new SourceableEntryImpl(user, creation, creator, sourceable, module);
@@ -354,7 +356,8 @@ public class CreationEntryTable extends AbstractTable<CreationEntry> {
 
         if (entry instanceof SourceableEntry) {
             Sourceable sourceable = ((SourceableEntry) entry).getSourceable();
-            if (((SourceableEntry) entry).readySourceableRemoval() || sourceable.isDead()) {
+
+            if (!sourceable.isNewEntry() && (((SourceableEntry) entry).readySourceableRemoval() || sourceable.isDead())) {
                 toDelete++;
                 //SubRelationTable of Sourceables and their sources
                 if (EntrySourceTable.getInstance().delete(sourceable, connection)) {
@@ -363,19 +366,19 @@ public class CreationEntryTable extends AbstractTable<CreationEntry> {
 
             }
         }
-        if (entry.readyUserRemoval() || user.isDead()) {
+        if (!user.isNewEntry() && (entry.readyUserRemoval() || user.isDead())) {
             toDelete++;
             if (UserTable.getInstance().delete(user, connection)) {
                 deleted++;
             }
         }
-        if (entry.readyCreatorRemoval() || creator.isDead()) {
+        if (!creator.isNewEntry() && (entry.readyCreatorRemoval() || creator.isDead())) {
             toDelete++;
             if (CreatorTable.getInstance().delete(creator, connection)) {
                 deleted++;
             }
         }
-        if (entry.readyCreationRemoval() || creation.isDead()) {
+        if (!creation.isNewEntry() && (entry.readyCreationRemoval() || creation.isDead())) {
             toDelete++;
             if (CreationTable.getInstance().delete(creation, connection)) {
                 deleted++;
@@ -387,9 +390,10 @@ public class CreationEntryTable extends AbstractTable<CreationEntry> {
     }
 
     private void setDeleteData(CreationEntry entry, PreparedStatement statement) throws SQLException {
-        statement.setInt(1, entry.getUser().getId());
+        statement.setInt(1, entry.getUser().getId());/*
         statement.setInt(2, entry.getCreation().getId());
         statement.setInt(3, entry.getCreator().getId());
+        and " + creationIdC + " = ? and " + creatorIdC + " = ?*/
     }
 
     /**
@@ -490,8 +494,8 @@ public class CreationEntryTable extends AbstractTable<CreationEntry> {
         checkId(userId);
 
         statement.setInt(1,creationId);
-        statement.setInt(2,creatorId);
-        statement.setInt(3,userId);
+        statement.setInt(2, userId);
+        statement.setInt(3, creatorId);
         statement.setString(5,module);
 
         //sets sourceableId to id of this entry or to null if it is an instance of SourceableEntry

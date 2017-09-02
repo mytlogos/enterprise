@@ -1,6 +1,7 @@
 package Enterprise.gui.enterprise.controller;
 
-import Enterprise.gui.general.PostSingleton;
+import Enterprise.ControlComm;
+import Enterprise.gui.general.PostManager;
 import Enterprise.misc.Log;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -10,6 +11,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
@@ -30,6 +32,12 @@ import java.util.logging.Logger;
  * // TODO: 24.08.2017 do the javadoc
  */
 public class PostView implements Initializable{
+
+    private static PostView INSTANCE = new PostView();
+    @FXML
+    private ToggleButton allToggle;
+    @FXML
+    private ToggleButton newToggle;
 
     private static Stage stage = null;
     private Logger logger = Log.classLogger(this);
@@ -104,10 +112,24 @@ public class PostView implements Initializable{
         );
     }
 
+    private PostView() {
+        if (INSTANCE != null) {
+            throw new IllegalStateException();
+        }
+    }
+
+    public static PostView getInstance() {
+        return INSTANCE;
+    }
+
+    /**
+     * Opens an independent window of {@code PostView}.
+     */
     public void open() {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("../fxml/PostView.fxml"));
         try {
             Parent root;
+            loader.setController(this);
             root = loader.load();
             Stage stage = new Stage();
 
@@ -118,12 +140,25 @@ public class PostView implements Initializable{
         } catch (IOException e) {
             logger.log(Level.SEVERE, "could not open postView", e);
         }
-
     }
 
+    /**
+     * Opens a owned Window of {@code PostView}.
+     * This Window appears right beside the Owner {@code window},
+     * with Width set to 400, making the width not changeable
+     * through User interactions.
+     * The height is always the same as the Owner {@code window}.
+     * This window follows the Owner {@code window}, always maintaining
+     * the same relative position.
+     *
+     * @param window window which will own the window of this {@code PostView}.
+     * @return
+     * @throws IOException
+     */
     Stage open(Window window) throws IOException {
         if (stage == null) {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("../fxml/PostView.fxml"));
+            loader.setController(this);
             root = loader.load();
 
             stage = new Stage();
@@ -147,6 +182,9 @@ public class PostView implements Initializable{
             stage.setMaxWidth(400);
             stage.setMinWidth(400);
 
+            allToggle.setSelected(true);
+            showAll();
+
             stage.show();
         } else {
             stage.close();
@@ -156,22 +194,44 @@ public class PostView implements Initializable{
     }
 
     private void setStatusBar() {
-        ScheduledScraper scraper = PostSingleton.getInstance().getScheduledScraper();
+        ScheduledScraper scraper = PostManager.getInstance().getScheduledScraper();
 
         statusBar.progressProperty().bind(scraper.progressProperty());
         statusBar.textProperty().bind(scraper.messageProperty());
     }
 
+    @FXML
+    void emptyNew() {
+        PostManager.getInstance().clearNew();
+    }
 
-    private void setData() {
-        listView.itemsProperty().bind(PostSingleton.getInstance().getPosts());
+    @FXML
+    private void showAll() {
+        listView.itemsProperty().bind(PostManager.getInstance().getPosts());
+    }
+
+    @FXML
+    private void showNew() {
+        listView.itemsProperty().bind(PostManager.getInstance().getNewPosts());
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         setListView();
         setStatusBar();
-        setData();
-        root.setPrefWidth(600);
+//        root.setPrefWidth(600);
+    }
+
+    public void openNew() {
+        Stage stage = ControlComm.getInstance().getEnterpriseController().getStage();
+        try {
+            if (stage != null) {
+                open(stage);
+            }
+            newToggle.setSelected(true);
+            showNew();
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "could not open postView", e);
+        }
     }
 }

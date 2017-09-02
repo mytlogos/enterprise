@@ -15,4 +15,6 @@ public interface Module {
     List<CreationEntry> getEntries();
 
     boolean addEntry(CreationEntry entry);
+
+    List<String> getListNames();
 }

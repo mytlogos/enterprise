@@ -10,17 +10,16 @@ import javafx.beans.property.*;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.logging.Level;
 
 /**
- * Class representing an Entertainment-Object, like a Series, Novel
+ * Implementation of {@code Creation}.
  *
  * @see Creation
  */
 @DataAccess(daoClass = "CreationTable")
-public class SimpleCreation extends EnterpriseEntry implements DataBase, Creation {
+public class CreationImpl extends EnterpriseEntry implements DataBase, Creation {
+
     private int creationId;
-    private static int idCounter = 1;
 
     @SQLUpdate(stateGet = "isTitleChanged", valueGet = "getTitle", columnField = "titleC")
     private StringProperty title = new SimpleStringProperty();
@@ -53,109 +52,31 @@ public class SimpleCreation extends EnterpriseEntry implements DataBase, Creatio
     private BooleanProperty workStatusChanged = new SimpleBooleanProperty(false);
 
     /**
-     * The no-argument constructor of this {@code SimpleCreation}.
-     * <p>All Data is set to default.</p>
-     */
-    public SimpleCreation() {
-        this(Default.VALUE, Default.STRING, Default.STRING, Default.IMAGE,
-                Default.VALUE, Default.STRING, Default.STRING);
-    }
-
-    /**
-     * The constructor of this {@code SimpleCreation}
+     * The private constructor of {@code CreationImpl}.
      *
-     * @param series          series of this {@code SimpleCreation}
-     * @param title           title of this {@code SimpleCreation}
-     * @param coverPath       coverPath of this {@code SimpleCreation}
-     * @param numPortion      number of Portions of this {@code SimpleCreation}
-     * @param dateLastPortion String representation of the date of the last published portion  of this {@code SimpleCreation}
-     * @param creatorStat     status of the Creator about this {@code SimpleCreation}
      */
-    public SimpleCreation(String series, String title, String coverPath, int numPortion,
-                          String dateLastPortion, String creatorStat) {
-        this(Default.VALUE, series, title, coverPath, numPortion, dateLastPortion, creatorStat);
-    }
+    private CreationImpl(CreationImplBuilder builder) {
+        this.series.set(builder.buildSeries);
+        this.title.set(builder.buildTitle);
+        this.dateLastPortion.set(builder.buildDateLastPortion);
+        this.numPortion.set(builder.buildNumPortion);
+        this.workStatus.set(builder.buildWorkStatus);
+        this.coverPath.set(builder.buildCoverPath);
+        creationId = builder.id;
 
-    /**
-     * The constructor of {@code SimpleCreation}
-     *
-     * @param title title of this {@code SimpleCreation}
-     */
-    public SimpleCreation(String title) {
-        this(Default.VALUE, Default.STRING, title, Default.IMAGE,
-                Default.VALUE, Default.STRING, Default.STRING);
-    }
-
-    // TODO: 23.08.2017 use builder pattern maybe
-
-    /**
-     * The constructor of {@code SimpleCreation}.
-     *
-     * @param id              id of this {@code SimpleCreation}
-     * @param series          series of this {@code SimpleCreation}
-     * @param title           title of this {@code SimpleCreation}
-     * @param coverPath       coverPath of this {@code SimpleCreation}
-     * @param numPortion      number of Portions of this {@code SimpleCreation}
-     * @param dateLastPortion String representation of the date of the last published portion  of this {@code SimpleCreation}
-     * @param workStatus      status of the Creator about this {@code SimpleCreation}
-     */
-    public SimpleCreation(int id, String series, String title, String coverPath,
-                          int numPortion, String dateLastPortion, String workStatus) {
-        this.series.set(series);
-        this.title.set(title);
-        this.dateLastPortion.set(dateLastPortion);
-        this.numPortion.set(numPortion);
-        this.workStatus.set(workStatus);
-        this.coverPath.set(coverPath);
-
-        if (id == 0) {
-            creationId = idCounter;
-            idCounter++;
-        } else {
-            creationId = id;
-            if (idCounter <= id) {
-                idCounter = id;
-                idCounter++;
-            }
-        }
-        validateState();
         invalidListener();
         bindUpdated();
     }
 
-    /**
-     * validates the State of this {@code SimpleCreation}
-     *
-     * @throws IllegalArgumentException if an argument is null or invalid
-     */
-    private void validateState() {
-        String message = "";
-        if (creationId < 0) {
-            message = message + "id is invalid: " + creationId + ", ";
+    @Override
+    public void setId(int id, Table table) {
+        if (!(table instanceof DataTable)) {
+            throw new IllegalAccessError();
         }
-        if (title.get() == null) {
-            message = message + "title is null, ";
+        if (id <= 0) {
+            throw new IllegalArgumentException("should not be smaller than 1: " + id);
         }
-        if (series.get() == null) {
-            message = message + "series is null, ";
-        }
-        if (dateLastPortion.get() == null) {
-            message = message + "dateLastPortion is null, ";
-        }
-        if (numPortion.get() < 0) {
-            message = message + "numPortion is invalid: " + numPortion.get() + ", ";
-        }
-        if (coverPath.get() == null) {
-            message = message + "coverPath is null, ";
-        }
-        if (workStatus.get() == null) {
-            message = message + "workStatus is null, ";
-        }
-        if (!message.isEmpty()) {
-            IllegalArgumentException exception = new IllegalArgumentException(message);
-            logger.log(Level.WARNING, "object creation failed", exception);
-            throw exception;
-        }
+        this.creationId = id;
     }
 
     /**
@@ -195,14 +116,13 @@ public class SimpleCreation extends EnterpriseEntry implements DataBase, Creatio
     }
 
     @Override
-    public void setId(int id, Table table) {
-        if (!(table instanceof DataTable)) {
-            throw new IllegalAccessError();
-        }
-        if (id < 1) {
-            throw new IllegalArgumentException("should not be smaller than 1: " + id);
-        }
-        this.creationId = id;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof CreationImpl)) return false;
+
+        CreationImpl that = (CreationImpl) o;
+
+        return getTitle().equals(that.getTitle()) && getSeries().equals(that.getSeries());
     }
 
     @Override
@@ -342,14 +262,89 @@ public class SimpleCreation extends EnterpriseEntry implements DataBase, Creatio
         return compare;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof SimpleCreation)) return false;
+    /**
+     * The {@code CreationImplBuilder} for this {@code CreationImpl}.
+     */
+    public static class CreationImplBuilder {
+        private final String buildTitle;
+        private String buildSeries = Default.STRING;
+        private String buildDateLastPortion = Default.STRING;
+        private int buildNumPortion = Default.VALUE;
+        private String buildCoverPath = Default.IMAGE;
+        private String buildWorkStatus = Default.STRING;
+        private int id = Default.VALUE;
 
-        SimpleCreation that = (SimpleCreation) o;
+        public CreationImplBuilder(String title) {
+            buildTitle = title;
+        }
 
-        return getTitle().equals(that.getTitle()) && getSeries().equals(that.getSeries());
+        public CreationImplBuilder setId(int id) {
+            this.id = id;
+            return this;
+        }
+
+        public CreationImplBuilder setSeries(String series) {
+            this.buildSeries = series;
+            return this;
+        }
+
+        public CreationImplBuilder setCoverPath(String coverPath) {
+            this.buildCoverPath = coverPath;
+            return this;
+        }
+
+        public CreationImplBuilder setNumPortion(int numPortion) {
+            this.buildNumPortion = numPortion;
+            return this;
+        }
+
+        public CreationImplBuilder setDateLastPortion(String dateLastPortion) {
+            this.buildDateLastPortion = dateLastPortion;
+            return this;
+        }
+
+        public CreationImplBuilder setWorkStatus(String workStatus) {
+            this.buildWorkStatus = workStatus;
+            return this;
+        }
+
+        public CreationImpl build() {
+            validateState();
+            return new CreationImpl(this);
+        }
+
+        /**
+         * Validates the State of this {@code CreationImplBuilder}.
+         *
+         * @throws IllegalArgumentException if an argument is null or invalid
+         */
+        private void validateState() {
+            String message = "";
+            if (id < 0) {
+                message = message + "id is invalid: " + id + ", ";
+            }
+            if (buildTitle == null) {
+                message = message + "title is null, ";
+            }
+            if (buildSeries == null) {
+                message = message + "series is null, ";
+            }
+            if (buildDateLastPortion == null) {
+                message = message + "dateLastPortion is null, ";
+            }
+            if (buildNumPortion < 0) {
+                message = message + "buildNumPortion is invalid: " + buildNumPortion + ", ";
+            }
+            if (buildCoverPath == null) {
+                message = message + "coverPath is null, ";
+            }
+            if (buildWorkStatus == null) {
+                message = message + "workStatus is null, ";
+            }
+            if (!message.isEmpty()) {
+                throw new IllegalArgumentException(message);
+            }
+        }
     }
 
     @Override

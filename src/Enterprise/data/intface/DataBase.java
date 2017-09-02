@@ -25,6 +25,7 @@ public interface DataBase extends Entry {
      * // TODO: 26.08.2017 maybe some better 'security' measure
      * @param id id to set to this instance
      * @param table table - instance of {@link Enterprise.data.database.AbstractDataTable}
+     * @throws IllegalArgumentException if id <= 0
      */
     void setId(int id, Table table);
 }

@@ -104,6 +104,11 @@ public class GuiPaths {
             public boolean addEntry(CreationEntry entry) {
                 throw new IllegalAccessError();
             }
+
+            @Override
+            public List<String> getListNames() {
+                throw new IllegalAccessError();
+            }
         };
 
         final String name;

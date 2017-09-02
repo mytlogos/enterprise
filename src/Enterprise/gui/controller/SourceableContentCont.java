@@ -7,10 +7,10 @@ import javafx.scene.control.TableColumn;
 import javafx.util.Callback;
 
 /**
- * This class represents an corresponding extension of {@code ModuleController}
+ * This class represents an corresponding extension of {@code ContentController}
  * for all controller which handle {@link Enterprise.data.intface.SourceableEntry}s.
  */
-public abstract class SourceableModuleCont<R extends Enum<R> & Module> extends ModuleController<SourceableEntry, R> {
+public abstract class SourceableContentCont<R extends Enum<R> & Module> extends ContentController<SourceableEntry, R> {
     private TableColumn<SourceableEntry, String> translatorColumn;
 
     /**

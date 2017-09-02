@@ -8,7 +8,7 @@
         <tabs>
           <Tab id="animeTab" fx:id="animeTab" closable="false">
                <content>
-                  <Pane fx:id="animePane" prefHeight="200.0" prefWidth="200.0" />
+                   <Pane fx:id="animePane" prefHeight="512.0" prefWidth="727.0"/>
                </content></Tab>
             <Tab fx:id="bookTab" closable="false">
                 <content>
@@ -39,12 +39,16 @@
               <menus>
                 <Menu mnemonicParsing="false" text="Datei">
                   <items>
-                        <MenuItem mnemonicParsing="false" text="Speichern" />
-                        <MenuItem mnemonicParsing="false" text="Liste öffnen" />
-                        <MenuItem mnemonicParsing="false" text="Neue Liste erstellen" />
-                        <MenuItem mnemonicParsing="false" text="Aktuelle Liste schließen" />
-                        <MenuItem mnemonicParsing="false" text="Aktuelle Liste löschen" />
-                    <MenuItem mnemonicParsing="false" text="Programm beenden" />
+                      <MenuItem fx:id="saveItem" mnemonicParsing="false" onAction="#saveData" text="Speichern"/>
+                      <MenuItem fx:id="openListItem" mnemonicParsing="false" onAction="#openLists" text="Liste öffnen"/>
+                      <MenuItem fx:id="newListItem" mnemonicParsing="false" onAction="#newList"
+                                text="Neue Liste erstellen"/>
+                      <MenuItem fx:id="closeListItem" mnemonicParsing="false" onAction="#closeList"
+                                text="Aktuelle Liste schließen"/>
+                      <MenuItem fx:id="deleteListItem" mnemonicParsing="false" onAction="#deleteList"
+                                text="Aktuelle Liste löschen"/>
+                      <MenuItem fx:id="closeItem" mnemonicParsing="false" onAction="#closeProgram"
+                                text="Programm beenden"/>
                   </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Bearbeiten">
@@ -66,7 +70,7 @@
                   </Menu>
                 <Menu mnemonicParsing="false" text="Hilfe">
                   <items>
-                    <MenuItem mnemonicParsing="false" text="About" />
+                      <MenuItem fx:id="aboutItem" mnemonicParsing="false" onAction="#openAbout" text="About"/>
                   </items>
                 </Menu>
               </menus>
@@ -75,6 +79,8 @@
               <items>
                   <Button fx:id="showPostsBtn" mnemonicParsing="false" onAction="#showPosts" prefWidth="100.0"
                           text="Zeige Posts"/>
+                  <ToggleButton fx:id="enableMoving" mnemonicParsing="false" onAction="#movingMode" text="Verschieben"/>
+                  <ComboBox fx:id="moveToBox" prefWidth="150.0" promptText="Verschieben nach.."/>
               </items>
             </ToolBar>
          </children>

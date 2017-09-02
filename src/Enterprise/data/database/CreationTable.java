@@ -1,6 +1,6 @@
 package Enterprise.data.database;
 
-import Enterprise.data.impl.SimpleCreation;
+import Enterprise.data.impl.CreationImpl;
 import Enterprise.data.intface.Creation;
 import Enterprise.data.intface.DataTable;
 
@@ -89,7 +89,7 @@ class CreationTable extends AbstractDataTable<Creation> implements DataTable<Cre
     @Override
     Creation getData(ResultSet rs) throws SQLException {
         Creation entry;
-        int authorId = rs.getInt(titleC);
+        int authorId = rs.getInt(tableId);
         String title = rs.getString(titleC);
         String series = rs.getString(seriesC);
         String dateLastPortion = rs.getString(dateLastPortionC);
@@ -97,7 +97,15 @@ class CreationTable extends AbstractDataTable<Creation> implements DataTable<Cre
         String coverPath = rs.getString(coverPathC);
         String workStatus = rs.getString(workStatusC);
 
-        entry = new SimpleCreation(authorId,series,title,coverPath,numPortion,dateLastPortion,workStatus);
+        entry = new CreationImpl.CreationImplBuilder(title).
+                setId(authorId).
+                setSeries(series).
+                setCoverPath(coverPath).
+                setNumPortion(numPortion).
+                setDateLastPortion(dateLastPortion).
+                setWorkStatus(workStatus).
+                build();
+
         entry.setEntryOld();
         return entry;
     }

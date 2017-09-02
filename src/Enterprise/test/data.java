@@ -84,7 +84,7 @@ public class data {
         try (PreparedStatement statement = connection.prepareStatement(select)) {
             statement.setString(1, user.getOwnStatus());
             statement.setString(2, user.getComment());
-            statement.setString(3, user.getList());
+            statement.setString(3, user.getListName());
             statement.setInt(4, user.getProcessedPortion());
             statement.setInt(5, user.getRating());
             statement.setString(6, user.getKeyWords());

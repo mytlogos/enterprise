@@ -6,9 +6,11 @@ import Enterprise.data.intface.DataTable;
 import Enterprise.data.intface.Table;
 import Enterprise.data.intface.User;
 import Enterprise.misc.DataAccess;
+import Enterprise.misc.KeyWordList;
 import Enterprise.misc.SQLUpdate;
 import javafx.beans.property.*;
 
+import java.util.List;
 import java.util.logging.Level;
 
 /**
@@ -20,7 +22,7 @@ public class SimpleUser extends EnterpriseEntry implements User{
     private int userId;
     private static int idCounter = 1;
 
-    @SQLUpdate(stateGet = "isOwnStatusChanged", valueGet = "getOwnStats", columnField = "ownStatusC")
+    @SQLUpdate(stateGet = "isOwnStatusChanged", valueGet = "getOwnStatus", columnField = "ownStatusC")
     private StringProperty ownStatus = new SimpleStringProperty();
 
     @SQLUpdate(stateGet = "isCommentChanged", valueGet = "getComment", columnField = "commentC")
@@ -32,24 +34,27 @@ public class SimpleUser extends EnterpriseEntry implements User{
     @SQLUpdate(stateGet = "isProcessedPortionChanged", valueGet = "getProcessedPortion", columnField = "processedPortionC")
     private IntegerProperty processedPortion = new SimpleIntegerProperty();
 
-    @SQLUpdate(stateGet = "isListChanged", valueGet = "getList", columnField = "listC")
-    private StringProperty list = new SimpleStringProperty();
+    @SQLUpdate(stateGet = "isListNameChanged", valueGet = "getListName", columnField = "listC")
+    private StringProperty listName = new SimpleStringProperty();
 
     @SQLUpdate(stateGet = "isKeyWordsChanged", valueGet = "getKeyWords", columnField = "keyWordsC")
     private StringProperty keyWords = new SimpleStringProperty();
+
+    private List<String> keyWordList = new KeyWordList();
+
 
     private BooleanProperty ownStatusChanged = new SimpleBooleanProperty(false);
     private BooleanProperty commentChanged = new SimpleBooleanProperty(false);
     private BooleanProperty ratingChanged = new SimpleBooleanProperty(false);
     private BooleanProperty processedPortionChanged = new SimpleBooleanProperty(false);
-    private BooleanProperty listChanged = new SimpleBooleanProperty(false);
+    private BooleanProperty listNameChanged = new SimpleBooleanProperty(false);
     private BooleanProperty keyWordsChanged = new SimpleBooleanProperty(false);
 
     /**
      * The no-argument constructor of {@code SimpleUser}
      */
     public SimpleUser() {
-        this(Default.VALUE, Default.STRING, Default.STRING, Default.VALUE, Default.STRING, Default.VALUE, Default.KEYWORDS);
+        this(Default.VALUE, Default.STRING, Default.STRING, Default.VALUE, Default.LIST, Default.VALUE, Default.KEYWORDS);
     }
 
     /**
@@ -58,7 +63,7 @@ public class SimpleUser extends EnterpriseEntry implements User{
      * @param ownStatus status of the {@link User}
      * @param comment comment about the {@link Enterprise.data.intface.Creation}
      * @param rating rating of the {@code Creation}
-     * @param list name of the list assigned to the {@code Creation}
+     * @param list name of the listName assigned to the {@code Creation}
      * @param processedPortion processed Portion of the {@code Creation}
      * @param keyWords search keyWords for the {@code Creation}
      */
@@ -73,30 +78,19 @@ public class SimpleUser extends EnterpriseEntry implements User{
      * @param ownStatus status of the {@link User}
      * @param comment comment about the {@link Enterprise.data.intface.Creation}
      * @param rating rating of the {@code Creation}
-     * @param list name of the list assigned to the {@code Creation}
+     * @param listName name of the listName assigned to the {@code Creation}
      * @param processedPortion processed Portion of the {@code Creation}
      * @param keyWords search keyWords for the {@code Creation}
      */
-    public SimpleUser(int id, String ownStatus, String comment, int rating, String list, int processedPortion, String keyWords) {
+    public SimpleUser(int id, String ownStatus, String comment, int rating, String listName, int processedPortion, String keyWords) {
         this.ownStatus.set(ownStatus);
         this.comment.set(comment);
         this.rating.set(rating);
-        this.list.set(list);
+        this.listName.set(listName);
         this.processedPortion.set(processedPortion);
         this.keyWords.set(keyWords);
+        userId = id;
 
-        // TODO: 20.08.2017 replace this through database id incrementation
-
-        if (id == 0) {
-            userId = idCounter;
-            idCounter++;
-        } else {
-            userId = id;
-            if (idCounter <= id) {
-                idCounter = id;
-                idCounter++;
-            }
-        }
         validateState();
         invalidListeners();
         bindUpdated();
@@ -122,8 +116,8 @@ public class SimpleUser extends EnterpriseEntry implements User{
         if (rating.get() < 0 || rating.get() > 10) {
             message = message + "rating is invalid: " + rating.get() +", ";
         }
-        if (list.get() == null) {
-            message = message + "list is null, ";
+        if (listName.get() == null) {
+            message = message + "listName is null, ";
         }
         if (processedPortion.get() < 0) {
             message = message + "processedPortion is invalid: " + processedPortion.get() + ", ";
@@ -140,7 +134,7 @@ public class SimpleUser extends EnterpriseEntry implements User{
 
     @Override
     protected void bindUpdated() {
-        updated.bind(ownStatusChanged.or(commentChanged).or(ratingChanged).or(processedPortionChanged).or(listChanged).or(keyWordsChanged));
+        updated.bind(ownStatusChanged.or(commentChanged).or(ratingChanged).or(processedPortionChanged).or(listNameChanged).or(keyWordsChanged));
     }
 
     /**
@@ -151,8 +145,26 @@ public class SimpleUser extends EnterpriseEntry implements User{
         comment.addListener(observable -> commentChanged.set(true));
         rating.addListener(observable -> ratingChanged.set(true));
         processedPortion.addListener(observable -> processedPortionChanged.set(true));
-        list.addListener(observable -> listChanged.set(true));
-        keyWords.addListener(observable -> keyWordsChanged.set(true));
+        listName.addListener(observable -> listNameChanged.set(true));
+        keyWords.addListener(observable -> {
+            keyWordsChanged.set(true);
+
+            String keyWords = getKeyWords();
+            if (keyWords == null) {
+                keyWords = "";
+            }
+
+            List<String> stringList = new KeyWordList();
+            for (String string : keyWords.split("[\\s,]")) {
+                if (!string.isEmpty() && !stringList.contains(string)) {
+                    stringList.add(string);
+                }
+            }
+            //removes all 'old' keyWords, adds only 'new' keyWords
+            keyWordList.retainAll(stringList);
+            stringList.removeAll(keyWordList);
+            keyWordList.addAll(stringList);
+        });
     }
 
     @Override
@@ -167,7 +179,7 @@ public class SimpleUser extends EnterpriseEntry implements User{
 
     @Override
     public void setUpdated() {
-        listChanged.set(false);
+        listNameChanged.set(false);
         processedPortionChanged.set(false);
         ratingChanged.set(false);
         commentChanged.set(false);
@@ -185,7 +197,7 @@ public class SimpleUser extends EnterpriseEntry implements User{
         if (!(table instanceof DataTable)) {
             throw new IllegalAccessError();
         }
-        if (id < 1) {
+        if (id <= 0) {
             throw new IllegalArgumentException("should not be smaller than 1: " + id);
         }
         this.userId = id;
@@ -232,8 +244,8 @@ public class SimpleUser extends EnterpriseEntry implements User{
     }
 
     @Override
-    public String getList() {
-        return list.get();
+    public String getListName() {
+        return listName.get();
     }
 
     @Override
@@ -247,8 +259,8 @@ public class SimpleUser extends EnterpriseEntry implements User{
     }
 
     @Override
-    public StringProperty listProperty() {
-        return list;
+    public void setListName(String listName) {
+        this.listName.set(listName);
     }
 
     @Override
@@ -272,13 +284,23 @@ public class SimpleUser extends EnterpriseEntry implements User{
     }
 
     @Override
-    public boolean isListChanged() {
-        return listChanged.get();
+    public StringProperty listNameProperty() {
+        return listName;
     }
 
     @Override
     public boolean isKeyWordsChanged() {
         return keyWordsChanged.get();
+    }
+
+    @Override
+    public boolean isListNameChanged() {
+        return listNameChanged.get();
+    }
+
+    @Override
+    public List<String> getKeyWordList() {
+        return keyWordList;
     }
 
     @Override
@@ -294,8 +316,8 @@ public class SimpleUser extends EnterpriseEntry implements User{
                 that.comment == null) && (rating != null ? rating.get() == that.rating.get() :
                 that.rating == null) && (processedPortion != null ? processedPortion.get() == that.processedPortion.get() :
 
-                that.processedPortion == null) && (list != null ? list.get().equals(that.list.get()) :
-                that.list == null) && (keyWords != null ? keyWords.get().equals(that.keyWords.get()) :
+                that.processedPortion == null) && (listName != null ? listName.get().equals(that.listName.get()) :
+                that.listName == null) && (keyWords != null ? keyWords.get().equals(that.keyWords.get()) :
 
                 that.keyWords == null);
     }
@@ -306,7 +328,7 @@ public class SimpleUser extends EnterpriseEntry implements User{
         result = 31 * result + (comment != null ? comment.hashCode() : 0);
         result = 31 * result + (rating != null ? rating.hashCode() : 0);
         result = 31 * result + (processedPortion != null ? processedPortion.hashCode() : 0);
-        result = 31 * result + (list != null ? list.hashCode() : 0);
+        result = 31 * result + (listName != null ? listName.hashCode() : 0);
         result = 31 * result + (keyWords != null ? keyWords.hashCode() : 0);
         return result;
     }
@@ -325,7 +347,7 @@ public class SimpleUser extends EnterpriseEntry implements User{
             compared = processedPortion.get() - o.getProcessedPortion();
         }
         if (compared == 0) {
-            compared = list.get().compareTo(o.getList());
+            compared = listName.get().compareTo(o.getListName());
         }
         if (compared == 0) {
             compared = keyWords.get().compareTo(o.getKeyWords());

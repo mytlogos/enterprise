@@ -9,7 +9,6 @@ import Enterprise.modules.Module;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.text.Text;
 import scrape.sources.Source;
 import scrape.sources.SourceList;
 
@@ -20,8 +19,6 @@ import java.net.URISyntaxException;
  */
 public abstract class SourceableAddController<E extends Enum<E> & Module> extends AddController<E> {
 
-    @FXML
-    protected Text label;
     @FXML
     protected ComboBox<Source.SourceType> urlType;
     @FXML // fx:id="translator"
@@ -47,7 +44,7 @@ public abstract class SourceableAddController<E extends Enum<E> & Module> extend
         Source.SourceType type = urlType.getValue();
         String url = validateStringInput(sourceURL);
         try {
-            Source source = new Source(url, type);
+            Source source = Source.createSource(url, type);
             sourceTable.getItems().add(source);
 
             sourceURL.clear();

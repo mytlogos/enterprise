@@ -2,6 +2,7 @@ package Enterprise.data.impl;
 
 import Enterprise.data.OpEntryCarrier;
 import Enterprise.data.intface.*;
+import Enterprise.gui.general.PostManager;
 import Enterprise.misc.SetList;
 import Enterprise.modules.BasicModules;
 import javafx.beans.property.BooleanProperty;
@@ -45,45 +46,42 @@ public class SourceableEntryImpl extends AbstractCreationEntry implements Source
         bindUpdated();
     }
 
-    /**
-     * A constructor of {@code SourceableEntryImpl} for testing purposes
-     * @param module module of this entry
-     */
-    public SourceableEntryImpl(BasicModules module) {
-        this(new SimpleUser(), new SimpleCreation(), new SimpleCreator(), new SimpleSourceable(), module);
-
-    }
-
     @Override
     public boolean readyUserRemoval() {
+        boolean onlyReference = checkOnlyReference(user);
         decrementReferences(user);
-        return checkOnlyReference(user);
+        return onlyReference;
     }
 
     @Override
     public boolean readyCreationRemoval() {
+        boolean onlyReference = checkOnlyReference(creation);
         decrementReferences(creation);
-        return checkOnlyReference(creation);
+        return onlyReference;
     }
 
     @Override
     public boolean readyCreatorRemoval() {
+        boolean onlyReference = checkOnlyReference(getCreator());
         decrementReferences(getCreator());
-        return checkOnlyReference(getCreator());
+        return onlyReference;
     }
     @Override
     public boolean readySourceableRemoval() {
+        boolean onlyReference = checkOnlyReference(sourceable);
         decrementReferences(sourceable);
 
-        sourceable.getSourceList().forEach(this::decrementReferences);
+
+        PostManager.getInstance().removeSearchEntries(sourceable.getKeyWordList());
 
         sourceable.getSourceList().forEach(source -> {
             if (checkOnlyReference(source)) {
                 source.setDead();
             }
         });
+        sourceable.getSourceList().forEach(this::decrementReferences);
 
-        return checkOnlyReference(sourceable);
+        return onlyReference;
     }
 
     @Override

@@ -1,13 +1,13 @@
 package Enterprise.gui.book.controller;
 
-import Enterprise.data.impl.SimpleCreation;
+import Enterprise.data.impl.CreationImpl;
+import Enterprise.data.impl.CreatorImpl;
 import Enterprise.data.impl.SimpleCreationEntry;
-import Enterprise.data.impl.SimpleCreator;
 import Enterprise.data.impl.SimpleUser;
 import Enterprise.data.intface.Creation;
 import Enterprise.data.intface.CreationEntry;
 import Enterprise.data.intface.Creator;
-import Enterprise.gui.controller.ModuleController;
+import Enterprise.gui.controller.ContentController;
 import Enterprise.modules.BasicModules;
 
 /**
@@ -15,15 +15,15 @@ import Enterprise.modules.BasicModules;
  * Part of OgameBot.
  * // TODO: 25.08.2017 do the javadoc and functionality
  */
-public class BookController extends ModuleController<CreationEntry, BasicModules> {
+public class BookController extends ContentController<CreationEntry, BasicModules> {
 
     @Override
     protected CreationEntry getSimpleEntry() {
         String author = creatorField.getText();
         String title = titleField.getText();
 
-        Creator creator = new SimpleCreator(author);
-        Creation creation = new SimpleCreation(title);
+        Creator creator = new CreatorImpl.CreatorBuilder(author).build();
+        Creation creation = new CreationImpl.CreationImplBuilder(title).build();
 
         return new SimpleCreationEntry(new SimpleUser(), creation, creator, module);
     }

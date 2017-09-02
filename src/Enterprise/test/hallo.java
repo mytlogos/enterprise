@@ -1,7 +1,7 @@
 package Enterprise.test;
 
 import Enterprise.gui.enterprise.controller.PostView;
-import Enterprise.gui.general.PostSingleton;
+import Enterprise.gui.general.PostManager;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import org.jsoup.Jsoup;
@@ -46,7 +46,7 @@ public class hallo extends Application {
         SourceList sources = new SourceList();
         addUris();
         for (String s : uris) {
-            sources.add(new Source(s, Source.SourceType.START));
+            sources.add(Source.createSource(s, Source.SourceType.START));
         }
 
         ServiceClass serviceClass = new ServiceClass();
@@ -54,7 +54,7 @@ public class hallo extends Application {
         serviceClass.messageProperty().addListener((observable, oldValue, newValue) -> System.out.println(newValue));
         serviceClass.progressProperty().addListener((observable, oldValue, newValue) -> System.out.println(newValue));
 
-        new PostView().open();
+        PostView.getInstance().open();
         serviceClass.setOnSucceeded(event -> {
             /*for (Post elements : serviceClass.getValue()) {
                 DisplayPost displayPost = new DisplayPost();
@@ -74,8 +74,8 @@ public class hallo extends Application {
                     break;
                 }
             }
-            PostSingleton.getInstance().getPosts().addAll(list);
-            PostSingleton.getInstance().getPosts().sort((o1, o2) -> o2.getTimeStamp().compareTo(o1.getTimeStamp()));
+            PostManager.getInstance().getPosts().addAll(list);
+            PostManager.getInstance().getPosts().sort((o1, o2) -> o2.getTimeStamp().compareTo(o1.getTimeStamp()));
         });
         serviceClass.start();
         System.out.println("fertig?");

@@ -79,7 +79,7 @@ class SourceTable extends AbstractDataTable<Source> {
         Source.SourceType sourceType = Source.SourceType.valueOf(type);
 
         try {
-            entry = new Source(url, sourceType, id);
+            entry = Source.createSource(id, url, sourceType);
             entry.setEntryOld();
         } catch (URISyntaxException e) {
             logger.log(Level.SEVERE, "corrupt data: URL: "

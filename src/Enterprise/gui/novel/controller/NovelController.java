@@ -5,7 +5,7 @@ import Enterprise.data.impl.*;
 import Enterprise.data.intface.Creation;
 import Enterprise.data.intface.Creator;
 import Enterprise.data.intface.SourceableEntry;
-import Enterprise.gui.controller.SourceableModuleCont;
+import Enterprise.gui.controller.SourceableContentCont;
 import Enterprise.gui.general.BasicModes;
 import Enterprise.modules.BasicModules;
 import javafx.fxml.Initializable;
@@ -18,14 +18,14 @@ import java.util.ResourceBundle;
  * Created by Dominik on 24.06.2017.
  * Part of OgameBot.
  */
-public class NovelController extends SourceableModuleCont<BasicModules> implements Initializable {
+public class NovelController extends SourceableContentCont<BasicModules> implements Initializable {
     @Override
     protected SourceableEntry getSimpleEntry() {
         String author = creatorField.getText();
         String title = titleField.getText();
 
-        Creator creator = new SimpleCreator(author);
-        Creation creation = new SimpleCreation(title);
+        Creator creator = new CreatorImpl.CreatorBuilder(author).build();
+        Creation creation = new CreationImpl.CreationImplBuilder(title).build();
 
         return new SourceableEntryImpl(new SimpleUser(), creation, creator, new SimpleSourceable(), module);
     }
@@ -44,7 +44,6 @@ public class NovelController extends SourceableModuleCont<BasicModules> implemen
         setIndexColumn();
         //adjusts the size of the columns to fill the size of the table
         entryTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        loadData();
         setGui();
         setRowListener();
         lockEditBtn();

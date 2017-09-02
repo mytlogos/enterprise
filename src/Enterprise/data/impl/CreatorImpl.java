@@ -1,5 +1,6 @@
 package Enterprise.data.impl;
 
+import Enterprise.data.Cache;
 import Enterprise.data.Default;
 import Enterprise.data.EnterpriseEntry;
 import Enterprise.data.Person;
@@ -11,20 +12,19 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.util.Builder;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Level;
 
 /**
  * Implementation of Creator
+ *
  * @see Creator
  */
 @DataAccess(daoClass = "CreatorTable")
-public class SimpleCreator extends EnterpriseEntry implements DataBase,Comparable<Creator>, Creator {
+public class CreatorImpl extends EnterpriseEntry implements DataBase, Comparable<Creator>, Creator {
     private int creatorId;
-    private static int idCounter = 1;
 
     @SQLUpdate(stateGet = "isNameChanged", valueGet = "getName", columnField = "nameC")
     private StringProperty name = new SimpleStringProperty();
@@ -44,106 +44,32 @@ public class SimpleCreator extends EnterpriseEntry implements DataBase,Comparabl
     private BooleanProperty sortNameChanged = new SimpleBooleanProperty(false);
     private BooleanProperty statusChanged = new SimpleBooleanProperty(false);
 
+    private static Cache<String, CreatorImpl> creatorCache = new Cache<>();
+
     /**
-     * The constructor of {@code SimpleCreator}
+     * The constructor of {@code CreatorImpl}
      *
-     * @param name name of this {@code SimpleCreator}
-     * @param sortName sorting name of this {@code SimpleCreator}
-     * @param status status of this {@code SimpleCreator}
      */
-    public SimpleCreator(String name, String sortName, String status) {
-        this(Default.VALUE, name, sortName, status, new Person(), new ArrayList<>());
-    }
+    private CreatorImpl(CreatorBuilder builder) {
+        this.name.set(builder.name);
+        this.sortName.set(builder.sortName);
+        this.status.set(builder.status);
+        this.personalInfo = builder.person;
+        creatorId = builder.id;
 
-    /**
-     * The constructor of {@code SimpleCreator}
-     *
-     * @param name name of this {@code SimpleCreator}
-     * @param sortName sorting name of this {@code SimpleCreator}
-     */
-    public SimpleCreator(String name, String sortName) {
-        this(Default.VALUE, name, sortName, Default.STRING, new Person(), new ArrayList<>());
-    }
-
-    /**
-     * The constructor of {@code SimpleCreator}.
-     *
-     * @param name name of this {@code SimpleCreator}
-     */
-    public SimpleCreator(String name) {
-        this(Default.VALUE, name, Default.STRING, Default.STRING, new Person(), new ArrayList<>());
-    }
-
-    /**
-     * The no-argument constructor of {@code SimpleCreator}
-     */
-    public SimpleCreator() {
-        this(Default.VALUE, Default.STRING, Default.STRING, Default.STRING, new Person(), new ArrayList<>());
-    }
-
-
-    /**
-     * The constructor of {@code SimpleCreator}
-     *
-     * @param id database id
-     * @param name name of this {@code SimpleCreator}
-     * @param sortName sorting name of this {@code SimpleCreator}
-     * @param status status of this {@code SimpleCreator}
-     * @param person personalInfo of this {@code SimpleCreator}
-     * @param simpleCreations creations of this {@code SimpleCreator}
-     */
-    public SimpleCreator(int id, String name, String sortName, String status, Person person, List<Creation> simpleCreations) {
-        this.name.set(name);
-        this.sortName.set(sortName);
-        this.status.set(status);
-        this.personalInfo = person;
-        this.creatorWorks = simpleCreations;
-
-        if (id == 0) {
-            creatorId = idCounter;
-            idCounter++;
-        } else {
-            creatorId = id;
-            if (idCounter <= id) {
-                idCounter = id;
-                idCounter++;
-            }
-        }
-        validateState();
         invalidListener();
         bindUpdated();
     }
 
-    /**
-     * validates the State of this {@code SimpleCreator}
-     *
-     * @throws IllegalArgumentException if any fields are null
-     */
-    private void validateState() {
-        String message = "";
-        if (creatorId < 0) {
-            message = message + "creatorId is invalid: " + creatorId + ", ";
+    @Override
+    public void setId(int id, Table table) {
+        if (!(table instanceof DataTable)) {
+            throw new IllegalAccessError();
         }
-        if (name.get() == null) {
-            message = message + "name is null, ";
+        if (id <= 0) {
+            throw new IllegalArgumentException("should not be smaller than 1: " + id);
         }
-        if (sortName.get() == null) {
-            message = message + "sortName is null, ";
-        }
-        if (status.get() == null) {
-            message = message + "status is null, ";
-        }
-        if (personalInfo == null) {
-            message = message + "personalInfo is null, ";
-        }
-        if (creatorWorks == null) {
-            message = message + "creatorWorks is null";
-        }
-        if (!message.isEmpty()) {
-            IllegalArgumentException exception = new IllegalArgumentException(message);
-            logger.log(Level.WARNING, "object creation failed", exception);
-            throw exception;
-        }
+        this.creatorId = id;
     }
 
     /**
@@ -259,14 +185,23 @@ public class SimpleCreator extends EnterpriseEntry implements DataBase,Comparabl
     }
 
     @Override
-    public void setId(int id, Table table) {
-        if (!(table instanceof DataTable)) {
-            throw new IllegalAccessError();
+    public boolean equals(Object o) {
+        boolean equals = false;
+        if (o instanceof CreatorImpl) {
+            String thisName = name.get();
+            String thatName = ((CreatorImpl) o).nameProperty().get();
+
+            equals = thisName.equalsIgnoreCase(thatName);
+
+            /*if (equals) {
+                Person thisPerson = personalInfo;
+                Person thatPerson = ((CreatorImpl) o).getPersonalInfo();
+
+                equals = thisPerson.equals(thatPerson);
+            }*/
+            // TODO: 15.08.2017 implement Person and the others
         }
-        if (id < 1) {
-            throw new IllegalArgumentException("should not be smaller than 1: " + id);
-        }
-        this.creatorId = id;
+        return equals;
     }
 
     @Override
@@ -299,24 +234,71 @@ public class SimpleCreator extends EnterpriseEntry implements DataBase,Comparabl
         }
         return compared;
     }
-    @Override
-    public boolean equals(Object o) {
-        boolean equals = false;
-        if (o instanceof SimpleCreator) {
-            String thisName = name.get();
-            String thatName = ((SimpleCreator) o).nameProperty().get();
 
-            equals = thisName.equalsIgnoreCase(thatName);
+    public static class CreatorBuilder implements Builder<CreatorImpl> {
 
-            /*if (equals) {
-                Person thisPerson = personalInfo;
-                Person thatPerson = ((SimpleCreator) o).getPersonalInfo();
+        private final String name;
+        private String sortName = Default.STRING;
+        private String status = Default.STRING;
+        private int id = Default.VALUE;
+        private Person person = new Person();
 
-                equals = thisPerson.equals(thatPerson);
-            }*/
-            // TODO: 15.08.2017 implement Person and the others
+        public CreatorBuilder(String name) {
+            this.name = name;
         }
-        return equals;
+
+        public CreatorBuilder setSortName(String sortName) {
+            this.sortName = sortName;
+            return this;
+        }
+
+        public CreatorBuilder setStatus(String status) {
+            this.status = status;
+            return this;
+        }
+
+        public CreatorBuilder setId(int id) {
+            this.id = id;
+            return this;
+        }
+
+        public CreatorBuilder setPerson(Person person) {
+            this.person = person;
+            return this;
+        }
+
+        @Override
+        public CreatorImpl build() {
+            validateState();
+            return creatorCache.checkCache(new CreatorImpl(this), CreatorImpl::getName);
+        }
+
+        /**
+         * validates the State of this {@code CreatorImpl}
+         *
+         * @throws IllegalArgumentException if any fields are null
+         */
+        private void validateState() {
+            String message = "";
+            if (id < 0) {
+                message = message + "creatorId is invalid: " + id + ", ";
+            }
+            if (name == null) {
+                message = message + "name is null, ";
+            }
+            if (sortName == null) {
+                message = message + "sortName is null, ";
+            }
+            if (status == null) {
+                message = message + "status is null, ";
+            }
+            if (person == null) {
+                message = message + "personalInfo is null, ";
+            }
+            if (!message.isEmpty()) {
+                throw new IllegalArgumentException(message);
+            }
+        }
     }
 
     @Override

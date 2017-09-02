@@ -28,4 +28,22 @@ public class KeyWordList extends ArrayList<String> implements Comparable<KeyWord
         }
         return compare;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+
+        KeyWordList that = (KeyWordList) o;
+
+        return count == that.count;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + count;
+        return result;
+    }
 }

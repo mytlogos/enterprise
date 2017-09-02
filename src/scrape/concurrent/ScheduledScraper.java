@@ -1,6 +1,6 @@
 package scrape.concurrent;
 
-import Enterprise.gui.general.PostSingleton;
+import Enterprise.gui.general.PostManager;
 import Enterprise.misc.Log;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
@@ -60,8 +60,8 @@ public class ScheduledScraper extends ScheduledService<List<Post>> {
             protected List<Post> call() throws Exception {
                 Thread.currentThread().setName("ScheduledScraper");
 
-                //the searchMap supplied from the PostSingleton
-                searchMap = PostSingleton.getInstance().getSearchMap();
+                //the searchMap supplied from the PostManager
+                searchMap = PostManager.getInstance().getSearchMap();
 
                 updateMessage("LadeService wird durchgeführt...");
 
@@ -70,6 +70,8 @@ public class ScheduledScraper extends ScheduledService<List<Post>> {
                 //fills noKeySources and keySources
                 separateMapContent();
 
+                System.out.println(searchMap);
+
                 //aborts execution if there is no Work to do
                 if (maxWork == 0) {
                     return new ArrayList<>();
@@ -77,9 +79,6 @@ public class ScheduledScraper extends ScheduledService<List<Post>> {
 
                 //start the Progressbar
                 updateProgress(progress, maxWork);
-
-                System.out.println("SourceListen ohne Schlüssel " + noKeySources);
-                System.out.println("SourceListen mit Schlüssel " + keySources);
 
                 //list which will hold the Posts
                 List<Post> postList = new ArrayList<>();
@@ -121,7 +120,6 @@ public class ScheduledScraper extends ScheduledService<List<Post>> {
 
                                 List<Post> posts1 = host.getSpecificPosts(keyWord);
 
-                                System.out.println("Posts in schleife "+ posts1);
                                 postList.addAll(posts1);
                             }
                         } catch (MalformedURLException | IllegalArgumentException e) {
@@ -133,7 +131,6 @@ public class ScheduledScraper extends ScheduledService<List<Post>> {
                         }
 
                         progress++;
-                        System.out.println("Fortschritt key " + progress);
                         updateProgress(progress, maxWork);
                         
                         //logs if maxWork is smaller than the done progress
@@ -162,7 +159,6 @@ public class ScheduledScraper extends ScheduledService<List<Post>> {
                             List<Post> posts1 = host.getPosts(source.getUrl());
 
 
-                            System.out.println("Posts in schleife " + posts1);
                             postList.addAll(posts1);
                         } catch (MalformedURLException | IllegalArgumentException e) {
                             // TODO: 21.08.2017 look if this catch clause is really necessary
@@ -172,7 +168,6 @@ public class ScheduledScraper extends ScheduledService<List<Post>> {
                             logger.log(Level.WARNING, "Failed in getting the html Document", e);
                         }
                         progress++;
-                        System.out.println("Fortschritt noKey " + progress);
                         updateProgress(progress, maxWork);
 
                         //logs if maxWork is smaller than the done progress

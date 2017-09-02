@@ -3,7 +3,7 @@ package Enterprise.gui.controller;
 import Enterprise.data.Default;
 import Enterprise.data.intface.SourceableEntry;
 import Enterprise.gui.general.GlobalItemValues;
-import Enterprise.gui.general.PostSingleton;
+import Enterprise.gui.general.PostManager;
 import Enterprise.modules.Module;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -44,7 +44,7 @@ public abstract class SourceableEditController<R extends Enum<R> & Module> exten
         Source.SourceType type = urlType.getValue();
         String url = validateStringInput(sourceURL);
         try {
-            Source source = new Source(url, type);
+            Source source = Source.createSource(url, type);
 
             sourceTable.getItems().add(source);
             sourceURL.clear();
@@ -87,7 +87,7 @@ public abstract class SourceableEditController<R extends Enum<R> & Module> exten
     protected void onCloseOperation() {
         Platform.runLater(() -> root.getScene().getWindow().setOnCloseRequest(event -> {
             unBindEntry();
-            PostSingleton.getInstance().addSearchEntries(creationEntry.getSourceable());
+            PostManager.getInstance().addSearchEntries(creationEntry.getSourceable());
         }));
     }
 

@@ -13,7 +13,7 @@ import java.sql.Types;
  *
  * @see AbstractTable
  */
-public class UserTable extends AbstractDataTable<User> {
+class UserTable extends AbstractDataTable<User> {
 
     private UserTable() throws SQLException {
         super("USERTABLE", "USER_ID");
@@ -75,7 +75,7 @@ public class UserTable extends AbstractDataTable<User> {
         String comment = entry.getComment();
         int rating = entry.getRating();
         int processedPortion = entry.getProcessedPortion();
-        String list = entry.getList();
+        String list = entry.getListName();
         String keyWords = entry.getKeyWords();
 
         stmt.setNull(1,Types.INTEGER);

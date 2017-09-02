@@ -5,7 +5,7 @@ import Enterprise.data.OpEntryCarrier;
 import Enterprise.data.impl.SourceableEntryImpl;
 import Enterprise.gui.controller.SourceableAddController;
 import Enterprise.gui.general.BasicModes;
-import Enterprise.gui.general.PostSingleton;
+import Enterprise.gui.general.PostManager;
 import Enterprise.modules.BasicModules;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -27,11 +27,9 @@ public class AddAnimeController extends SourceableAddController<BasicModules> im
      * and {@link Enterprise.modules.Module}.
      */
     public void open() {
-        Stage stage = loadStage();
+        final Stage stage = loadStage();
 
         stage.setResizable(false);
-        setData(stage);
-
         stage.show();
     }
 
@@ -49,7 +47,7 @@ public class AddAnimeController extends SourceableAddController<BasicModules> im
             OpEntryCarrier.getInstance().addNewEntry(entry);
 
             //Make content available for Scraping
-            PostSingleton.getInstance().addSearchEntries(entry.getSourceable());
+            PostManager.getInstance().addSearchEntries(entry.getSourceable());
         } else {
             System.out.println("Adding the entry failed.");
 

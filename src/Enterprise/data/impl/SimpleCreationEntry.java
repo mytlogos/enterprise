@@ -65,20 +65,23 @@ public class SimpleCreationEntry extends AbstractCreationEntry implements Creati
 
     @Override
     public boolean readyUserRemoval() {
+        boolean onlyReference = checkOnlyReference(user);
         decrementReferences();
-        return checkOnlyReference(user);
+        return onlyReference;
     }
 
     @Override
     public boolean readyCreationRemoval() {
+        boolean onlyReference = checkOnlyReference(creation);
         decrementReferences();
-        return checkOnlyReference(creation);
+        return onlyReference;
     }
 
     @Override
     public boolean readyCreatorRemoval() {
+        boolean onlyReference = checkOnlyReference(getCreator());
         decrementReferences();
-        return checkOnlyReference(getCreator());
+        return onlyReference;
     }
 
     @Override

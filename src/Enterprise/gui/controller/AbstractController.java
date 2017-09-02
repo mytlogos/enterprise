@@ -18,4 +18,5 @@ abstract class AbstractController<E extends Enum<E> & Module, R extends Enum<R> 
     protected abstract void setMode();
 
     protected abstract void setModule();
+
 }

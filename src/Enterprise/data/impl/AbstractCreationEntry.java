@@ -7,8 +7,8 @@ import Enterprise.data.intface.DataBase;
 import Enterprise.data.intface.User;
 import Enterprise.modules.BasicModules;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.WeakHashMap;
 
 /**
  *
@@ -18,7 +18,7 @@ abstract class AbstractCreationEntry extends EnterpriseEntry {
     Creation creation;
     BasicModules module;
 
-    private Map<DataBase, Integer> references = new HashMap<>();
+    private static Map<DataBase, Integer> references = new WeakHashMap<>();
 
     void incrementReferences(DataBase... dataBases) {
         for (DataBase dataBase : dataBases) {

@@ -1,11 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.ListView?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 <?import org.controlsfx.control.StatusBar?>
-
-<VBox fx:id="root" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Enterprise.gui.enterprise.controller.PostView">
+<VBox xmlns:fx="http://javafx.com/fxml/1" fx:id="root" xmlns="http://javafx.com/javafx/8.0.111">
    <children>
+       <HBox alignment="CENTER" spacing="5.0" VBox.vgrow="NEVER">
+           <children>
+               <ToggleButton fx:id="allToggle" mnemonicParsing="false" onAction="#showAll" text="Zeig alle Posts">
+                   <toggleGroup>
+                       <ToggleGroup fx:id="showThisThat"/>
+                   </toggleGroup>
+               </ToggleButton>
+               <ToggleButton fx:id="newToggle" mnemonicParsing="false" onAction="#showNew" text="Zeig neue Posts"
+                             toggleGroup="$showThisThat"/>
+               <Button mnemonicParsing="false" onAction="#emptyNew" text="Leer neu"/>
+           </children>
+           <VBox.margin>
+               <Insets/>
+           </VBox.margin>
+           <padding>
+               <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+           </padding>
+       </HBox>
       <ListView fx:id="listView" VBox.vgrow="ALWAYS" />
       <StatusBar fx:id="statusBar" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="25.0" progress="0.9" VBox.vgrow="NEVER" />
    </children>

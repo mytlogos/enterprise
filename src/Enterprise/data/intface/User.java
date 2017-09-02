@@ -3,6 +3,8 @@ package Enterprise.data.intface;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.StringProperty;
 
+import java.util.List;
+
 /**
  * This class represents a user who processes a {@link Creation} and gives personal Information, like comments about it.
  */
@@ -73,7 +75,7 @@ public interface User extends DataBase, Comparable<User> {
      * @return list - name of the List which the User assigned this {@link Creation} to. Is not {@code null}.
      *         Is by default an empty String.
      */
-    String getList();
+    String getListName();
 
     /**
      * Gets the Value of the {@code keyWords}-{@code StringProperty}.
@@ -91,11 +93,11 @@ public interface User extends DataBase, Comparable<User> {
     StringProperty keyWordsProperty();
 
     /**
-     * Gets the {@code StringProperty}-Object of the {@code list}-Field.
+     * Sets the name of the list, which the entry will set in.
      *
-     * @return listProperty - Is not {@code null}.
+     * @param listName name of the "list"
      */
-    StringProperty listProperty();
+    void setListName(String listName);
 
     /**
      * The corresponding stateChanged-Getter
@@ -138,14 +140,11 @@ public interface User extends DataBase, Comparable<User> {
     boolean isProcessedPortionChanged();
 
     /**
-     * The corresponding stateChanged-Getter
-     * <p>
-     * Queries if the State of the Field {@code list} has changed
-     * </p>
+     * Gets the {@code StringProperty}-Object of the {@code list}-Field.
      *
-     * @return listChanged returns true if the state of the field {@code list} has been changed
+     * @return listNameProperty - Is not {@code null}.
      */
-    boolean isListChanged();
+    StringProperty listNameProperty();
 
     /**
      * The corresponding stateChanged-Getter
@@ -156,4 +155,16 @@ public interface User extends DataBase, Comparable<User> {
      * @return keywWordsChanged returns true if the state of the field {@code keyWords} has been changed
      */
     boolean isKeyWordsChanged();
+
+    /**
+     * The corresponding stateChanged-Getter
+     * <p>
+     * Queries if the State of the Field {@code list} has changed
+     * </p>
+     *
+     * @return listChanged returns true if the state of the field {@code list} has been changed
+     */
+    boolean isListNameChanged();
+
+    List<String> getKeyWordList();
 }

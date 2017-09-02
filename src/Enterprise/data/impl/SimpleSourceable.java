@@ -15,6 +15,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import scrape.sources.SourceList;
 
+import java.util.List;
 import java.util.logging.Level;
 
 /**
@@ -30,7 +31,7 @@ public class SimpleSourceable extends EnterpriseEntry implements Sourceable{
 
     private User user;
 
-    @SQLUpdate(stateGet = "isTranslatorChanged", valueGet = "getTranslato", columnField = "translatorC")
+    @SQLUpdate(stateGet = "isTranslatorChanged", valueGet = "getTranslator", columnField = "translatorC")
     private StringProperty translator = new SimpleStringProperty();
 
     private BooleanProperty sourceListChanged = new SimpleBooleanProperty(false);
@@ -63,17 +64,8 @@ public class SimpleSourceable extends EnterpriseEntry implements Sourceable{
     public SimpleSourceable(int id, SourceList sourceList, String translator) {
         this.sourceList = sourceList;
         this.translator.set(translator);
+        sourceableId = id;
 
-        if (id == 0) {
-            sourceableId = idCounter;
-            idCounter++;
-        } else {
-            sourceableId = id;
-            if (idCounter <= id) {
-                idCounter = id;
-                idCounter++;
-            }
-        }
         validateState();
         invalidListener();
         bindUpdated();
@@ -127,7 +119,7 @@ public class SimpleSourceable extends EnterpriseEntry implements Sourceable{
         if (!(table instanceof DataTable)) {
             throw new IllegalAccessError();
         }
-        if (id < 1) {
+        if (id <= 0) {
             throw new IllegalArgumentException("should not be smaller than 1: " + id);
         }
         this.sourceableId = id;
@@ -212,5 +204,10 @@ public class SimpleSourceable extends EnterpriseEntry implements Sourceable{
             compare = this.sourceList.compareTo(o.getSourceList());
         }
         return compare;
+    }
+
+    @Override
+    public List<String> getKeyWordList() {
+        return user.getKeyWordList();
     }
 }

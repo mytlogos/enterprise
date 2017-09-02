@@ -4,6 +4,8 @@ import com.sun.istack.internal.NotNull;
 import javafx.beans.property.StringProperty;
 import scrape.sources.SourceList;
 
+import java.util.List;
+
 /**
  * Represents an Entry which is Sourceable, meaning that this entry is accessible through the internet
  * (optional?: and has been translated from one Language, into another)
@@ -71,11 +73,5 @@ public interface Sourceable extends DataBase, Comparable<Sourceable> {
      */
     int compareTo(Sourceable o);
 
-    /**
-     * Gets the Id of this {@code Sourceable}
-     *
-     * @return id Database Id
-     */
-    int getId();
-
+    List<String> getKeyWordList();
 }

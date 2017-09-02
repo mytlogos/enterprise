@@ -2,6 +2,7 @@ package Enterprise.modules;
 
 import Enterprise.data.OpEntryCarrier;
 import Enterprise.data.intface.CreationEntry;
+import Enterprise.misc.SetList;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,44 +12,78 @@ import java.util.List;
  */
 public enum BasicModules implements Module {
     ANIME("Anime") {
-        List<CreationEntry> entries = new ArrayList<>();
+        List<CreationEntry> entries = new SetList<>();
+        List<String> distinctionList = new SetList<>();
 
         @Override
-        List<CreationEntry> getList() {
+        List<CreationEntry> getEntryList() {
             return entries;
+        }
+
+        @Override
+        List<String> getDistinctionList() {
+            return distinctionList;
         }
 
     },
     BOOK("Bücher") {
-        List<CreationEntry> entries = new ArrayList<>();
+        List<CreationEntry> entries = new SetList<>();
+        List<String> distinctionList = new ArrayList<>();
+
 
         @Override
-        List<CreationEntry> getList() {
+        List<CreationEntry> getEntryList() {
             return entries;
+        }
+
+        @Override
+        List<String> getDistinctionList() {
+            return distinctionList;
         }
     },
     MANGA("Manga") {
-        List<CreationEntry> entries = new ArrayList<>();
+        List<CreationEntry> entries = new SetList<>();
+        List<String> distinctionList = new ArrayList<>();
+
 
         @Override
-        List<CreationEntry> getList() {
+        List<CreationEntry> getEntryList() {
             return entries;
+        }
+
+        @Override
+        List<String> getDistinctionList() {
+            return distinctionList;
         }
     },
     NOVEL("Novel") {
-        List<CreationEntry> entries = new ArrayList<>();
+        List<CreationEntry> entries = new SetList<>();
+        List<String> distinctionList = new ArrayList<>();
+
 
         @Override
-        List<CreationEntry> getList() {
+        List<CreationEntry> getEntryList() {
             return entries;
+        }
+
+        @Override
+        List<String> getDistinctionList() {
+            return distinctionList;
         }
     },
     SERIES("Serien") {
-        List<CreationEntry> entries = new ArrayList<>();
+        List<CreationEntry> entries = new SetList<>();
+        List<String> distinctionList = new ArrayList<>();
+
 
         @Override
-        List<CreationEntry> getList() {
+        List<CreationEntry> getEntryList() {
             return entries;
+        }
+
+        @Override
+        List<String> getDistinctionList() {
+            return distinctionList;
         }
     };
 
@@ -60,26 +95,34 @@ public enum BasicModules implements Module {
 
     @Override
     public List<CreationEntry> getEntries() {
-        return getList();
+        return getEntryList();
     }
 
     @Override
     public boolean addEntry(CreationEntry entry) {
-        return getList().add(entry);
+        if (entry != null) {
+            getDistinctionList().add(entry.getUser().getListName());
+            return getEntryList().add(entry);
+        } else {
+            throw new NullPointerException();
+        }
     }
 
-    abstract List<CreationEntry> getList();
+    @Override
+    public List<String> getListNames() {
+        return getDistinctionList();
+    }
 
     @Override
     public boolean deleteEntry(CreationEntry entry) {
         boolean deleted;
-        if (!this.getList().contains(entry)) {
+        if (!this.getEntryList().contains(entry)) {
             System.out.println("'Entry' nicht vorhanden!");
             deleted = false;
         } else {
             if (OpEntryCarrier.getInstance().addDeleted(entry)) {
                 entry.setDead();
-                deleted = getList().remove(entry);
+                deleted = getEntryList().remove(entry);
             } else {
                 deleted = false;
                 System.out.println("Konnte nicht gelöscht werden!");
@@ -96,4 +139,16 @@ public enum BasicModules implements Module {
     public String toString() {
         return super.toString().toLowerCase();
     }
+
+    /**
+     * Returns the inner EntryList of this {@code BasicModules}
+     *
+     * @return
+     */
+    abstract List<CreationEntry> getEntryList();
+
+    /**
+     * @return
+     */
+    abstract List<String> getDistinctionList();
 }

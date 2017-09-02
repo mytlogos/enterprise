@@ -202,7 +202,8 @@ public class Columns {
         return module == BasicModules.ANIME ? AnimeColumns.KEYWORDS :
                 module == BasicModules.MANGA ? MangaColumns.KEYWORDS :
                         module == BasicModules.NOVEL ? NovelColumns.KEYWORDS :
-                                                "";
+                                module == BasicModules.SERIES ? SeriesColumns.KEYWORDS :
+                                        "";
     }
 
     /**
@@ -275,6 +276,7 @@ public class Columns {
         private static final String AUTHORSTAT = "Status des Autors";
         private static final String OWNSTAT = "Eigener Status";
         private static final String COMMENT = "Kommentar";
+        public static final String KEYWORDS = "Stichwörter";
     }
 
     /**

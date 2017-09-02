@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 
 /**
  * Service class responsible for adding new Entries to the DataBase.
+ * // FIXME: 02.09.2017 returns false even though sth was added
  */
 public class AddCall implements Callable<Boolean> {
     private Logger logger = Log.packageLogger(this);
@@ -39,8 +40,8 @@ public class AddCall implements Callable<Boolean> {
                     if (entry.isNewEntry()) {
                         added = table.insert(entry);
                     }
-                    logger.log(Level.INFO, "AddCall was successful");
                 }
+                logger.log(Level.INFO, "AddCall was successful");
             } else {
                 counter++;
                 int maxTries = 10;
