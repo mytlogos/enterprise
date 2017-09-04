@@ -9,18 +9,15 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
-import org.jsoup.Connection;
-import org.jsoup.Jsoup;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -43,50 +40,34 @@ public class TableViewer extends Application implements Initializable {
     private Button addPC;
 
     @FXML
-    private ImageView image;
-
+    private WebView browser;
 
     @FXML
-    void addInternet(ActionEvent event) {
+    void addInternet() {
         try {
             URI uri = new URI(name.getText());
-            Connection.Response resultImageResponse = Jsoup.connect(uri.toString()).ignoreContentType(true).execute();
+            WebEngine engine = browser.getEngine();
+            engine.load(uri.toString());
 
-            String path = uri.getPath();
-
-            int slash = path.lastIndexOf("/");
-
-            String file = path.substring(slash,path.length());
-
-            File imageFile = new File("img\\" + file);
-
-            FileOutputStream out = (new FileOutputStream(imageFile));
-            out.write(resultImageResponse.bodyAsBytes());  // resultImageResponse.body() is where the image's contents are.
-            out.close();
-
-            Image img = new Image(imageFile.toURI().toString());
-
-            image.setImage(img);
-        } catch (URISyntaxException | IOException e) {
+        } catch (URISyntaxException e) {
             e.printStackTrace();
         }
     }
     @FXML
-    void addLocal(ActionEvent event) {
+    void addLocal() {
         FileChooser fileChooser = new FileChooser();
 
         //Set extension filter
-        FileChooser.ExtensionFilter extFilterJPG = new FileChooser.ExtensionFilter("JPG files (*.jpg)", "*.JPG");
-        FileChooser.ExtensionFilter extFilterPNG = new FileChooser.ExtensionFilter("PNG files (*.png)", "*.PNG");
-        fileChooser.getExtensionFilters().addAll(extFilterJPG, extFilterPNG);
-        fileChooser.setInitialDirectory(new File("img"));
+        FileChooser.ExtensionFilter extFilterJPG = new FileChooser.ExtensionFilter("Html files (*.html)", "*.html");
+        fileChooser.getExtensionFilters().addAll(extFilterJPG);
+        fileChooser.setInitialDirectory(new File(System.getProperty("user.dir")));
 
         //Show open file dialog
         File file = fileChooser.showOpenDialog(null);
 
         if (file != null) {
-            Image img = new Image(file.toURI().toString());
-            image.setImage(img);
+            WebEngine engine = browser.getEngine();
+            engine.load(file.toURI().toString());
         }
     }
 

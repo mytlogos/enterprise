@@ -1,27 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.web.WebView?>
 <BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:id="root" xmlns="http://javafx.com/javafx/8.0.111"
             fx:controller="Enterprise.test.TableViewer">
     <center>
-        <AnchorPane fx:id="pane" prefHeight="404.0" prefWidth="566.0">
-            <children>
-                <TextField fx:id="name" layoutX="14.0" layoutY="361.0" prefHeight="25.0" prefWidth="313.0"
-                           promptText="URL"/>
-                <Button fx:id="addUrl" layoutX="337.0" layoutY="361.0" mnemonicParsing="false" onAction="#addInternet"
-                        text="Bild runterladen"/>
-                <Button fx:id="addPC" layoutX="450.0" layoutY="361.0" mnemonicParsing="false" onAction="#addLocal"
-                        text="PC durchsuchen"/>
-                <ImageView fx:id="image" fitHeight="340.0" fitWidth="533.0" layoutX="14.0" layoutY="14.0"
-                           pickOnBounds="true" preserveRatio="true"/>
-                <Button fx:id="show" layoutX="475.0" layoutY="329.0" mnemonicParsing="false" onAction="#showSideBar"
-                        text="Button"/>
-            </children>
-        </AnchorPane>
+        <WebView fx:id="browser" prefHeight="500.0" prefWidth="1000.0"/>
     </center>
+    <bottom>
+        <HBox prefWidth="200.0" spacing="1.0" BorderPane.alignment="CENTER">
+            <children>
+                <TextField fx:id="name" prefHeight="25.0" prefWidth="313.0" promptText="URL" HBox.hgrow="ALWAYS"/>
+                <Button fx:id="addUrl" mnemonicParsing="false" onAction="#addInternet" text="Öffne Internet"/>
+                <Button fx:id="addPC" mnemonicParsing="false" onAction="#addLocal" text="PC durchsuchen"/>
+            </children>
+            <padding>
+                <Insets bottom="1.0" left="1.0" right="1.0" top="1.0"/>
+            </padding>
+        </HBox>
+    </bottom>
 </BorderPane>

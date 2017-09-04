@@ -63,7 +63,7 @@ public class EntrySourceTable extends AbstractSubRelation<Sourceable> {
     }
 
     @Override
-    String createString() {
+    protected String createString() {
         return "CREATE TABLE IF NOT EXISTS " +
                 getTableName() +
                 "(" + sourceableId + " " + IdType + " NOT NULL" +

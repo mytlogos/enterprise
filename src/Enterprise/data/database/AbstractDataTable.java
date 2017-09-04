@@ -21,8 +21,8 @@ import java.util.logging.Level;
  * to manage a specific table.
  *
  */
-abstract class AbstractDataTable<E extends DataBase> extends AbstractTable<E> implements DataTable<E> {
-    final String tableId;
+public abstract class AbstractDataTable<E extends DataBase> extends AbstractTable<E> implements DataTable<E> {
+    protected final String tableId;
 
     /**
      * The constructor of this {@code AbstractDataTable}.
@@ -34,7 +34,7 @@ abstract class AbstractDataTable<E extends DataBase> extends AbstractTable<E> im
      * @param tableId name of the id column
      * @throws SQLException if the table could not be constructed
      */
-    AbstractDataTable(String tableName, String tableId) throws SQLException {
+    protected AbstractDataTable(String tableName, String tableId) throws SQLException {
         super(tableName);
         this.tableId = tableId;
         createTable();
@@ -322,7 +322,7 @@ abstract class AbstractDataTable<E extends DataBase> extends AbstractTable<E> im
      * @throws SQLException if there is a problem with the {@code PreparedStatement},
      *                      if for example, it is closed
      */
-    abstract void setInsertData(E entry, PreparedStatement stmt) throws SQLException;
+    protected abstract void setInsertData(E entry, PreparedStatement stmt) throws SQLException;
 
     /**
      * Constructs an {@code Entry} from the given {@code ResultSet}.
@@ -333,5 +333,5 @@ abstract class AbstractDataTable<E extends DataBase> extends AbstractTable<E> im
      *                      the {@code Cursor} was not moved or
      *                      the given column does not exist
      */
-    abstract E getData(ResultSet rs) throws SQLException;
+    protected abstract E getData(ResultSet rs) throws SQLException;
 }

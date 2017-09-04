@@ -112,14 +112,14 @@ abstract class AbstractTable<E extends DataBase> implements Table<E> {
      *
      * @return string - the complete SQL statement
      */
-    abstract String createString();
+    protected abstract String createString();
 
     /**
      * Gets the SQL statement for a INSERT operation. Inserts only one row in the table.
      *
      * @return string - the complete SQL statement
      */
-    abstract String getInsert();
+    protected abstract String getInsert();
 
     @Override
     final public void deleteAll() {

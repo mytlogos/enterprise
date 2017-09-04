@@ -55,7 +55,7 @@ public class CreationEntryTable extends AbstractTable<CreationEntry> {
     }
 
     @Override
-    final String getInsert() {
+    protected final String getInsert() {
         return "insert into " + getTableName() + " values(?,?,?,?,?)";
     }
 
@@ -285,7 +285,7 @@ public class CreationEntryTable extends AbstractTable<CreationEntry> {
      *
      * @return createString - the SQL statement to create the table
      */
-    String createString() {
+    protected String createString() {
         return "CREATE TABLE IF NOT EXISTS " +
                 getTableName() +
                 "(" + creationIdC + " INTEGER NOT NULL" +

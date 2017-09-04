@@ -1,6 +1,9 @@
 package scrape.sources;
 
 import Enterprise.data.Default;
+import Enterprise.data.intface.DataBase;
+import Enterprise.data.intface.Table;
+import javafx.beans.property.BooleanProperty;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -10,7 +13,7 @@ import java.util.List;
  * This class represents a Post of a blog.
  * It is mutable.
  */
-public class Post implements Comparable<Post> {
+public class Post implements Comparable<Post>, DataBase {
 
 
     private String title = Default.STRING;
@@ -180,5 +183,60 @@ public class Post implements Comparable<Post> {
         int result = 31 * timeStamp.hashCode();
         result = 31 * result * title.hashCode();
         return result;
+    }
+
+    @Override
+    public int getId() {
+        return 0;
+    }
+
+    @Override
+    public void setId(int id, Table table) {
+
+    }
+
+    @Override
+    public void setDead() {
+
+    }
+
+    @Override
+    public void setAlive() {
+
+    }
+
+    @Override
+    public void setEntryNew() {
+
+    }
+
+    @Override
+    public void setEntryOld() {
+
+    }
+
+    @Override
+    public boolean isDead() {
+        return false;
+    }
+
+    @Override
+    public boolean isNewEntry() {
+        return false;
+    }
+
+    @Override
+    public void setUpdated() {
+
+    }
+
+    @Override
+    public boolean isUpdated() {
+        return false;
+    }
+
+    @Override
+    public BooleanProperty updatedProperty() {
+        return null;
     }
 }

@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
 /**
  * This class parses {@link Elements} to {@link Post}.
  */
-class PostParser {
+public class PostParser {
 
     List<Post> toPosts(Elements postElements) {
         List<Post> posts = new PostList();
@@ -182,10 +182,16 @@ class PostParser {
 
         localDateTime = parseTime(time);
 
+        try {
+            System.out.println("to parse: " + time + " parsed: " + ParseTime.parseTime(time));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         return localDateTime;
     }
 
-    private LocalDateTime parseTime(String time) {
+    public LocalDateTime parseTime(String time) {
         ZonedDateTime zonedDateTime;
         LocalDateTime dateTime = null;
         String finalTime = time;

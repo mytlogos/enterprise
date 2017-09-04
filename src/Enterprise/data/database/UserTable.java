@@ -50,7 +50,7 @@ class UserTable extends AbstractDataTable<User> {
     }
 
     @Override
-    final String getInsert() {
+    protected final String getInsert() {
         return "insert into " + getTableName() +
                 " values(?,?,?,?,?,?,?)";
     }
@@ -70,7 +70,7 @@ class UserTable extends AbstractDataTable<User> {
     }
 
     @Override
-    void setInsertData(User entry, PreparedStatement stmt) throws SQLException {
+    protected void setInsertData(User entry, PreparedStatement stmt) throws SQLException {
         String ownStatus = entry.getOwnStatus();
         String comment = entry.getComment();
         int rating = entry.getRating();
@@ -88,7 +88,7 @@ class UserTable extends AbstractDataTable<User> {
     }
 
     @Override
-    User getData(ResultSet rs) throws SQLException {
+    protected User getData(ResultSet rs) throws SQLException {
         User entry;
         int id = rs.getInt(tableId);
         String ownStatus = rs.getString(ownStatusC);

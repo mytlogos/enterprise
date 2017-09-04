@@ -64,7 +64,7 @@ public class CreatorTable extends AbstractDataTable<Creator> {
     }
 
     @Override
-    void setInsertData(Creator entry, PreparedStatement stmt) throws SQLException {
+    protected void setInsertData(Creator entry, PreparedStatement stmt) throws SQLException {
         String authName = entry.getName();
         String authSortName = entry.getSortName();
         String authStat = entry.getStatus();
@@ -76,7 +76,7 @@ public class CreatorTable extends AbstractDataTable<Creator> {
     }
 
     @Override
-    Creator getData(ResultSet rs) throws SQLException {
+    protected Creator getData(ResultSet rs) throws SQLException {
         Creator entry;
         int authorId = rs.getInt(tableId);
         String name = rs.getString(nameC);
@@ -97,7 +97,7 @@ public class CreatorTable extends AbstractDataTable<Creator> {
     }
 
     @Override
-    String getInsert() {
+    protected String getInsert() {
         return "insert into " + getTableName() + " values(?,?,?,?)";
     }
 }

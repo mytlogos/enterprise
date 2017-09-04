@@ -59,13 +59,13 @@ public class SourceableTable extends AbstractDataTable<Sourceable> {
     }
 
     @Override
-    void setInsertData(Sourceable entry, PreparedStatement stmt) throws SQLException {
+    protected void setInsertData(Sourceable entry, PreparedStatement stmt) throws SQLException {
         stmt.setNull(1,Types.INTEGER);
         stmt.setString(2,entry.getTranslator());
     }
 
     @Override
-    Sourceable getData(ResultSet rs) throws SQLException {
+    protected Sourceable getData(ResultSet rs) throws SQLException {
         Sourceable entry;
         int id = rs.getInt(tableId);
         // TODO: 23.08.2017 look at this more, maybe other solution,
@@ -80,7 +80,7 @@ public class SourceableTable extends AbstractDataTable<Sourceable> {
     }
 
     @Override
-    String getInsert() {
+    protected String getInsert() {
         return "insert into " + getTableName() + " values(?,?)";
     }
 }

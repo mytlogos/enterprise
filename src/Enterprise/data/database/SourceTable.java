@@ -60,7 +60,7 @@ class SourceTable extends AbstractDataTable<Source> {
     }
 
     @Override
-    void setInsertData(Source entry, PreparedStatement stmt) throws SQLException {
+    protected void setInsertData(Source entry, PreparedStatement stmt) throws SQLException {
         String url = entry.getUrl();
         String sourceType = entry.getSourceType().name();
 
@@ -70,7 +70,7 @@ class SourceTable extends AbstractDataTable<Source> {
     }
 
     @Override
-    Source getData(ResultSet rs) throws SQLException {
+    protected Source getData(ResultSet rs) throws SQLException {
         Source entry = null;
         int id = rs.getInt(tableId);
         String url = rs.getString(sourceUrl);
@@ -91,7 +91,7 @@ class SourceTable extends AbstractDataTable<Source> {
     }
 
     @Override
-    String getInsert() {
+    protected String getInsert() {
         return "insert into " + getTableName() + " values(?,?,?)";
     }
 

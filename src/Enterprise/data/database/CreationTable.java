@@ -37,7 +37,7 @@ class CreationTable extends AbstractDataTable<Creation> implements DataTable<Cre
     }
 
     @Override
-    String getInsert() {
+    protected String getInsert() {
         return "insert into " + getTableName() +
                 " values(?,?,?,?,?,?,?)";
     }
@@ -60,7 +60,7 @@ class CreationTable extends AbstractDataTable<Creation> implements DataTable<Cre
     }
 
     @Override
-    String createString() {
+    protected String createString() {
         return "CREATE TABLE IF NOT EXISTS " +
                 getTableName() +
                 "(" + tableId + " " + INTEGER + " PRIMARY KEY NOT NULL UNIQUE" +
@@ -74,7 +74,7 @@ class CreationTable extends AbstractDataTable<Creation> implements DataTable<Cre
     }
 
     @Override
-    void setInsertData(Creation entry, PreparedStatement stmt) throws SQLException {
+    protected void setInsertData(Creation entry, PreparedStatement stmt) throws SQLException {
         // TODO: 23.08.2017 check the sql statement of stmt if it is an INSERT operation
 
         stmt.setNull(1,Types.INTEGER);
@@ -87,7 +87,7 @@ class CreationTable extends AbstractDataTable<Creation> implements DataTable<Cre
     }
 
     @Override
-    Creation getData(ResultSet rs) throws SQLException {
+    protected Creation getData(ResultSet rs) throws SQLException {
         Creation entry;
         int authorId = rs.getInt(tableId);
         String title = rs.getString(titleC);
