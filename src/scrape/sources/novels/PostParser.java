@@ -191,7 +191,7 @@ public class PostParser {
         return localDateTime;
     }
 
-    public LocalDateTime parseTime(String time) {
+    private LocalDateTime parseTime(String time) {
         ZonedDateTime zonedDateTime;
         LocalDateTime dateTime = null;
         String finalTime = time;

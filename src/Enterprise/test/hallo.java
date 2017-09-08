@@ -46,7 +46,7 @@ public class hallo extends Application {
         SourceList sources = new SourceList();
         addUris();
         for (String s : uris) {
-            sources.add(Source.createSource(s, Source.SourceType.START));
+            sources.add(Source.create(s, Source.SourceType.START));
         }
 
         ServiceClass serviceClass = new ServiceClass();

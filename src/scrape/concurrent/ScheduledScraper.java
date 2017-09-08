@@ -113,7 +113,7 @@ public class ScheduledScraper extends ScheduledService<List<Post>> {
                         try {
                             updateMessage("Lade Posts von " + source.getSourceName());
                             //loads the HTTP document of the given URL
-                            host.loadDoc(source.getUrl());
+                            host.load(source.getUrl());
 
                             //searches for the keyWord in Posts, wraps the content in Post objects and gathers them
                             for (String keyWord : keyWordList) {
@@ -150,13 +150,13 @@ public class ScheduledScraper extends ScheduledService<List<Post>> {
              * @param postList list of {@link Post}s, to be operated on
              */
             private void searchForPosts(List<Post> postList) {
-                NovelPosts host =new NovelPosts();
+                NovelPosts host = new NovelPosts();
 
                 for (SourceList noKeySource : noKeySources) {
                     for (Source source : noKeySource) {
                         updateMessage("Lade Posts von " + source.getSourceName());
                         try {
-                            List<Post> posts1 = host.getPosts(source.getUrl());
+                            List<Post> posts1 = host.getPosts(source);
 
 
                             postList.addAll(posts1);

@@ -5,6 +5,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import scrape.sources.Post;
+import scrape.sources.Source;
 
 import java.io.IOException;
 import java.net.URI;
@@ -12,15 +13,17 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+// TODO: 06.09.2017 handle connection problems
 /**
  * This class is responsible for getting Posts from
  * the internet which are related to novels.
  */
 public class NovelPosts {
-    private URI baseUri;
+    private Source source;
     private Document doc;
 
     /**
@@ -36,11 +39,31 @@ public class NovelPosts {
      * to {@code Post}s afterwards.
      *
      * @return posts - list of parsed posts
+     * @param source source to process, not null
      * @throws IOException if an error occurred
      * @throws URISyntaxException if the {@code uri} is invalid
      */
-    public List<Post> getPosts(String uri) throws IOException, URISyntaxException {
-        init(uri);
+    public List<Post> getPosts(Source source) throws IOException, URISyntaxException {
+        Objects.requireNonNull(source);
+
+        init(source.getUrl());
+        Elements postElements = getPostElements();
+        return new PostParser().toPosts(postElements);
+    }
+
+    /**
+     * Gets the html document of the specified
+     * {@code uri}, gets the all Elements
+     * that resemble Posts and parses the content
+     * to {@code Post}s afterwards.
+     *
+     * @return posts - list of parsed posts
+     * @throws IOException        if an error occurred
+     * @throws URISyntaxException if the {@code uri} is invalid
+     */
+    public List<Post> getPosts() throws IOException, URISyntaxException {
+        Objects.requireNonNull(doc, "no document available");
+
         Elements postElements = getPostElements();
         return new PostParser().toPosts(postElements);
     }
@@ -53,8 +76,21 @@ public class NovelPosts {
      * @throws IOException if an error occurred
      * @throws URISyntaxException if the {@code uri} is invalid
      */
-    public void loadDoc(String uri) throws IOException, URISyntaxException {
+    public void load(String uri) throws IOException, URISyntaxException {
         init(uri);
+    }
+
+    /**
+     * Gets the html document of the
+     * specified {@code uri}.
+     *
+     * @param source source to process
+     * @throws IOException        if an error occurred
+     * @throws URISyntaxException if the {@code uri} is invalid
+     */
+    public void load(Source source) throws IOException, URISyntaxException {
+        this.source = source;
+        init(source.getUrl());
     }
 
     /**
@@ -63,17 +99,16 @@ public class NovelPosts {
      * to {@code Post}s afterwards.
      * <p>
      * Before this document is called, it is imperative
-     * to call {@link #loadDoc(String)} before , to load the html
+     * to call {@link #load(String)} before , to load the html
      * document, else it will throw a {@code NullPointerException}.
      * </p>
      *
      * @return posts - list of parsed posts
      * @throws IOException if an error occurred
      */
-    public List<Post> getSpecificPosts(String match) throws IOException{
-        if (doc == null) {
-            throw new NullPointerException("no document available");
-        }
+    public List<Post> getSpecificPosts(String match) throws IOException {
+        Objects.requireNonNull(doc, "no document available");
+
         Elements postElements = getPostElements();
         postElements = searchPosts(match, postElements);
         return new PostParser().toPosts(postElements);
@@ -90,8 +125,7 @@ public class NovelPosts {
      */
     private void init(String  uri) throws URISyntaxException, IOException {
         URI startUri = new URI(uri);
-        baseUri = new URI( startUri.getScheme()+"://" + startUri.getHost());
-        doc = getDocument(startUri);
+        doc = getDocument(startUri.toString());
     }
 
     /**
@@ -102,8 +136,8 @@ public class NovelPosts {
      * @return the parsed html document
      * @throws IOException if an error occurred
      */
-    private Document getDocument(URI uri) throws IOException {
-        return Jsoup.connect(uri.toString()).get();
+    public Document getDocument(String uri) throws IOException {
+        return Jsoup.connect(uri).get();
     }
 
     /**
@@ -126,6 +160,7 @@ public class NovelPosts {
         }
         return postElements;
     }
+
 
     /**
      * Searches in the {@code elements} for text and urls
@@ -166,7 +201,7 @@ public class NovelPosts {
         }
 
         for (Element element : link) {
-            completeLinks.add(baseUri.toString() + element.attr("abs:href"));
+            completeLinks.add(element.absUrl("href"));
         }
 
         postElements = getPostContent(completeLinks);

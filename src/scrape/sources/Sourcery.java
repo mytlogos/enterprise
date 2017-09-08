@@ -98,8 +98,10 @@ public class Sourcery implements Initializable {
         uris.add("https://isekailunatic.wordpress.com/");
         host = new NovelPosts();
         for (String s : uris) {
+            Source source = Source.create(s, Source.SourceType.START);
 
-            postsBox.getItems().addAll(host.getPosts(s));
+            // FIXME: 04.09.2017 "fix" this
+            postsBox.getItems().addAll(host.getPosts(source));
             postsBox.getSelectionModel().select(0);
             /*
             Element element;

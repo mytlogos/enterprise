@@ -52,7 +52,7 @@ public class ServiceClass extends Service<List<Post>> {
                 for (Source source : list) {
                     updateMessage("Lade Posts von " + source.getSourceName());
                     try {
-                        List<Post> list = host.getPosts(source.getUrl());
+                        List<Post> list = host.getPosts(source);
                         System.out.println("Anzahl Posts: " + list.size());
                         postList.addAll(list);
 

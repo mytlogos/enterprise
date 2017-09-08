@@ -44,7 +44,7 @@ public abstract class SourceableEditController<R extends Enum<R> & Module> exten
         Source.SourceType type = urlType.getValue();
         String url = validateStringInput(sourceURL);
         try {
-            Source source = Source.createSource(url, type);
+            Source source = Source.create(url, type);
 
             sourceTable.getItems().add(source);
             sourceURL.clear();

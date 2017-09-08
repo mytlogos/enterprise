@@ -3,10 +3,7 @@ package scrape.sources;
 import Enterprise.data.Cache;
 import Enterprise.data.Default;
 import Enterprise.data.EnterpriseEntry;
-import Enterprise.data.intface.DataBase;
-import Enterprise.data.intface.DataTable;
-import Enterprise.data.intface.Sourceable;
-import Enterprise.data.intface.Table;
+import Enterprise.data.intface.*;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -16,7 +13,9 @@ import javafx.collections.SetChangeListener;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -36,10 +35,12 @@ import java.util.Set;
  * It can be alive again, if it gets references to {@code Sourceables}.
  * </p>
  */
-public class Source extends EnterpriseEntry implements DataBase,Comparable<Source> {
+public class Source extends EnterpriseEntry implements DataBase, Comparable<Source> {
     private StringProperty sourceName = new SimpleStringProperty();
     private StringProperty url = new SimpleStringProperty();
     private SourceType sourceType;
+    private PostConfigs configs;
+    private Map<CreationEntry, Post> newestPosts = new HashMap<>();
 
     private final ObservableSet<Sourceable> creationEntries = FXCollections.observableSet();
     private final Set<Sourceable> deletedEntries = new HashSet<>();
@@ -53,7 +54,7 @@ public class Source extends EnterpriseEntry implements DataBase,Comparable<Sourc
     /**
      * The constructor of {@code Source}.
      *
-     * @param url the url of the source
+     * @param url  the url of the source
      * @param type the type of the source
      * @throws URISyntaxException if url is invalid
      */
@@ -64,9 +65,9 @@ public class Source extends EnterpriseEntry implements DataBase,Comparable<Sourc
     /**
      * The constructor of {@code Source}.
      *
-     * @param url the url of the source
+     * @param url  the url of the source
      * @param type the type of the source
-     * @param id the database id
+     * @param id   the database id
      * @throws URISyntaxException if url is invalid
      */
     private Source(String url, SourceType type, int id) throws URISyntaxException {
@@ -83,12 +84,24 @@ public class Source extends EnterpriseEntry implements DataBase,Comparable<Sourc
         setListener();
     }
 
-    public static Source createSource(int id, String url, SourceType type) throws URISyntaxException {
+    public static Source create(int id, String url, SourceType type) throws URISyntaxException {
         return sourceCache.checkCache(new Source(url, type, id), source -> source.url.get());
     }
 
-    public static Source createSource(String url, SourceType type) throws URISyntaxException {
-        return createSource(Default.VALUE, url, type);
+    public static Source create(String url, SourceType type) throws URISyntaxException {
+        return create(Default.VALUE, url, type);
+    }
+
+    public void putPost(CreationEntry entry, Post post) {
+        if (newestPosts.containsKey(entry)) {
+            if (newestPosts.get(entry).getTimeStamp().compareTo(post.getTimeStamp()) < 0) {
+                newestPosts.put(entry, post);
+            }
+        }
+    }
+
+    public Post getNewestPost(CreationEntry entry) {
+        return newestPosts.get(entry);
     }
 
     @Override
@@ -107,7 +120,8 @@ public class Source extends EnterpriseEntry implements DataBase,Comparable<Sourc
         this.id = id;
     }
 
-    @Override @Deprecated
+    @Override
+    @Deprecated
     protected void bindUpdated() {
         throw new IllegalAccessError();
     }
@@ -188,12 +202,14 @@ public class Source extends EnterpriseEntry implements DataBase,Comparable<Sourc
         setEntryOld();
     }
 
-    @Override @Deprecated
+    @Override
+    @Deprecated
     public boolean isUpdated() {
         throw new IllegalAccessError();
     }
 
-    @Override @Deprecated
+    @Override
+    @Deprecated
     public BooleanProperty updatedProperty() {
         throw new IllegalAccessError();
     }
@@ -239,7 +255,15 @@ public class Source extends EnterpriseEntry implements DataBase,Comparable<Sourc
 
     @Override
     public String toString() {
-        return  this.getClass().getSimpleName() + "@" + sourceName.get() + "@" +sourceType.name() + "@" + creationEntries.size();
+        return this.getClass().getSimpleName() + "@" + sourceName.get() + "@" + sourceType.name() + "@" + creationEntries.size();
+    }
+
+    public PostConfigs getConfigs() {
+        return configs;
+    }
+
+    public void setConfigs(PostConfigs configs) {
+        this.configs = configs;
     }
 
     /**
@@ -277,4 +301,5 @@ public class Source extends EnterpriseEntry implements DataBase,Comparable<Sourc
         }
 
     }
+
 }

@@ -15,11 +15,12 @@ import java.util.List;
  */
 public class Post implements Comparable<Post>, DataBase {
 
-
+    private Source source;
     private String title = Default.STRING;
     private List<String> content = new ArrayList<>();
     private String footer = Default.STRING;
     private LocalDateTime timeStamp;
+
 
     /**
      * The constructor of {@code Post}.
