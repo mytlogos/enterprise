@@ -8,7 +8,7 @@ import scrape.sources.Source;
 import java.io.IOException;
 
 /**
- *
+ *  // TODO: 09.09.2017 make a function strategy from this
  */
 public class Feed {
 

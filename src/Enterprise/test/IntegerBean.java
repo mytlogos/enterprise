@@ -5,6 +5,7 @@ import org.jsoup.nodes.Attribute;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import scrape.sources.novels.strategies.Archive;
 
 import java.io.*;
 import java.net.MalformedURLException;
@@ -29,7 +30,7 @@ public class IntegerBean implements Serializable {
     public static void main(String[] args) throws IOException, URISyntaxException, InterruptedException {
 
         System.out.println(Jsoup.parse(new File("TestData/TestPosts/arkmachinetranslations.wordpress.com.html"), "UTF-8"));
-        /*String s = addLinks().get(72);
+        String s = addLinks().get(72);
         // TODO: 07.09.2017 empty archive in unlimitednovelfailures
         // TODO: 07.09.2017 empty archive in thelordofpie, does not search for non empty ones
         // TODO: 07.09.2017 get facebook scraper
@@ -39,11 +40,13 @@ public class IntegerBean implements Serializable {
         // TODO: 07.09.2017 gravity has other .row elements
         // TODO: 07.09.2017 omegaharem: searches in wrong archive, 2016.12 instead of 2017.09
         // TODO: 07.09.2017 sousetsuka: searches in wrong archive, 2016.12 instead of 2017.09
+        // TODO: 10.09.2017 div#/.content has to have text
+        // TODO: 10.09.2017 the lorfofpie does have archives
         try {
             Document document = getDocument(s);
 
-            if (SiteArchive.hasArchive(document)) {
-                System.out.println("has archive");
+            if (Archive.hasArchive(document)) {
+                System.out.println("has archive");/*
                 Iterator<Document> iterator = SiteArchive.archiveSearcher(document).iterator();
                 if (iterator.hasNext()) {
                     System.out.println("has next");
@@ -51,13 +54,13 @@ public class IntegerBean implements Serializable {
                 } else {
                     System.out.println(s + " has no recent activity in last 12 months");
                     printPosts(document);
-                }
+                }*/
             } else {
                 printPosts(document);
             }
         } catch (IOException e) {
             e.printStackTrace();
-        }*/
+        }
     }
 
     private static void printPosts(Document document) {
@@ -363,4 +366,108 @@ public class IntegerBean implements Serializable {
         return times;
     }
 
+
+    /*private int getMonth(String s) {
+        Matcher matcher = Pattern.compile("/[0-1]?\\d/").matcher(s);
+        int montInt = 0;
+
+        if (matcher.find()) {
+            String month = matcher.group().replaceAll("/", "");
+            montInt = Integer.parseInt(month);
+        }
+
+        return montInt;
+    }
+
+
+
+    private Document getNewestArchive(Document document) throws IOException {
+        Elements archiveElements = getArchiveElements(document);
+
+        if (archiveElements.isEmpty()) {
+            return checkWithLink(document.location(),0);
+        }
+
+        List<String> monthlyLinks = checkWithDocument(document, archiveElements);
+
+        return getDocument(getNewest(monthlyLinks));
+    }
+
+    private String getNewest(Collection<String> collection) {
+        String result = "";
+        int max = 0;
+
+        Pattern monthPattern = Pattern.compile("/[0-1]?\\d/?$");
+
+        for (String s : collection) {
+
+            if (sameYears(result, s)) {
+                Matcher matcher = monthPattern.matcher(s);
+                if (matcher.find()) {
+
+                    String temp = matcher.group();
+                    temp = temp.replaceAll("/", "");
+
+                    int tempInt = Integer.parseInt(temp);
+
+                    if (tempInt > max) {
+                        result = s;
+                        max = tempInt;
+                    }
+                }
+            } else {
+                if (getYear(result) < getYear(s)) {
+                    Matcher matcher = monthPattern.matcher(s);
+                    if (matcher.find()) {
+
+                        String temp = matcher.group();
+                        temp = temp.replaceAll("/", "");
+
+                        int tempInt = Integer.parseInt(temp);
+
+                        if (tempInt > max) {
+                            result = s;
+                            max = tempInt;
+                        }
+                    }
+                }
+            }
+
+        }
+
+        return result;
+    }
+
+    private int getYear(String s) {
+        if (s == null || s.isEmpty()) {
+            return 0;
+        }
+
+        Pattern yearPattern = Pattern.compile("/2\\d{3}/");
+        Matcher yearMatcher = yearPattern.matcher(s);
+
+        int result = 0;
+        if (yearMatcher.find()) {
+            String year = yearMatcher.group();
+            year = year.replaceAll("/", "");
+            result = Integer.parseInt(year);
+        }
+        return result;
+    }
+
+    private boolean sameYears(String result, String s) {
+        boolean sameYear = false;
+        if (result == null) {
+            return false;
+        }
+
+        Pattern yearPattern = Pattern.compile("/2\\d{3}/");
+        Matcher yearMatcher = yearPattern.matcher(s);
+
+        if (yearMatcher.find()) {
+            String year = yearMatcher.group();
+            sameYear = result.contains(year);
+        }
+        return sameYear;
+    }*/
 }

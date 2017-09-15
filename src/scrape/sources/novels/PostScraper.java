@@ -1,25 +1,31 @@
 package scrape.sources.novels;
 
+import Enterprise.misc.Log;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.safety.Whitelist;
 import org.jsoup.select.Elements;
 import scrape.sources.Post;
 import scrape.sources.PostConfigs;
 import scrape.sources.Source;
+import scrape.sources.novels.strategies.Archive;
+import scrape.sources.novels.strategies.PostConfigsSetter;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
+import java.util.logging.Level;
 
 /**
  *
  */
 public class PostScraper {
     private Source source;
-    private PostConfigs configs;
+    private PostConfigs postConfigs;
     private Document document;
     private LocalDateTime localDateTime;
 
@@ -35,11 +41,28 @@ public class PostScraper {
         init(source);
     }
 
-    public List<Post> getPosts() {
-        Objects.requireNonNull(source);
-        Objects.requireNonNull(document);
-        Elements elements = getPostElements(null);
-        return new PostParser().toPosts(elements);
+    private static Document cleanDoc(Document document) {
+        Whitelist whitelist = Whitelist.relaxed();
+        whitelist.addAttributes(":all", "id", "class", "style");
+        whitelist.addAttributes("div", "class", "id");
+        whitelist.addAttributes("a", "id", "datetime");
+        whitelist.addAttributes("p", "data-timestamp");
+        whitelist.addAttributes("time", "datetime");
+        whitelist.addAttributes("abbr", "title");
+        whitelist.addAttributes("span", "title");
+        whitelist.addAttributes("em", "data-timestamp");
+        whitelist.addTags("time");
+        whitelist.addTags("style");
+        whitelist.addTags("main");
+        whitelist.addTags("article");
+        document.getElementsByAttributeValueContaining("class", "comment").remove();
+        document.getElementsByAttributeValueContaining("class", "share").remove();
+        document.getElementsByAttributeValueContaining("id", "comment").remove();
+        document.getElementsByAttributeValueContaining("id", "share").remove();
+
+        String cleaned = Jsoup.clean(document.outerHtml(), document.baseUri(), whitelist);
+
+        return Jsoup.parse(cleaned, document.baseUri());
     }
 
     public List<Post> getPosts(String match) {
@@ -67,20 +90,31 @@ public class PostScraper {
         return null;
     }
 
-    private void init(Source source) throws IOException {
-        if (source.getConfigs().isInit()) {
-            this.configs = source.getConfigs();
-        } else {
-            this.configs = null;
-        }
-        document = getDocument(source.getUrl());
-        this.source = source;
+    /*public List<Post> getPosts() {
+        Objects.requireNonNull(source);
+        Objects.requireNonNull(document);
+        Elements elements = getPostElements(null);
+        return new PostParser().toPosts(elements);
+    }*/
+    public Elements getPosts() {
+        Objects.requireNonNull(source);
+        Objects.requireNonNull(document);
+        return getPostElements(null);
     }
 
     private Document getDocument(String uri) throws IOException {
         return Jsoup.connect(uri).get();
     }
 
+    private void init(Source source) throws IOException {
+        if (source.getConfigs().isInit()) {
+            this.postConfigs = source.getConfigs();
+        } else {
+            this.postConfigs = null;
+        }
+        document = getDocument(source.getUrl());
+        this.source = source;
+    }
 
     private Elements getAll() {
         checkFeed();
@@ -91,26 +125,10 @@ public class PostScraper {
         }
 
         Elements elements;
-        if (configs == null) {
-            elements = search(SiteArchive.hasArchive(document));
+        if (postConfigs == null) {
+            elements = search(Archive.hasArchive(document));
         } else {
-            elements = search(configs.isArchive());
-        }
-        return elements;
-    }
-
-    private Elements search(boolean bool) {
-        Elements elements;
-        if (bool) {
-            elements = searchArchives();
-        } else {
-            elements = postsFromPage(document);
-            while (!hasNextPage(document)) {
-                Elements secondaryElements = fromNextPage(document);
-                elements.addAll(secondaryElements);
-
-                if (checkTime(secondaryElements)) break;
-            }
+            elements = search(postConfigs.isArchive());
         }
         return elements;
     }
@@ -127,31 +145,74 @@ public class PostScraper {
         }
     }
 
-    private Elements postsFromPage(Document document) {
-        // TODO: 08.09.2017  format all posts to specific format of
-        // TODO: 08.09.2017 title, body, footer and timestamp
-        Elements elements = new Elements();
-        if (configs == null) {
-            for (BasicNovelPosts basicNovelPosts : BasicNovelPosts.values()) {
-                if (!(elements = basicNovelPosts.get(document)).isEmpty()) {
-
-// TODO: 08.09.2017 check if not whole basicNovelPosts instance should be stored in source
-                    configs.setBody(basicNovelPosts.bodyStrategy());
-                    configs.setPosts(basicNovelPosts.postsStrategy());
-                    break;
-                }
-            }
+    private Elements search(boolean isArchive) {
+        Elements elements;
+        if (isArchive) {
+            elements = searchArchives();
         } else {
-            Elements bodyWithPosts = configs.getBody().get(document);
-            elements = configs.getPosts().get(Jsoup.parse(bodyWithPosts.html()));
-        }
+            // TODO: 14.09.2017 do it with Pages
+            elements = postsFromPage(document);
+            while (hasNextPage(document)) {
+                Elements secondaryElements = fromNextPage(document);
+                elements.addAll(secondaryElements);
 
+                if (checkTime(secondaryElements)) break;
+            }
+        }
         return elements;
     }
 
+    private Elements postsFromPage(Document document) {
+        Document cleaned = cleanDoc(document);
+        if (postConfigs == null) {
+            return initConfigs(cleaned);
+        } else {
+            return getFormattedElements(cleaned, postConfigs);
+        }
+    }
+
+    private Elements getFormattedElements(Document cleaned, PostConfigs configs) {
+        Elements result = new Elements();
+
+        Element bodyWithPosts = configs.getBody().apply(cleaned);
+        Elements postElements = configs.getPosts().apply(bodyWithPosts);
+
+        for (Element postElement : postElements) {
+            Element article = new Element("article");
+
+            setElement(configs.getTitle(), postElement, article);
+            setElement(configs.getTime(), postElement, article);
+            setElement(configs.getPostBody(), postElement, article);
+            setElement(configs.getFooter(), postElement, article);
+
+            result.add(article);
+        }
+        return result;
+    }
+
+    private Elements initConfigs(Document document) {
+        PostConfigs configs = source.getConfigs();
+
+        if (PostConfigsSetter.setPostConfigs(configs, document)) {
+            return getFormattedElements(document, configs);
+        } else {
+            Log.classLogger(this).log(Level.WARNING, source.getUrl() + " is not supported");
+            return null;
+        }
+    }
+
+    private boolean setElement(Function<Element, Element> function, Element post, Element article) {
+        if (function != null) {
+            Element content = function.apply(post);
+            article.appendChild(content);
+            return true;
+        }
+        return false;
+    }
+
     private Elements searchArchives() {
-        if (configs == null) {
-            SiteArchive archive = SiteArchive.archiveSearcher(document);
+        /*if (postConfigs == null) {
+            Archive.SiteArchive archive = Archive.SiteArchive.archiveSearcher(document);
 
             outer:
             {
@@ -171,14 +232,14 @@ public class PostScraper {
                 }
             }
         } else {
-            return configs.getArchive().get(document);
-        }
+            return postConfigs.getArchive().get(document);
+        }*/
 
         return null;
     }
 
     private boolean hasNextPage(Document document) {
-        return false;
+        return true;
     }
 
     private boolean checkTime(Elements elements) {

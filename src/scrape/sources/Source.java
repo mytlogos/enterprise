@@ -39,7 +39,7 @@ public class Source extends EnterpriseEntry implements DataBase, Comparable<Sour
     private StringProperty sourceName = new SimpleStringProperty();
     private StringProperty url = new SimpleStringProperty();
     private SourceType sourceType;
-    private PostConfigs configs;
+    private PostConfigs configs = new PostConfigs();
     private Map<CreationEntry, Post> newestPosts = new HashMap<>();
 
     private final ObservableSet<Sourceable> creationEntries = FXCollections.observableSet();
