@@ -67,6 +67,15 @@ public class Post implements Comparable<Post>, DataBase {
     }
 
     /**
+     * Gets the String representation of the link of the Post.
+     *
+     * @return link to the Post
+     */
+    public String getFollowLink() {
+        return followLink;
+    }
+
+    /**
      * Returns the timestamp.
      * @return time - may be null
      */

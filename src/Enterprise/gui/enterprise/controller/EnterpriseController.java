@@ -116,12 +116,10 @@ public class EnterpriseController implements Initializable, Controller {
     @FXML
     void showPosts() {
         try {
-
-            PostView.getInstance().open(root.getScene().getWindow());
+            postView = PostView.getInstance().open(root.getScene().getWindow());
         } catch (IOException e) {
             logger.log(Level.SEVERE, "could not open postView", e);
         }
-
         if (postView == null) {
             showPostsBtn.setText("Zeige Posts");
         } else {
