@@ -5,7 +5,7 @@ import org.jsoup.nodes.Attribute;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import scrape.sources.novels.strategies.Archive;
+import scrape.sources.novels.strategies.ArchiveGetter;
 
 import java.io.*;
 import java.net.MalformedURLException;
@@ -45,7 +45,7 @@ public class IntegerBean implements Serializable {
         try {
             Document document = getDocument(s);
 
-            if (Archive.hasArchive(document)) {
+            if (ArchiveGetter.hasArchive(document)) {
                 System.out.println("has archive");/*
                 Iterator<Document> iterator = SiteArchive.archiveSearcher(document).iterator();
                 if (iterator.hasNext()) {

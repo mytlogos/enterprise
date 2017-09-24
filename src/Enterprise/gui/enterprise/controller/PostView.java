@@ -3,16 +3,16 @@ package Enterprise.gui.enterprise.controller;
 import Enterprise.ControlComm;
 import Enterprise.gui.general.PostManager;
 import Enterprise.misc.Log;
+import javafx.beans.binding.DoubleBinding;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ToggleButton;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
@@ -59,7 +59,7 @@ public class PostView implements Initializable{
                     prefWidthProperty().bind(root.widthProperty().subtract(30));
                 }
                 @FXML
-                AnchorPane postPane;
+                HBox postPane;
 
                 @FXML
                 private Text title;
@@ -67,46 +67,39 @@ public class PostView implements Initializable{
                 @FXML
                 private Text date;
 
-                @FXML
-                private Label content;
-
-                @FXML
-                private Text footer;
-
-                private FXMLLoader mLLoader;
-
                 @Override
                 protected void updateItem(Post item, boolean empty) {
                     super.updateItem(item, empty);
                     if (empty || item == null) {
                         setText(null);
                     } else {
-                        if (mLLoader == null) {
-                            mLLoader = new FXMLLoader(getClass().getResource("../fxml/PostCell.fxml"));
-                            mLLoader.setController(this);
-                            try {
-                                mLLoader.load();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                        if (title == null ||  content == null) {
-                            System.out.println(title);
-                            System.out.println(content);
-                            System.out.println(footer);
-                        } else {
-                            title.setText(item.getTitle());
-                            content.setText(item.getContent().toString());
-                            date.setText(item.getTime());
+                        postPane = new HBox();
+                        postPane.setSpacing(5);
 
-                            title.setWrappingWidth(440);
-                            date.setWrappingWidth(120);
-                            content.setWrapText(true);
-                            content.prefWidthProperty().bind(widthProperty().subtract(30));
+                        title = new Text(item.getTitle());
+                        date = new Text(item.getTime());
+                        configureWidth();
 
-                            setGraphic(postPane);
-                        }
+                        postPane.getChildren().add(title);
+                        postPane.getChildren().add(date);
+
+                        setGraphic(postPane);
                     }
+                }
+
+                /**
+                 * Binds the value of the {@link Text#wrappingWidthProperty()}
+                 * of the title.
+                 * Calculated, so it will be wrapped, if no space is available for
+                 * the title, after subtracting the spacing the the width of the date
+                 * of the cell´s prefWidth.
+                 */
+                private void configureWidth() {
+                    DoubleBinding rest = prefWidthProperty().
+                            subtract(date.layoutBoundsProperty().get().getWidth()).
+                            subtract(postPane.spacingProperty());
+
+                    title.wrappingWidthProperty().bind(rest);
                 }
             }
         );
@@ -152,7 +145,7 @@ public class PostView implements Initializable{
      * the same relative position.
      *
      * @param window window which will own the window of this {@code PostView}.
-     * @return
+     * @return the stage of this {@code PostView}
      * @throws IOException
      */
     Stage open(Window window) throws IOException {
@@ -194,6 +187,7 @@ public class PostView implements Initializable{
     }
 
     private void setStatusBar() {
+        // FIXME: 24.09.2017 statusbar does not display progress or message or it will be displayed too short
         ScheduledScraper scraper = PostManager.getInstance().getScheduledScraper();
 
         statusBar.progressProperty().bind(scraper.progressProperty());

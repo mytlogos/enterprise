@@ -11,12 +11,13 @@ import java.util.List;
 
 /**
  * This class represents a Post of a blog.
- * It is mutable.
+ * It is immutable.
  */
 public class Post implements Comparable<Post>, DataBase {
 
     private Source source;
-    private String title = Default.STRING;
+    private String followLink;
+    private String title;
     private List<String> content = new ArrayList<>();
     private String footer = Default.STRING;
     private LocalDateTime timeStamp;
@@ -25,7 +26,44 @@ public class Post implements Comparable<Post>, DataBase {
     /**
      * The constructor of {@code Post}.
      */
-    public Post() {
+    public Post(Source source, String title, LocalDateTime dateTime, String followLink) {
+        this.title = title;
+        this.source = source;
+        this.timeStamp = dateTime;
+        this.followLink = followLink;
+        validateState();
+    }
+
+    public Post(Source source, String title, List<String> content, String footer, LocalDateTime timeStamp, String followLink) {
+        this(source, title, timeStamp, followLink);
+        this.content = content;
+        this.footer = footer;
+        validateState();
+    }
+
+    private void validateState() {
+        String message = "";
+        if (source == null) {
+            message = message + "source is null, ";
+        }
+        if (timeStamp == null) {
+            message = message + "timeStamp is null, ";
+        }
+        if (title == null) {
+            message = message + "title is null, ";
+        }
+        if (content == null) {
+            message = message + "content is null, ";
+        }
+        if (footer == null) {
+            message = message + "footer is null";
+        }
+        if (followLink == null) {
+            message = message + "followLink is null";
+        }
+        if (!message.isEmpty()) {
+            throw new IllegalArgumentException(message);
+        }
     }
 
     /**
@@ -64,15 +102,12 @@ public class Post implements Comparable<Post>, DataBase {
     }
 
     /**
-     * Sets the timestamp of this {@code Post}.
+     * Gets the source of this Post.
      *
-     * @param timeStamps valid timestamp to set
+     * @return source
      */
-    public void setTimeStamp(LocalDateTime timeStamps) {
-        if (timeStamps == null) {
-            throw new NullPointerException();
-        }
-        this.timeStamp = timeStamps;
+    public Source getSource() {
+        return source;
     }
 
     /**
@@ -85,20 +120,6 @@ public class Post implements Comparable<Post>, DataBase {
     }
 
     /**
-     * Sets the title of this {@code Post}.
-     *
-     * @param title title to set
-     * @throws IllegalArgumentException if {@code title} is null or empty
-     */
-    public void setTitle(String title) {
-        if (title == null || title.isEmpty()) {
-            throw new IllegalArgumentException();
-        } else {
-            this.title = title;
-        }
-    }
-
-    /**
      * Gets the content of the {@code Post}.
      *
      * @return the content in a {@code List}, every element represents one paragraph.
@@ -108,14 +129,6 @@ public class Post implements Comparable<Post>, DataBase {
         return content;
     }
 
-    public void setContent(List<String> content) {
-        if (content == null || content.isEmpty()) {
-            this.content.add(Default.STRING);
-        } else {
-            this.content = content;
-        }
-    }
-
     /**
      * Gets the footer of this {@code Post}.
      *
@@ -123,20 +136,6 @@ public class Post implements Comparable<Post>, DataBase {
      */
     public String getFooter() {
         return footer;
-    }
-
-    /**
-     * Sets the {@code footer} of this {@code Post}.
-     *
-     * @param footer sets {@code footer} to {@link Default#STRING}
-     *               parameter is {@code null} or empty
-     */
-    public void setFooter(String footer) {
-        if (footer == null || footer.isEmpty()) {
-            this.footer = Default.STRING;
-        } else {
-            this.footer = footer;
-        }
     }
 
     /**

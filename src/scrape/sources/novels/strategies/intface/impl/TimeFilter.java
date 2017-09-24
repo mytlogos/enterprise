@@ -5,9 +5,11 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import scrape.sources.novels.ParseTime;
+import scrape.sources.novels.PostScraper;
 import scrape.sources.novels.strategies.PostFormat;
 import scrape.sources.novels.strategies.intface.ElementFilter;
 import scrape.sources.novels.strategies.intface.TimeElement;
+import scrape.sources.novels.strategies.intface.TitleElement;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -23,6 +25,14 @@ public class TimeFilter implements ElementFilter<TimeElement> {
         return new ArrayList<>(Arrays.asList(Time.values()));
     }
 
+
+    private static Element getElement(String timeString) {
+        if (ParseTime.isParseAble(timeString)) {
+            return PostFormat.timeElement(timeString);
+        }
+        return null;
+    }
+
     /**
      *
      */
@@ -31,22 +41,21 @@ public class TimeFilter implements ElementFilter<TimeElement> {
         },
         LINK_TITLE("a", "title", Type.ATTRIBUTE) {
         },
-        LINK_TEXT("a", "abs:href", Type.LINK_TEXT) {
+        LINK_TEXT("a", "abs:href", Type.RELATIVE_LINK_TEXT) {
         },
         PARAGRAPH("p", "data-timestamp", Type.ATTRIBUTE_ONLY) {
         },
         ENTRY_META("div", "entry-meta", Type.TEXT) {
         },
-        SPAN_TEXT("span", "updated", Type.TEXT) {
+        SPAN_TEXT("span", "updated", Type.PREV_TEXT) {
         },
         SPAN_TITLE("span", "title", Type.ATTRIBUTE) {
         },
         PUBLISHED("abbr", "title", Type.ATTRIBUTE) {
         },
-        TITLE_LINK("h1[class*=title]>a[href], h2[class*=title]>a[href], h3[class*=title] > a[href], h4[class*=title] > a[href]", "abs:href", Type.LAST_RESORT) {
-        },
         DATE_HEADER("h2", "date-header", Type.PARENT) {
-        };
+        },
+        RELATIVE_SPAN_TEXT("span", "[class*=tim]", Type.RELATIVE_TEXT);
 
         private final String tag;
         private final String attr;
@@ -61,11 +70,7 @@ public class TimeFilter implements ElementFilter<TimeElement> {
         @Override
         public Element apply(Element element) {
             String timeString = this.type.get(this, element);
-
-            if (ParseTime.isParseAble(timeString)) {
-                return PostFormat.timeElement(timeString);
-            }
-            return null;
+            return getElement(timeString);
         }
 
         private enum Type {
@@ -86,22 +91,33 @@ public class TimeFilter implements ElementFilter<TimeElement> {
                 @Override
                 String get(Time time, Element element) {
                     Elements elements = element.select(time.tag + "[" + time.attr + "]");
-                    if (elements.isEmpty()) {
+                    if (elements.isEmpty() || elements.size() != 1) {
                         return null;
+                    } else {
+                        return elements.get(0).attr(time.attr);
                     }
-
-//                    System.out.println("TIME: " + elements.get(0));
-                    // TODO: 14.09.2017 sth was wrong here, copy of LINK_TEXT
-                    return null;
                 }
             },
-            LINK_TEXT {
+            RELATIVE_LINK_TEXT {
                 @Override
                 String get(Time time, Element element) {
                     Elements elements = element.getElementsByAttribute(time.attr);
 
                     for (Element element1 : elements) {
-                        if (element1.text().matches(".*[0-5]?\\d\\s(minute(s)?|second(s)?|hour(s)?|day(s)?|week(s)?|month(s)?|year(s)?)\\sago")) {
+                        if (ParseTime.hasRelative(element1.text())) {
+                            return element1.text();
+                        }
+                    }
+                    return null;
+                }
+            },
+            RELATIVE_TEXT {
+                @Override
+                String get(Time time, Element element) {
+                    Elements elements = element.select(time.attr);
+
+                    for (Element element1 : elements) {
+                        if (ParseTime.hasRelative(element1.text())) {
                             return element1.text();
                         }
                     }
@@ -119,30 +135,6 @@ public class TimeFilter implements ElementFilter<TimeElement> {
                     return timeString;
                 }
             },
-            LAST_RESORT {
-                @Override
-                String get(Time time, Element element) {
-                    String timeString = null;
-
-                    Elements postContentLinkElements = element.select(time.tag);
-                    if (!postContentLinkElements.isEmpty()) {
-                        String postContentLink = postContentLinkElements.get(0).attr(time.attr);
-
-                        if (!postContentLink.isEmpty()) {
-                            try {
-                                Document document = Jsoup.connect(postContentLink).get();
-                                Elements elements = document.getElementsByAttributeValueContaining("property", "article:published_time");
-                                if (!elements.isEmpty()) {
-                                    timeString = elements.get(0).attr("content");
-                                }
-                            } catch (IOException ignored) {
-                                // TODO: 11.09.2017 do sth here
-                            }
-                        }
-                    }
-                    return timeString;
-                }
-            },
             PARENT {
                 @Override
                 String get(Time time, Element element) {
@@ -153,6 +145,20 @@ public class TimeFilter implements ElementFilter<TimeElement> {
                         return null;
                     }
                 }
+            }, PREV_TEXT {
+                @Override
+                String get(Time time, Element element) {
+                    String timeString = TEXT.get(time, element);
+
+                    if (timeString.isEmpty()) {
+                        Element previous = element.parent().previousElementSibling();
+                        if (previous != null && previous.classNames().contains("post-outer")) {
+                            return (get(time, previous));
+                        }
+                    }
+
+                    return timeString;
+                }
             };
 
             abstract String get(Time time, Element element);
@@ -160,5 +166,58 @@ public class TimeFilter implements ElementFilter<TimeElement> {
 
         }
 
+    }
+
+    public static class LINK_PAGE implements TimeElement {
+        TitleElement titleElement = null;
+
+        public LINK_PAGE(TitleElement titleElement) {
+            this.titleElement = titleElement;
+        }
+
+        @Override
+        public Element apply(Element element) {
+            if (titleElement == null) {
+                return null;
+            } else {
+                String link = PostFormat.getLink(titleElement.apply(element));
+                return getTime(link);
+            }
+        }
+
+        Element getTime(String link) {
+            Element element = null;
+
+            if (link == null) {
+                return null;
+            }
+
+            try {
+                Document document = Jsoup.connect(link).get();
+                element = getByProperty(document);
+
+                if (element == null) {
+                    element = getByDateTime(document);
+                }
+            } catch (IOException ignored) {
+                System.out.println("error occurred");
+                // TODO: 11.09.2017 do sth here
+            }
+            return element;
+        }
+
+        private Element getByDateTime(Document document) {
+            Document doc = PostScraper.cleanDoc(document);
+            return Time.DATETIME.apply(doc.body());
+        }
+
+        private Element getByProperty(Document document) {
+            Elements elements = document.getElementsByAttributeValueContaining("property", "article:published_time");
+            String timeString = null;
+            if (!elements.isEmpty()) {
+                timeString = elements.get(0).attr("content");
+            }
+            return getElement(timeString);
+        }
     }
 }

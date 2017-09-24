@@ -45,22 +45,9 @@ public class Source extends EnterpriseEntry implements DataBase, Comparable<Sour
     private final ObservableSet<Sourceable> creationEntries = FXCollections.observableSet();
     private final Set<Sourceable> deletedEntries = new HashSet<>();
 
-    private static int counter = 0;
     private int id;
 
-
     private static Cache<String, Source> sourceCache = new Cache<>();
-
-    /**
-     * The constructor of {@code Source}.
-     *
-     * @param url  the url of the source
-     * @param type the type of the source
-     * @throws URISyntaxException if url is invalid
-     */
-    private Source(String url, SourceType type) throws URISyntaxException {
-        this(url, type, Default.VALUE);
-    }
 
     /**
      * The constructor of {@code Source}.
@@ -258,12 +245,13 @@ public class Source extends EnterpriseEntry implements DataBase, Comparable<Sour
         return this.getClass().getSimpleName() + "@" + sourceName.get() + "@" + sourceType.name() + "@" + creationEntries.size();
     }
 
+    /**
+     * Returns the {@code PostConfigs} of this Source.
+     *
+     * @return the configs of this source
+     */
     public PostConfigs getConfigs() {
         return configs;
-    }
-
-    public void setConfigs(PostConfigs configs) {
-        this.configs = configs;
     }
 
     /**

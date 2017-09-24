@@ -16,7 +16,7 @@ import static java.util.regex.Pattern.compile;
 public class ParseTime {
 
 
-    private final static String IS_RELATIVE = "[0-5]?\\d\\s(minute(s)?|second(s)?|hour(s)?|day(s)?|week(s)?|month(s)?|year(s)?)\\sago";
+    private final static String IS_RELATIVE = "[0-5]?\\d\\s(minute(s)?|second(s)?|hour(s)?|day(s)?|week(s)?|month(s)?|year(s)?)\\sago|just now";
     private final static String HAS_DATE = "(?=^\\d{4})((\\d{4}\\W[0-1]?\\d\\W[0-3]?\\d))|(?=[a-zA-z]{3,10})([a-zA-z]{3,10}\\s[0-3]?\\d,\\s\\d{4})|(?=[0-3]?\\d\\s[a-zA-z]{3,10})([0-3]?\\d\\s[a-zA-z]{3,10}\\s\\d{4})|([0-3]?\\d\\W[0-1]?\\d\\W\\d{4})";
     private final static String HAS_TIME = "[0-2]?\\d:[0-5]\\d(:[0-5]\\d)?((.?((am)|(pm))).?)?((.?(\\+\\d{2}:00).?)|(.?((GMT)|(UTC)).?-\\d{1,2}).?)?";
     private final static String MMMM_DD_YYYY = "[a-zA-z]{3,10}\\s[0-3]?\\d,\\s\\d{4}";
@@ -64,11 +64,11 @@ public class ParseTime {
         return patternAvailable(s, HAS_TIME);
     }
 
-    public static boolean hasDate(String s) {
+    private static boolean hasDate(String s) {
         return patternAvailable(s, HAS_DATE);
     }
 
-    private static boolean hasRelative(String s) {
+    public static boolean hasRelative(String s) {
         return patternAvailable(s, IS_RELATIVE);
     }
 
@@ -80,6 +80,10 @@ public class ParseTime {
         LocalDateTime result;
         LocalDateTime now = LocalDateTime.now();
         String relative = patternFind(s, IS_RELATIVE);
+
+        if (relative.contains("just now")) {
+            return now;
+        }
 
         int number = Integer.parseInt(patternFind(relative, "[0-5]?\\d"));
         if (relative.contains("second")) {

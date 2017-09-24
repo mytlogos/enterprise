@@ -9,10 +9,10 @@ import scrape.sources.Post;
 import scrape.sources.Source;
 import scrape.sources.SourceList;
 import scrape.sources.novels.NovelPosts;
+import scrape.sources.novels.PostScraper;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -102,7 +102,7 @@ public class ScheduledScraper extends ScheduledService<List<Post>> {
              * @param postList list of {@link Post}s, to operate on
              */
             private void searchForSpecificPosts(List<Post> postList) {
-                NovelPosts host = new NovelPosts();
+                PostScraper host = new PostScraper();
 
                 for (List<String> keyWordList : keySources.keySet()) {
 
@@ -113,20 +113,19 @@ public class ScheduledScraper extends ScheduledService<List<Post>> {
                         try {
                             updateMessage("Lade Posts von " + source.getSourceName());
                             //loads the HTTP document of the given URL
-                            host.load(source.getUrl());
+                            host.load(source);
 
                             //searches for the keyWord in Posts, wraps the content in Post objects and gathers them
                             for (String keyWord : keyWordList) {
 
-                                List<Post> posts1 = host.getSpecificPosts(keyWord);
-
+                                List<Post> posts1 = host.getPosts(keyWord);
                                 postList.addAll(posts1);
                             }
                         } catch (MalformedURLException | IllegalArgumentException e) {
                             // TODO: 21.08.2017 look if this catch clause is really necessary
                             logger.log(Level.WARNING, "Searching for specific Posts failed", e);
 
-                        } catch (IOException | URISyntaxException e) {
+                        } catch (IOException e) {
                             logger.log(Level.WARNING, "Failed in getting the HTTP Document", e);
                         }
 
@@ -150,13 +149,14 @@ public class ScheduledScraper extends ScheduledService<List<Post>> {
              * @param postList list of {@link Post}s, to be operated on
              */
             private void searchForPosts(List<Post> postList) {
-                NovelPosts host = new NovelPosts();
+                PostScraper host;
 
                 for (SourceList noKeySource : noKeySources) {
                     for (Source source : noKeySource) {
                         updateMessage("Lade Posts von " + source.getSourceName());
                         try {
-                            List<Post> posts1 = host.getPosts(source);
+                            host = PostScraper.scraper(source);
+                            List<Post> posts1 = host.getPosts();
 
 
                             postList.addAll(posts1);
@@ -164,7 +164,7 @@ public class ScheduledScraper extends ScheduledService<List<Post>> {
                             // TODO: 21.08.2017 look if this catch clause is really necessary
                             logger.log(Level.WARNING, "Searching for specific Posts failed", e);
 
-                        } catch (IOException | URISyntaxException e) {
+                        } catch (IOException e) {
                             logger.log(Level.WARNING, "Failed in getting the html Document", e);
                         }
                         progress++;

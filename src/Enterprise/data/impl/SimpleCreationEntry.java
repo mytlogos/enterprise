@@ -5,8 +5,6 @@ import Enterprise.data.intface.*;
 import Enterprise.modules.BasicModules;
 import javafx.beans.property.BooleanProperty;
 
-import java.util.logging.Level;
-
 /**
  * Simple container class, representing an Entry of an Entertainment-element like a book, with user interactions,
  * meaning, in the context of the user processing the creation.
@@ -47,9 +45,7 @@ public class SimpleCreationEntry extends AbstractCreationEntry implements Creati
             message = message + "creation is null, ";
         }
         if (!message.isEmpty()) {
-            IllegalArgumentException exception = new IllegalArgumentException(message);
-            logger.log(Level.WARNING, "object creation failed", exception);
-            throw exception;
+            throw new IllegalArgumentException(message);
         }
     }
 

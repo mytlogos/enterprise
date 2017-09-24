@@ -7,6 +7,7 @@ import scrape.sources.PostConfigs;
 import scrape.sources.novels.strategies.intface.*;
 import scrape.sources.novels.strategies.intface.impl.*;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -26,6 +27,8 @@ public class PostConfigsSetter {
         PostConfigsSetter setter = new PostConfigsSetter(configs);
 
         PostsWrapper wrapper = PostsWrapper.tryAll(document);
+        configs.setWrapper(wrapper);
+
         Element body = wrapper.apply(document);
 
         PostElement postFilter = setter.getPostFilter(body);
@@ -34,17 +37,24 @@ public class PostConfigsSetter {
     }
 
     private boolean validPosts(Elements postElements) {
-        if (postElements == null || postElements.isEmpty()) {
-            return false;
-        }
-
         TitleElement titleElement = tryAll(postElements, new TitlesFilter().getFilter());
         TimeElement timeElement = tryAll(postElements, new TimeFilter().getFilter());
 
-        System.out.println("TIME: " + timeElement);
-        System.out.println("TITLE:" + titleElement);
+        if (timeElement == null && titleElement != null) {
+            TimeFilter.LINK_PAGE linkPage = new TimeFilter.LINK_PAGE(titleElement);
+
+            List<TimeElement> list = new ArrayList<>();
+            list.add(linkPage);
+
+            timeElement = tryAll(postElements, list);
+        }
+
         if (timeElement != null && titleElement != null) {
-            return false;
+
+            configs.setTime(timeElement);
+            configs.setTitle(titleElement);
+
+            return true;
         } else {
             return false;
         }
@@ -58,9 +68,10 @@ public class PostConfigsSetter {
             for (PostElement filter : filters) {
                 Elements applied = filter.apply(element);
 
-                System.out.println("FILTER: " + filter);
-                if (validPosts(applied)) {
+                if (applied != null && !applied.isEmpty() && validPosts(applied)) {
                     setOptionalConfigs(applied);
+
+                    configs.setPosts(filter);
                     return filter;
                 }
             }
@@ -71,7 +82,11 @@ public class PostConfigsSetter {
     private void setOptionalConfigs(Elements applied) {
         ContentElement contentElement = tryAll(applied, new ContentFilter().getFilter());
         FooterElement footerElement = tryAll(applied, new FooterFilter().getFilter());
+
+        configs.setFooter(footerElement);
+        configs.setPostBody(contentElement);
     }
+
 
     private <E extends FilterElement> E tryAll(Elements elements, Collection<E> filters) {
         if (!elements.isEmpty() && filters != null && !filters.isEmpty()) {
@@ -97,6 +112,7 @@ public class PostConfigsSetter {
         }
         return filter;
     }
+
 
     private <E extends FilterElement> E getTitleFilter(Element element, Collection<E> filters) {
         Iterator<E> iterator = filters.iterator();

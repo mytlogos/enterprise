@@ -1,11 +1,8 @@
 package Enterprise.data;
 
 import Enterprise.data.intface.Entry;
-import Enterprise.misc.Log;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-
-import java.util.logging.Logger;
 
 /**
  * Basic implementation of {@code Entry}.
@@ -15,8 +12,7 @@ import java.util.logging.Logger;
  * data.
  */
 public abstract class EnterpriseEntry implements Entry {
-
-    protected Logger logger = Log.classLogger(this);
+//    protected Logger logger = Log.classLogger(this);
 
 
     private boolean dead = false;

@@ -8,7 +8,6 @@ import Enterprise.modules.BasicModules;
 import javafx.beans.property.BooleanProperty;
 
 import java.util.List;
-import java.util.logging.Level;
 
 /**
  * Simple Implementation of {@code SourceableEntry}.
@@ -197,9 +196,7 @@ public class SourceableEntryImpl extends AbstractCreationEntry implements Source
             message = message + "sourceable is null";
         }
         if (!message.isEmpty()) {
-            IllegalArgumentException exception = new IllegalArgumentException(message);
-            logger.log(Level.WARNING, "object creation failed", exception);
-            throw exception;
+            throw new IllegalArgumentException(message);
         }
     }
 

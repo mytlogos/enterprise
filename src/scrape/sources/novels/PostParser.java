@@ -4,40 +4,40 @@ import Enterprise.gui.general.PostList;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import scrape.sources.Post;
+import scrape.sources.Source;
+import scrape.sources.novels.strategies.PostFormat;
 
-import java.time.*;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
-import java.util.Arrays;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Locale;
-import java.util.regex.Pattern;
 
 /**
  * This class parses {@link Elements} to {@link Post}.
  */
-public class PostParser {
-
-    List<Post> toPosts(Elements postElements) {
+class PostParser {
+    List<Post> toPosts(Elements postElements, Source source) {
         List<Post> posts = new PostList();
         for (Element postElement : postElements) {
-            Post post = new Post();
 
-            setPostTitle(post, postElement);
-            setPostContent(post, postElement);
-            setPostFooter(post,postElement);
-            setPostTime(post, postElement);
+            String link = PostFormat.getLink(postElement);
+            String title = PostFormat.getTitle(postElement);
 
+            String time = PostFormat.getTime(postElement);
+            LocalDateTime dateTime = ParseTime.parseTime(time);
+
+            Post post = new Post(source, title, dateTime, link);
             posts.add(post);
         }
+        Post post = posts.stream().max(Post::compareTo).orElse(null);
+        System.out.println("Newest Post: " + post);
+        source.putPost(null, post);
         return posts;
     }
 
-    private void setPostTitle(Post post, Element postElement) {
+    /*private void setPostTitle(Post post, Element postElement) {
         post.setTitle(postElement.getElementsByClass("entry-title").text());
-    }
+    }*/
 
-    private void setPostContent(Post post, Element postElement) {
+    /*private void setPostContent(Post post, Element postElement) {
         Elements elements = postElement.getElementsByClass("entry-content");
 
         if (elements.isEmpty()) {
@@ -63,16 +63,16 @@ public class PostParser {
             elements1 = postElement.getElementsByClass("postmeta");
         }
         post.setFooter(elements1.text());
-    }
+    }*/
 
-    private void setPostTime(Post post, Element element) {
+    /*private void setPostTime(Post post, Element element) {
         LocalDateTime dateTime = getTime(element);
         if (dateTime != null) {
             post.setTimeStamp(getTime(element));
         }
-    }
+    }*/
 
-    private LocalDateTime getTime(Element elements) {
+    /*private LocalDateTime getTime(Element elements) {
         LocalDateTime localDateTime;
 
         Elements updatedTimes = getTimeByUpdatedClass(elements);
@@ -115,9 +115,9 @@ public class PostParser {
         }
 
         return localDateTime;
-    }
+    }*/
 
-    private final String[] updateClasses = new String[]{
+    /*private final String[] updateClasses = new String[]{
             "updated",
             "entry-date updated",
     };
@@ -129,10 +129,10 @@ public class PostParser {
             "timeago",
             "time published updated",
             "entry-meta"
-    };
+    };*/
 
 
-    private Elements getTimeByUpdatedClass(Element element) {
+    /*private Elements getTimeByUpdatedClass(Element element) {
         Elements timeElements = new Elements();
 
         for (String timeClass : updateClasses) {
@@ -236,5 +236,5 @@ public class PostParser {
             }
         }
         return dateTime;
-    }
+    }*/
 }

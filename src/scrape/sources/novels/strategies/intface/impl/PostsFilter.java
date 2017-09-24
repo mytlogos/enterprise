@@ -30,13 +30,15 @@ public class PostsFilter implements ElementFilter {
         },
         SHADOW("[class=shadow]") {
         },
-        ROW(".row") {
+        ROW(".chapter, .announcements") {
         },
         ARTICLE("article") {
         },
         HENTRY(".hentry") {
         },
         POST(".post") {
+        },
+        POST_EX_ASIDE(".post:not(.format-aside)") {
         };
 
         private final String selector;

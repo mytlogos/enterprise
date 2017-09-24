@@ -16,7 +16,6 @@ import javafx.beans.property.StringProperty;
 import scrape.sources.SourceList;
 
 import java.util.List;
-import java.util.logging.Level;
 
 /**
  * Implementation of Sourceable
@@ -88,9 +87,7 @@ public class SimpleSourceable extends EnterpriseEntry implements Sourceable{
             message = message + "translator is null";
         }
         if (!message.isEmpty()) {
-            IllegalArgumentException exception = new IllegalArgumentException(message);
-            logger.log(Level.WARNING, "object creation failed", exception);
-            throw exception;
+            throw new IllegalArgumentException(message);
         }
     }
 

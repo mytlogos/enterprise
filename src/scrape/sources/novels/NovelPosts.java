@@ -48,7 +48,7 @@ public class NovelPosts {
 
         init(source.getUrl());
         Elements postElements = getPostElements();
-        return new PostParser().toPosts(postElements);
+        return new PostParser().toPosts(postElements, source);
     }
 
     /**
@@ -65,7 +65,7 @@ public class NovelPosts {
         Objects.requireNonNull(doc, "no document available");
 
         Elements postElements = getPostElements();
-        return new PostParser().toPosts(postElements);
+        return new PostParser().toPosts(postElements, source);
     }
 
     /**
@@ -111,7 +111,7 @@ public class NovelPosts {
 
         Elements postElements = getPostElements();
         postElements = searchPosts(match, postElements);
-        return new PostParser().toPosts(postElements);
+        return new PostParser().toPosts(postElements, source);
     }
 
     /**

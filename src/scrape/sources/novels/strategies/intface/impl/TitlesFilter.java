@@ -2,6 +2,7 @@ package scrape.sources.novels.strategies.intface.impl;
 
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import scrape.sources.novels.strategies.PostFormat;
 import scrape.sources.novels.strategies.intface.ElementFilter;
 import scrape.sources.novels.strategies.intface.TitleElement;
 
@@ -32,8 +33,9 @@ public class TitlesFilter implements ElementFilter<TitleElement> {
         },
         TITLE(".title", Type.INNER_LINK) {
         },
-        OUTER_ENTRY_TITLE("a > h1.entry-title", Type.OUTER_LINK) {
-        },
+        /*OUTER_ENTRY_TITLE("a > h1.entry-title", Type.OUTER_LINK) {
+        },*/
+        OUTER_ENTRY_TITLE("a .entry-title", Type.PARENT_LINK),
         POST_LINK("a:contains(permalink)", "h2", Type.PERMALINK) {
         },
         LINK_CONTAINS("h3 > a[href*=news], p > a[href*=post]", Type.INNER_LINK) {
@@ -42,8 +44,8 @@ public class TitlesFilter implements ElementFilter<TitleElement> {
         },
         LINK("a", Type.LINK_TEXT) {
         },
-        PARENT_LINK(".h-recent-posts", Type.PARENT_LINK) {
-        };
+        RECENT_POSTS(".h-recent-posts", Type.PARENT_LINK) {
+        },;
 
 
         private final Type type;
@@ -74,14 +76,7 @@ public class TitlesFilter implements ElementFilter<TitleElement> {
         }
 
         private static Element getElement(String title, String link) {
-            if (!link.isEmpty() && !title.isEmpty()) {
-
-                Element newElement = new Element("a");
-                newElement.attr("href", link);
-                newElement.text(title);
-                return newElement;
-            }
-            return null;
+            return PostFormat.titleElement(title, link);
         }
 
         @Override
@@ -92,7 +87,7 @@ public class TitlesFilter implements ElementFilter<TitleElement> {
         public enum Mixture implements TitleElement {
             ENTRY_AND_LINK(ENTRY_TITLE, LINK) {
             },
-            ENTRY_AND_PARENT(ENTRY_TITLE, PARENT_LINK);
+            ENTRY_AND_PARENT(ENTRY_TITLE, RECENT_POSTS);
 
             Titles[] mixture = new Titles[0];
 
@@ -113,49 +108,6 @@ public class TitlesFilter implements ElementFilter<TitleElement> {
             }
         }
 
-        /*public static TitleElement tryAll(Elements elements) {
-            if (!elements.isEmpty()) {
-                Collection<TitleElement> filters = getFilter();
-                Element first = elements.get(0);
-                return tryFilter(elements, first, filters);
-            } else {
-                return null;
-            }
-        }
-
-        private static TitleElement tryFilter(Elements elements, Element first, Collection<TitleElement> filters) {
-            TitleElement filter = getTitleFilter(first, filters);
-
-            if (filter != null) {
-                for (Element element : elements) {
-                    Element titleLink = filter.apply(element);
-    //                System.out.println("MODE " + filter + " RESULT " + titleLink);
-                    if (titleLink == null) {
-
-                        filters.remove(filter);
-                        return tryFilter(elements, first, filters);
-                    }
-                }
-            }
-            return filter;
-        }
-
-        private static TitleElement getTitleFilter(Element element, Collection<TitleElement> filters) {
-            //most other loops throw either index or concurrentModification exception
-            Iterator<TitleElement> iterator = filters.iterator();
-            while (iterator.hasNext()) {
-                TitleElement filter = iterator.next();
-                Element titleLink = filter.apply(element);
-
-                if (titleLink != null) {
-                    return filter;
-                } else {
-                    iterator.remove();
-                }
-            }
-            return null;
-        }*/
-
         private enum Type {
             INNER_LINK {
                 @Override
@@ -167,7 +119,7 @@ public class TitlesFilter implements ElementFilter<TitleElement> {
 
                             if (byTag.size() == 1) {
                                 String link = byTag.get(0).attr("abs:href");
-                                String titleString = element.text();
+                                String titleString = byTag.get(0).text();
 
                                 return getElement(titleString, link);
                             }
@@ -178,7 +130,7 @@ public class TitlesFilter implements ElementFilter<TitleElement> {
 
                             if (entry_format.size() == 1) {
                                 String link = entry_format.get(0).attr("abs:href");
-                                String titleString = element.text();
+                                String titleString = entry_format.get(0).text();
 
                                 return getElement(titleString, link);
                             }
@@ -222,11 +174,11 @@ public class TitlesFilter implements ElementFilter<TitleElement> {
                 Element get(Titles title, Element element) {
                     Elements elements = element.select(title.tag);
                     if (elements.size() == 1) {
-                        elements.select("span, em").remove();
-                        Element node = elements.get(0);
+                        Element copy = elements.get(0).clone();
+                        copy.select("span, em").remove();
 
-                        String titleString = node.text();
-                        String link = node.attr("abs:href");
+                        String titleString = copy.text();
+                        String link = copy.attr("abs:href");
 
                         return getElement(titleString, link);
                     }

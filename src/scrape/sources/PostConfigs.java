@@ -1,7 +1,6 @@
 package scrape.sources;
 
 import scrape.sources.novels.Feed;
-import scrape.sources.novels.strategies.Archive;
 import scrape.sources.novels.strategies.PostsWrapper;
 import scrape.sources.novels.strategies.intface.*;
 
@@ -12,7 +11,7 @@ public class PostConfigs {
     private boolean init = false;
     private boolean isArchive = false;
 
-    private Archive archive = null;
+    private ArchiveSearcher archive = null;
     private PostsWrapper body = null;
     private Feed feed = null;
 
@@ -34,21 +33,21 @@ public class PostConfigs {
         return isArchive;
     }
 
-    public Archive getArchive() {
+    public ArchiveSearcher getArchive() {
         return archive;
     }
 
-    public void setArchive(Archive archive) {
+    public void setArchive(ArchiveSearcher archive) {
         init();
         isArchive = archive != null;
         this.archive = archive;
     }
 
-    public PostsWrapper getBody() {
+    public PostsWrapper getWrapper() {
         return body;
     }
 
-    public void setBody(PostsWrapper body) {
+    public void setWrapper(PostsWrapper body) {
         init();
         this.body = body;
     }
@@ -102,5 +101,16 @@ public class PostConfigs {
 
     public void setFooter(FooterElement footer) {
         this.footer = footer;
+    }
+
+    @Override
+    public String toString() {
+        return "Archive: " + archive + System.lineSeparator() +
+                "Wrapper: " + body + System.lineSeparator() +
+                "Post: " + posts + System.lineSeparator() +
+                "Title: " + title + System.lineSeparator() +
+                "Time: " + time + System.lineSeparator() +
+                "Content: " + postBody + System.lineSeparator() +
+                "Footer: " + footer;
     }
 }

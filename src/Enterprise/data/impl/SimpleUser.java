@@ -11,7 +11,6 @@ import Enterprise.misc.SQLUpdate;
 import javafx.beans.property.*;
 
 import java.util.List;
-import java.util.logging.Level;
 
 /**
  * Implementation of User
@@ -126,9 +125,7 @@ public class SimpleUser extends EnterpriseEntry implements User{
             message = message + "keyWords is null";
         }
         if (!message.isEmpty()) {
-            IllegalArgumentException exception = new IllegalArgumentException(message);
-            logger.log(Level.WARNING, "object creation failed", exception);
-            throw exception;
+            throw new IllegalArgumentException(message);
         }
     }
 
