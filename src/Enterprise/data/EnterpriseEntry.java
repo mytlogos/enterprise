@@ -12,9 +12,6 @@ import javafx.beans.property.SimpleBooleanProperty;
  * data.
  */
 public abstract class EnterpriseEntry implements Entry {
-//    protected Logger logger = Log.classLogger(this);
-
-
     private boolean dead = false;
     protected boolean newEntry = false;
     protected BooleanProperty updated = new SimpleBooleanProperty(false);
@@ -28,40 +25,46 @@ public abstract class EnterpriseEntry implements Entry {
     }
 
     @Override
-    public void setDead() {
+    final public void setDead() {
         this.dead = true;
     }
 
     @Override
-    public void setEntryNew() {
+    final public void setEntryNew() {
         this.newEntry = true;
     }
 
     @Override
-    public void setEntryOld() {
+    final public void setEntryOld() {
         this.newEntry = false;
     }
 
     @Override
-    public boolean isDead() {
+    final public boolean isDead() {
         return dead;
     }
 
     @Override
-    public boolean isNewEntry() {
+    final public boolean isNewEntry() {
         return newEntry;
     }
 
     @Override
-    public void setAlive() {
+    final public void setAlive() {
         dead = false;
     }
 
     /**
-     * binds an BooleanProperty field named "updated".
+     * Binds an BooleanProperty field named "updated".
      * It is important to call this method in the constructors
      * of the varying implementations, because the update function
      * of the DAO classes need an up-to-date indicator of the inner state.
      */
     protected abstract void bindUpdated();
+
+    @Override
+    public void fromDataBase() {
+        setUpdated();
+        setEntryOld();
+    }
 }

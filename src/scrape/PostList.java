@@ -1,14 +1,15 @@
-package Enterprise.gui.general;
+package scrape;
 
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
-import scrape.sources.Post;
+import javafx.collections.ObservableList;
 
 import java.util.Collection;
 import java.util.List;
 
 /**
- * This class is an extension {@code SimpleListProperty} to display {@link Post}s in real-Time.
+ * This class is an extension of {@code SimpleListProperty} to display {@link Post}s in real-Time.
  */
 public class PostList extends SimpleListProperty<Post> {
 
@@ -31,7 +32,16 @@ public class PostList extends SimpleListProperty<Post> {
         super(FXCollections.observableArrayList(list));
     }
 
-    @Override
+    /**
+     * Binds the list of this {@code PostList} to the parameter.
+     *
+     * @param listObjectProperty listProperty to bind the list of this to
+     */
+    public void bindToList(ObjectProperty<ObservableList<Post>> listObjectProperty) {
+        listObjectProperty.bind(this);
+    }
+
+
     public boolean add(Post element) {
         boolean added = false;
         if (!this.contains(element)) {
@@ -41,14 +51,12 @@ public class PostList extends SimpleListProperty<Post> {
     }
 
 
-    @Override
     public void add(int index, Post element) {
         if (!this.contains(element)) {
             super.add(index, element);
         }
     }
 
-    @Override
     public boolean addAll(int index, Collection<? extends Post> c) {
         boolean addedAll = false;
         if (!this.containsAll(c)) {
@@ -57,9 +65,9 @@ public class PostList extends SimpleListProperty<Post> {
         return addedAll;
     }
 
-    @Override
     public boolean addAll(Collection<? extends Post> c) {
-        removeAll(c);
+        this.removeAll(c);
         return super.addAll(c);
     }
+
 }

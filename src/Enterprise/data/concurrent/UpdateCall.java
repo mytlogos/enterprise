@@ -1,49 +1,49 @@
 package Enterprise.data.concurrent;
 
 import Enterprise.data.OpEntryCarrier;
-import Enterprise.data.database.CreationEntryTable;
-import Enterprise.data.intface.CreationEntry;
-import Enterprise.misc.Log;
+import Enterprise.data.database.*;
+import Enterprise.data.intface.*;
+import scrape.sources.Source;
 
-import java.sql.SQLException;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.logging.Logger;
 
 /**
- * Service class responsible for updating Entries in the underlying DataBase, before the program terminates.
+ * Service class responsible for updating Entries in the underlying DataEntry, before the program terminates.
  * Gets called from {@link OnCloseRun}.
  */
 public class UpdateCall implements Callable<Boolean> {
-
-    private Logger logger = Log.packageLogger(this);
 
     @Override
     public Boolean call() throws Exception {
         Thread.currentThread().setName("UpdateEntries");
 
-        Boolean updated;
-        //gets the updates Entries
-        List<CreationEntry> entries = OpEntryCarrier.getInstance().getUpdateEntries();
-        //updates the Entries in the database
-        updated = CreationEntryTable.getInstance().updateEntries(entries);
+        List<Creation> creations = OpEntryCarrier.getInstance().getUpdateCreations();
+        List<Creator> creators = OpEntryCarrier.getInstance().getUpdateCreators();
+        List<User> users = OpEntryCarrier.getInstance().getUpdateUsers();
+        List<Sourceable> sourceables = OpEntryCarrier.getInstance().getUpdateSourceable();
+        List<Source> sources = OpEntryCarrier.getInstance().getUpdateSources();
 
+        boolean sourceUpdated = updateTable(sources, SourceTable.getInstance());
+        boolean creatorsUpdated = updateTable(creators, CreatorTable.getInstance());
+        boolean creationsUpdated = updateTable(creations, CreationTable.getInstance());
+        boolean usersUpdated = updateTable(users, UserTable.getInstance());
+        boolean sourceablesUpdated = updateTable(sourceables, SourceableTable.getInstance());
+        boolean sourceRelationUpdated = (!sourceables.isEmpty() && EntrySourceTable.getInstance().updateEntries(sourceables));
 
         System.out.println("UpdateCall wurde ausgeführt!");
-        return updated;
+        return sourceUpdated ||
+                creationsUpdated ||
+                creatorsUpdated ||
+                usersUpdated ||
+                sourceablesUpdated ||
+                sourceRelationUpdated
+                ;
     }
 
-    @Deprecated
-    private Boolean updateTable() throws SQLException {
-        Boolean updated;
-
-        List<CreationEntry> entries = OpEntryCarrier.getInstance().getUpdateEntries();
-        for (CreationEntry entry : entries) {
-            CreationEntryTable.getInstance().updateEntry(entry);
-        }
-        updated = CreationEntryTable.getInstance().updateEntries(entries);
-
-        return updated;
+    private <E extends DataEntry> boolean updateTable(Collection<E> entries, AbstractDataTable<E> dataTable) {
+        return !entries.isEmpty() && dataTable.updateEntries(entries);
     }
 
 }

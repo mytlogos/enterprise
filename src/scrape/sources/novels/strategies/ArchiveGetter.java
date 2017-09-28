@@ -11,10 +11,7 @@ import scrape.sources.novels.strategies.intface.impl.PostsFilter;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Level;
@@ -34,6 +31,10 @@ public class ArchiveGetter {
      */
     public static boolean hasArchive(Document doc) {
         return !getArchiveElements(doc).isEmpty() || validArchive(checkWithLink(doc.location(), 0, 12));
+    }
+
+    public static List<ArchiveSearcher> getFilter() {
+        return new ArrayList<>(Arrays.asList(ArchiveStrategy.values()));
     }
 
     /**

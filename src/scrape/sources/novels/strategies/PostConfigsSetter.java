@@ -33,6 +33,7 @@ public class PostConfigsSetter {
 
         PostElement postFilter = setter.getPostFilter(body);
 
+        System.out.println("Configs:\n" + configs);
         return postFilter != null;
     }
 

@@ -4,11 +4,8 @@ import Enterprise.data.database.CreationEntryTable;
 import Enterprise.data.intface.CreationEntry;
 import Enterprise.misc.Log;
 
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -21,22 +18,17 @@ public class GetCall implements Callable<List<? extends CreationEntry>> {
     public List<? extends CreationEntry> call() throws Exception {
         Thread.currentThread().setName("GetData");
 
-        List<? extends CreationEntry> creationLists = new ArrayList<>();
+        List<? extends CreationEntry> creationLists;
 
         CreationEntryTable entryTable;
-        try {
-            entryTable = new CreationEntryTable();
+        entryTable = CreationEntryTable.getInstance();
 
-            //checks if table exists
-            if (entryTable.tableExists()) {
-                creationLists = entryTable.getEntries();
-            } else {
-                entryTable.createTable();
-                creationLists = entryTable.getEntries();
-            }
-        } catch (SQLException e) {
-            logger.log(Level.SEVERE, "Service could not get Data from Database", e);
-            e.printStackTrace();
+        //checks if table exists
+        if (entryTable.tableExists()) {
+            creationLists = entryTable.getEntries();
+        } else {
+            entryTable.createTable();
+            creationLists = entryTable.getEntries();
         }
 
         return creationLists;

@@ -2,16 +2,14 @@ package Enterprise.data.concurrent;
 
 import Enterprise.data.OpEntryCarrier;
 import Enterprise.data.database.CreationEntryTable;
-import Enterprise.data.intface.CreationEntry;
 import Enterprise.misc.Log;
 
-import java.sql.SQLException;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Service class responsible for adding new Entries to the DataBase.
+ * Service class responsible for adding new Entries to the DataEntry.
  * // FIXME: 02.09.2017 returns false even though sth was added
  */
 public class AddCall implements Callable<Boolean> {
@@ -33,28 +31,22 @@ public class AddCall implements Callable<Boolean> {
      */
     private boolean addDataToDB() {
         boolean added = false;
-        try {
-            CreationEntryTable table = new CreationEntryTable();
-            if (table.tableExists()) {
-                for (CreationEntry entry : OpEntryCarrier.getInstance().getNewEntries()) {
-                    if (entry.isNewEntry()) {
-                        added = table.insert(entry);
-                    }
-                }
-                logger.log(Level.INFO, "AddCall was successful");
-            } else {
-                counter++;
-                int maxTries = 10;
-                if (counter <= maxTries) {
-                    table.createTable();
-                    addDataToDB();
-                } else {
-                    added = false;
-                }
+        CreationEntryTable table = CreationEntryTable.getInstance();
+        if (table.tableExists()) {
+            added = table.insert(OpEntryCarrier.getInstance().getNewEntries());
+            if (added) {
+                OpEntryCarrier.getInstance().clearNewEntries();
             }
-        } catch (SQLException e) {
-            logger.log(Level.SEVERE, "Adding Operation failed", e);
-            e.printStackTrace();
+            logger.log(Level.INFO, "AddCall was successful");
+        } else {
+            counter++;
+            int maxTries = 10;
+            if (counter <= maxTries) {
+                table.createTable();
+                addDataToDB();
+            } else {
+                added = false;
+            }
         }
         logger.log(Level.INFO, "Addcall tried: " + counter + " times");
         return added;

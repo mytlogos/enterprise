@@ -1,7 +1,5 @@
 package Enterprise.data.intface;
 
-import javafx.beans.property.BooleanProperty;
-
 /**
  * Represents an Entry.
  * It can be dead or alive, depending on the situation.
@@ -50,9 +48,8 @@ public interface Entry {
     boolean isUpdated();
 
     /**
-     * Required for {@code BooleanBinding} of the Container-Class.
-     *
-     * @return updatedProperty returns the internal updateProperty {@code Property}
+     * Sets the settings of the Entry, because it was created
+     * from an existing source (database) not user input.
      */
-    BooleanProperty updatedProperty();
+    void fromDataBase();
 }

@@ -2,12 +2,8 @@ package Enterprise.data.impl;
 
 import Enterprise.data.OpEntryCarrier;
 import Enterprise.data.intface.*;
-import Enterprise.gui.general.PostManager;
-import Enterprise.misc.SetList;
 import Enterprise.modules.BasicModules;
-import javafx.beans.property.BooleanProperty;
-
-import java.util.List;
+import scrape.PostManager;
 
 /**
  * Simple Implementation of {@code SourceableEntry}.
@@ -16,9 +12,6 @@ import java.util.List;
  */
 public class SourceableEntryImpl extends AbstractCreationEntry implements SourceableEntry {
     private Sourceable sourceable;
-
-
-    private static List<CreationEntry> deleted = new SetList<>();
 
     /**
      * The constructor of {@code SourceableEntryImpl}
@@ -46,32 +39,11 @@ public class SourceableEntryImpl extends AbstractCreationEntry implements Source
     }
 
     @Override
-    public boolean readyUserRemoval() {
-        boolean onlyReference = checkOnlyReference(user);
-        decrementReferences(user);
-        return onlyReference;
-    }
-
-    @Override
-    public boolean readyCreationRemoval() {
-        boolean onlyReference = checkOnlyReference(creation);
-        decrementReferences(creation);
-        return onlyReference;
-    }
-
-    @Override
-    public boolean readyCreatorRemoval() {
-        boolean onlyReference = checkOnlyReference(getCreator());
-        decrementReferences(getCreator());
-        return onlyReference;
-    }
-    @Override
     public boolean readySourceableRemoval() {
         boolean onlyReference = checkOnlyReference(sourceable);
         decrementReferences(sourceable);
 
-
-        PostManager.getInstance().removeSearchEntries(sourceable.getKeyWordList());
+        PostManager.getInstance().removeSearchEntries(this);
 
         sourceable.getSourceList().forEach(source -> {
             if (checkOnlyReference(source)) {
@@ -104,8 +76,9 @@ public class SourceableEntryImpl extends AbstractCreationEntry implements Source
     }
 
     @Override
-    public BooleanProperty updatedProperty() {
-        return updated;
+    public void fromDataBase() {
+        super.fromDataBase();
+        sourceable.fromDataBase();
     }
 
     @Override
@@ -157,9 +130,7 @@ public class SourceableEntryImpl extends AbstractCreationEntry implements Source
 
     @Override
     public void setUpdated() {
-        user.setUpdated();
-        creation.setUpdated();
-        getCreator().setUpdated();
+        super.setUpdated();
         sourceable.setUpdated();
     }
 
@@ -198,15 +169,5 @@ public class SourceableEntryImpl extends AbstractCreationEntry implements Source
         if (!message.isEmpty()) {
             throw new IllegalArgumentException(message);
         }
-    }
-
-    @Override
-    public int getId() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setId(int id, Table table) {
-        throw new UnsupportedOperationException();
     }
 }

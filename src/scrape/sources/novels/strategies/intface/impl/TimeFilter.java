@@ -219,5 +219,10 @@ public class TimeFilter implements ElementFilter<TimeElement> {
             }
             return getElement(timeString);
         }
+
+        @Override
+        public String toString() {
+            return "LINK_PAGE";
+        }
     }
 }

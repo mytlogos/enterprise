@@ -3,22 +3,19 @@ package Enterprise.data.concurrent;
 import Enterprise.data.OpEntryCarrier;
 import Enterprise.data.database.CreationEntryTable;
 import Enterprise.data.intface.CreationEntry;
-import Enterprise.misc.Log;
+import Enterprise.data.intface.SourceableEntry;
+import Enterprise.modules.BasicModules;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
 import javafx.util.Duration;
 
-import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Scheduled Service for periodically updating and adding new Entries to the underlying database.
  */
 public class UpdateService extends ScheduledService<Boolean> {
-
-    private Logger logger = Log.packageLogger(this);
 
     /**
      * The constructor of {@code UpdateService}.
@@ -33,9 +30,8 @@ public class UpdateService extends ScheduledService<Boolean> {
     protected Task<Boolean> createTask() {
         return new Task<Boolean>() {
 
-            List<CreationEntry> updateEntries = OpEntryCarrier.getInstance().getUpdateEntries();
-            List<CreationEntry> newEntries = OpEntryCarrier.getInstance().getNewEntries();
-
+            List<CreationEntry> updateEntries = new ArrayList<>();
+            List<CreationEntry> newEntries = new ArrayList<>();
 
             final int maxWork = newEntries.size() + updateEntries.size();
             int currentProgress = 1;
@@ -44,6 +40,19 @@ public class UpdateService extends ScheduledService<Boolean> {
             protected Boolean call() throws Exception {
                 Thread.currentThread().setName("Scheduled UpdateThread");
 
+                updateEntries = OpEntryCarrier.getInstance().getUpdateEntries();
+                newEntries = OpEntryCarrier.getInstance().getNewEntries();
+                BasicModules.ANIME.getEntries().forEach(entry -> {
+                    System.out.println("Entry: " + entry.isUpdated());
+                    System.out.println("Sourceable: " + ((SourceableEntry) entry).getSourceable().isUpdated());
+                    System.out.println("SourceList: " + ((SourceableEntry) entry).getSourceable().getSourceList().listChangedProperty().get());
+                    ((SourceableEntry) entry).getSourceable().getSourceList().forEach(source -> {
+                        System.out.println("Source: " + source + " is " + source.isUpdated());
+                        System.out.println("Source: " + source + " is  new?: " + source.isNewEntry());
+                        System.out.println("Configs is: " + source.getConfigs().isUpdated());
+                    });
+                    System.out.println();
+                });
 
                 updateDataFromDB(updateEntries);
                 addDataToDB(newEntries);
@@ -63,18 +72,12 @@ public class UpdateService extends ScheduledService<Boolean> {
              * @param entries entries to be updated in the database
              */
             private void updateDataFromDB(List<? extends CreationEntry> entries){
+                CreationEntryTable table = CreationEntryTable.getInstance();
+                for (CreationEntry entry : entries) {
+                    table.updateEntry(entry);
 
-                try {
-                    CreationEntryTable table = new CreationEntryTable();
-                    for (CreationEntry entry : entries) {
-                        table.updateEntry(entry);
-
-                        updateProgress(currentProgress, maxWork);
-                        currentProgress++;
-                    }
-                } catch (SQLException e) {
-                    logger.log(Level.SEVERE, "CreationEntryTable could not be instantiated", e);
-                    e.printStackTrace();
+                    updateProgress(currentProgress, maxWork);
+                    currentProgress++;
                 }
             }
 
@@ -84,17 +87,13 @@ public class UpdateService extends ScheduledService<Boolean> {
              * @param entries list of {@link CreationEntry}s
              */
             private void addDataToDB(List<? extends CreationEntry> entries) {
-                try {
-                    CreationEntryTable animeTable = new CreationEntryTable();
-                        for (CreationEntry entry : entries) {
-                                animeTable.insert(entry);
-                                updateProgress(currentProgress, maxWork);
-                                currentProgress++;
-                                System.out.println(currentProgress);
-                        }
-                } catch (SQLException e) {
-                    logger.log(Level.SEVERE, "CreationEntryTable could not be instantiated", e);
-                    e.printStackTrace();
+                CreationEntryTable animeTable = CreationEntryTable.getInstance();
+
+                for (CreationEntry entry : entries) {
+                    animeTable.insert(entry);
+                    updateProgress(currentProgress, maxWork);
+                    currentProgress++;
+                    System.out.println(currentProgress);
                 }
             }
         };

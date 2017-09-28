@@ -2,11 +2,13 @@ package scrape.sources.novels;
 
 import Enterprise.misc.Log;
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Attribute;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.safety.Whitelist;
 import org.jsoup.select.Elements;
-import scrape.sources.Post;
+import scrape.Post;
+import scrape.SearchEntry;
 import scrape.sources.PostConfigs;
 import scrape.sources.Source;
 import scrape.sources.novels.strategies.ArchiveGetter;
@@ -26,20 +28,30 @@ import java.util.logging.Level;
  *
  */
 public class PostScraper {
+    private SearchEntry search;
     private Source source;
     private PostConfigs postConfigs;
     private Document document;
+    private Elements formattedElements;
 
+    public static PostScraper scraper(SearchEntry searchEntry) throws IOException {
+        validate(searchEntry);
+        PostScraper scraper = new PostScraper();
+        scraper.init(searchEntry);
+        return scraper;
+    }
     public static PostScraper scraper(Source source) throws IOException {
-        Objects.requireNonNull(source, "null for source not allowed");
+        Objects.requireNonNull(source);
         PostScraper scraper = new PostScraper();
         scraper.init(source);
+        scraper.formattedElements = scraper.getAll();
         return scraper;
     }
 
-    public void load(Source source) throws IOException {
-        Objects.requireNonNull(source, "null for source not allowed");
-        init(source);
+    private static void validate(SearchEntry searchEntry) {
+        Objects.requireNonNull(searchEntry, "null for source not allowed");
+        Objects.requireNonNull(searchEntry.getKeyWords(), "null not allowed");
+        Objects.requireNonNull(searchEntry.getSource(), "null not allowed");
     }
 
     public static Document cleanDoc(Document document) {
@@ -62,77 +74,99 @@ public class PostScraper {
         document.getElementsByAttributeValueContaining("id", "share").remove();
 
         String cleaned = Jsoup.clean(document.outerHtml(), document.baseUri(), whitelist);
-
         return Jsoup.parse(cleaned, document.baseUri());
     }
 
-    public List<Post> getPosts(String match) {
-        Objects.requireNonNull(source);
-        Objects.requireNonNull(document);
-
-        if (match == null || match.isEmpty()) {
-            throw new IllegalArgumentException();
+    private static String abbreviate(String s) {
+        StringBuilder builder = new StringBuilder();
+        for (String s1 : s.split("[^a-zA-Z0-9öäü]")) {
+            if (!s1.isEmpty()) {
+                builder.append(s1.substring(0, 1).toUpperCase());
+            }
         }
-        Elements elements = getPostElements(match);
-        return new PostParser().toPosts(elements, source);
+        return builder.toString();
     }
 
+    public List<Post> getPosts(SearchEntry entry) throws IOException {
+        validate(entry);
+        Objects.requireNonNull(document);
+
+        this.search = entry;
+        Elements filtered = filterPosts(formattedElements);
+        return new PostParser().toPosts(filtered, entry);
+    }
 
     public List<Post> getPosts() {
-        Objects.requireNonNull(source);
         Objects.requireNonNull(document);
-        Elements elements = getPostElements(null);
-        return new PostParser().toPosts(elements, source);
+        Elements elements = getPostElements();
+        return new PostParser().toPosts(elements, search);
     }
 
-    private Elements getPostElements(String match) {
-        Elements posts = getAll();
-        if (match == null) {
-            return posts;
+    private Elements getPostElements() {
+        formattedElements = getAll();
+        if (search.getKeyWords().isEmpty()) {
+            return formattedElements;
         } else {
-            return filterPosts(posts, match);
+            return filterPosts(formattedElements);
         }
     }
 
-    public Elements getElementPosts() {
-        Objects.requireNonNull(source);
-        Objects.requireNonNull(document);
-        return getPostElements(null);
+    private void init(Source source) throws IOException {
+        this.source = source;
+        initScraper();
     }
 
-    private Elements filterPosts(Elements posts, String match) {
+    private Elements filterPosts(Elements posts) {
+        if (search == null) {
+            throw new IllegalStateException();
+        }
+
         Elements elements = new Elements();
         for (Element post : posts) {
-            if (post.text().contains(match)) {
+            if (inText(post)) {
                 elements.add(post);
             } else {
-                post.attributes().forEach(attribute -> {
-                    if (attribute.getValue().contains(match)) {
-                        elements.add(post);
-                    }
-                });
-                post.childNodes().forEach(node -> node.attributes().forEach(attribute -> {
-                    if (attribute.getValue().contains(match) && !elements.contains(post)) {
-                        elements.add(post);
-                    }
-                }));
+                post.attributes().forEach(attribute -> searchAttribute(elements, post, attribute));
+                post.childNodes().forEach(node -> node.attributes().forEach(attribute -> searchAttribute(elements, post, attribute)));
             }
         }
         return elements;
     }
 
-    private Document getDocument(String uri) throws IOException {
-        return Jsoup.connect(uri).get();
+    private boolean inText(Element post) {
+        boolean contains = search.getKeyWords().stream().anyMatch(s -> post.text().contains(s));
+        String abbreviation = abbreviate(search.getCreationKey().getTitle());
+        boolean containsAbbr = false;
+
+        if (!abbreviation.isEmpty() && abbreviation.length() > 1) {
+            containsAbbr = post.text().contains(abbreviation);
+        }
+
+        return contains ||
+                post.text().contains(search.getCreationKey().getTitle()) ||
+                containsAbbr;
     }
 
-    private void init(Source source) throws IOException {
+    private void searchAttribute(Elements elements, Element post, Attribute attribute) {
+        if (search.getKeyWords().stream().anyMatch(s -> attribute.getValue().contains(s))) {
+            elements.add(post);
+        }
+    }
+
+
+    private void init(SearchEntry entry) throws IOException {
+        this.source = entry.getSource();
+        initScraper();
+        this.search = entry;
+    }
+
+    private void initScraper() throws IOException {
         if (source.getConfigs().isInit()) {
             this.postConfigs = source.getConfigs();
         } else {
             this.postConfigs = null;
         }
         document = getDocument(source.getUrl());
-        this.source = source;
     }
 
     private Elements getAll() {
@@ -143,13 +177,6 @@ public class PostScraper {
             elements = search(postConfigs.isArchive());
         }
         return elements;
-    }
-
-    private void checkFeed() {
-        if (Feed.hasFeed(source)) {
-            Feed feed = new Feed();
-            // TODO: 08.09.2017
-        }
     }
 
     private Elements search(boolean isArchive) {
@@ -176,12 +203,12 @@ public class PostScraper {
     }
 
     private Elements initConfigs(Document document) {
-        PostConfigs configs = source.getConfigs();
+        PostConfigs configs = search.getSource().getConfigs();
 
         if (PostConfigsSetter.setPostConfigs(configs, document)) {
             return PostFormat.format(document, configs);
         } else {
-            Log.classLogger(this).log(Level.WARNING, source.getUrl() + " is not supported");
+            Log.classLogger(this).log(Level.WARNING, search.getSource().getUrl() + " is not supported");
             return new Elements();
         }
     }
@@ -257,7 +284,7 @@ public class PostScraper {
      */
     private boolean checkTime(Elements elements) {
         LocalDateTime dateTime = getOldestTime(elements);
-        Post post = source.getNewestPost(null);
+        Post post = search.getSource().getNewestPost(search.getCreationKey());
 
         if (post == null) {
             //not more than 100 posts at once
@@ -294,4 +321,8 @@ public class PostScraper {
         return localDateTimes.stream().min(LocalDateTime::compareTo).orElse(LocalDateTime.now());
     }
 
+
+    private Document getDocument(String uri) throws IOException {
+        return Jsoup.connect(uri).get();
+    }
 }

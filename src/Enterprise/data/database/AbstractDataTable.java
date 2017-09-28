@@ -1,7 +1,7 @@
 package Enterprise.data.database;
 
 import Enterprise.data.ReflectUpdate;
-import Enterprise.data.intface.DataBase;
+import Enterprise.data.intface.DataEntry;
 import Enterprise.data.intface.DataTable;
 import Enterprise.misc.SetList;
 
@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 
+import static Enterprise.data.database.DataColumn.Modifiers.*;
+
 /**
  * The {@code AbstractDataTable} class represents a table manager of user data in the database,
  * in contrast to {@link AbstractSubRelation}, which manages tables
@@ -21,8 +23,8 @@ import java.util.logging.Level;
  * to manage a specific table.
  *
  */
-public abstract class AbstractDataTable<E extends DataBase> extends AbstractTable<E> implements DataTable<E> {
-    protected final String tableId;
+public abstract class AbstractDataTable<E extends DataEntry> extends AbstractTable<E> implements DataTable<E> {
+    private DataColumn idColumn;
 
     /**
      * The constructor of this {@code AbstractDataTable}.
@@ -36,8 +38,7 @@ public abstract class AbstractDataTable<E extends DataBase> extends AbstractTabl
      */
     protected AbstractDataTable(String tableName, String tableId) throws SQLException {
         super(tableName);
-        this.tableId = tableId;
-        createTable();
+        this.idColumn = new DataColumn(tableId, DataColumn.Type.INTEGER, NOT_NULL, PRIMARY_KEY, UNIQUE);
     }
 
     @Override
@@ -50,7 +51,7 @@ public abstract class AbstractDataTable<E extends DataBase> extends AbstractTabl
         validate(entry, connection);
         boolean updated = false;
         ReflectUpdate classSpy = new ReflectUpdate();
-        Set<String> statements = classSpy.updateStrings(entry, getTableName(), tableId);
+        Set<String> statements = getStatements(classSpy, entry);
 
         int[] affected;
         try (Statement stmt = connection.createStatement()) {
@@ -68,6 +69,7 @@ public abstract class AbstractDataTable<E extends DataBase> extends AbstractTabl
                 throw new IllegalStateException("Beinflusste Spalten beim " + getTableName() + " stimmen nicht überein!");
             }
         } catch (SQLException e) {
+            System.out.println(statements);
             e.printStackTrace();
         }
         return updated;
@@ -85,7 +87,6 @@ public abstract class AbstractDataTable<E extends DataBase> extends AbstractTabl
         boolean updated = false;
         try {
             validate(entries, connection);
-
             try (Statement stmt = connection.createStatement()) {
                 for (String sql : statements) {
                     stmt.addBatch(sql);
@@ -118,7 +119,7 @@ public abstract class AbstractDataTable<E extends DataBase> extends AbstractTabl
         }
         try {
             validate(entry, connection);
-            try(PreparedStatement stmt = connection.prepareStatement(getInsert())) {
+            try (PreparedStatement stmt = connection.prepareStatement(insert)) {
                 setInsertData(entry, stmt);
                 int updated = stmt.executeUpdate();
 
@@ -128,7 +129,7 @@ public abstract class AbstractDataTable<E extends DataBase> extends AbstractTabl
                 if (set != null && set.next()) {
                     entry.setId(set.getInt(1), this);
                 } else {
-                    System.out.println("could not set id");
+                    throw new SQLException("error in getting database id");
                 }
 
                 // TODO: 15.07.2017 do sth about execute/executeUpdate
@@ -281,17 +282,21 @@ public abstract class AbstractDataTable<E extends DataBase> extends AbstractTabl
      *
      * @param entries {@code Collection} to be updated
      * @return statements - {@code Set} of complete SQL statements
-     * @see ReflectUpdate#updateStrings(DataBase, String, String)
+     * @see ReflectUpdate#updateStrings(Object, Object, String, String)
      */
     Set<String> updateStrings(Collection<? extends E> entries) {
         Set<String> statements = new HashSet<>();
         ReflectUpdate classSpy = new ReflectUpdate();
 
         for (E entry : entries) {
-            statements.addAll(classSpy.updateStrings(entry, getTableName(), tableId));
+            statements.addAll(getStatements(classSpy, entry));
         }
 
         return statements;
+    }
+
+    protected Set<String> getStatements(ReflectUpdate classSpy, E entry) {
+        return classSpy.updateStrings(entry, entry, getTableName(), getTableId());
     }
 
     /**
@@ -301,7 +306,7 @@ public abstract class AbstractDataTable<E extends DataBase> extends AbstractTabl
      * @return string - the complete SQL statement
      */
     private String getFromId(int id) {
-        return "Select * from " + getTableName() + " where " + tableId + " = " + id;
+        return "Select * from " + getTableName() + " where " + getTableId() + " = " + id;
     }
 
     /**
@@ -311,7 +316,46 @@ public abstract class AbstractDataTable<E extends DataBase> extends AbstractTabl
      * @return string - the complete SQL statement
      */
     private String getDelete(E entry) {
-        return "Delete from " + getTableName() + " where " + tableId + "=" + entry.getId();
+        return "Delete from " + getTableName() + " where " + getTableId() + "=" + entry.getId();
+    }
+
+    protected String getTableId() {
+        return idColumn.getName();
+    }
+
+    public DataColumn getIdColumn() {
+        return idColumn;
+    }
+
+    protected String createDataTableHelper(DataColumn tableIdColumn, DataColumn... dataColumns) {
+        StringBuilder builder = new StringBuilder();
+
+        int counter = 0;
+        builder.append("CREATE TABLE IF NOT EXISTS ").
+                append(getTableName()).
+                append("(").
+                append(tableIdColumn.getName()).
+                append(" ").
+                append(tableIdColumn.getType());
+
+        appendModifier(tableIdColumn, builder);
+
+        counter = setIndex(tableIdColumn, counter);
+
+        for (DataColumn column : dataColumns) {
+            builder.append(",").
+                    append(column.getName()).
+                    append(" ").
+                    append(column.getType());
+
+            appendModifier(column, builder);
+            counter = setIndex(column, counter);
+        }
+
+        builder.append(")");
+
+        setInsert(counter);
+        return builder.toString();
     }
 
     /**

@@ -7,5 +7,5 @@ import java.util.function.Function;
 /**
  *
  */
-public interface FilterElement extends Function<Element, Element> {
+public interface FilterElement extends Function<Element, Element>, Filter {
 }

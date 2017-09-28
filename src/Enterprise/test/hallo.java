@@ -1,14 +1,9 @@
 package Enterprise.test;
 
-import Enterprise.gui.enterprise.controller.PostView;
-import Enterprise.gui.general.PostManager;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import scrape.sources.Post;
-import scrape.sources.Source;
-import scrape.sources.SourceList;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -19,12 +14,8 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.sql.SQLException;
 import java.text.ParseException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.ListIterator;
 
 /**
  * Created by Dominik on 10.07.2017.
@@ -43,42 +34,6 @@ public class hallo extends Application {
         primaryStage.setScene(new Scene(root));
         primaryStage.show();
         */
-        SourceList sources = new SourceList();
-        addUris();
-        for (String s : uris) {
-            sources.add(Source.create(s, Source.SourceType.START));
-        }
-
-        ServiceClass serviceClass = new ServiceClass();
-        serviceClass.setList(sources);
-        serviceClass.messageProperty().addListener((observable, oldValue, newValue) -> System.out.println(newValue));
-        serviceClass.progressProperty().addListener((observable, oldValue, newValue) -> System.out.println(newValue));
-
-        PostView.getInstance().open();
-        serviceClass.setOnSucceeded(event -> {
-            /*for (Post elements : serviceClass.getValue()) {
-                DisplayPost displayPost = new DisplayPost();
-                try {
-                    displayPost.open(elements);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }*/
-            List<Post> list = serviceClass.getValue();
-            list.sort((o1, o2) -> o2.getTimeStamp().compareTo(o1.getTimeStamp()));
-            LocalDateTime limit = LocalDateTime.of(LocalDate.now(), LocalTime.of(16, 0, 0));
-            for (ListIterator<Post> iterator = list.listIterator(); iterator.hasNext(); ) {
-                Post post = iterator.next();
-                if (post.getTimeStamp().isEqual(limit) || post.getTimeStamp().isBefore(limit)) {
-                    list = list.subList(0, iterator.previousIndex());
-                    break;
-                }
-            }
-            PostManager.getInstance().getPosts().addAll(list);
-            PostManager.getInstance().getPosts().sort((o1, o2) -> o2.getTimeStamp().compareTo(o1.getTimeStamp()));
-        });
-        serviceClass.start();
-        System.out.println("fertig?");
 
     }
 

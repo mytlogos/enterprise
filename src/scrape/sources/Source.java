@@ -2,14 +2,18 @@ package scrape.sources;
 
 import Enterprise.data.Cache;
 import Enterprise.data.Default;
-import Enterprise.data.EnterpriseEntry;
-import Enterprise.data.intface.*;
+import Enterprise.data.OpEntryCarrier;
+import Enterprise.data.impl.AbstractDataEntry;
+import Enterprise.data.intface.Creation;
+import Enterprise.data.intface.DataEntry;
+import Enterprise.data.intface.Sourceable;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
 import javafx.collections.SetChangeListener;
+import scrape.Post;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -35,17 +39,16 @@ import java.util.Set;
  * It can be alive again, if it gets references to {@code Sourceables}.
  * </p>
  */
-public class Source extends EnterpriseEntry implements DataBase, Comparable<Source> {
+public class Source extends AbstractDataEntry implements DataEntry, Comparable<Source> {
     private StringProperty sourceName = new SimpleStringProperty();
     private StringProperty url = new SimpleStringProperty();
+
     private SourceType sourceType;
     private PostConfigs configs = new PostConfigs();
-    private Map<CreationEntry, Post> newestPosts = new HashMap<>();
+    private Map<Creation, Post> newestPosts = new HashMap<>();
 
     private final ObservableSet<Sourceable> creationEntries = FXCollections.observableSet();
     private final Set<Sourceable> deletedEntries = new HashSet<>();
-
-    private int id;
 
     private static Cache<String, Source> sourceCache = new Cache<>();
 
@@ -58,17 +61,40 @@ public class Source extends EnterpriseEntry implements DataBase, Comparable<Sour
      * @throws URISyntaxException if url is invalid
      */
     private Source(String url, SourceType type, int id) throws URISyntaxException {
+        super(id);
         if (url == null || url.isEmpty()) {
             throw new IllegalArgumentException("url is invalid: " + url);
         } else {
             URI uri = new URI(url);
-            sourceName.set(uri.getHost());
+            setName(uri);
             this.url.set(uri.toString());
         }
-        this.id = id;
         sourceType = type;
 
         setListener();
+        bindUpdated();
+    }
+
+    private void setName(URI uri) {
+        String host = uri.getHost();
+        String[] strings = host.split("\\.");
+        StringBuilder builder = new StringBuilder();
+
+        for (int i = 0, stringsLength = strings.length; i < stringsLength; i++) {
+            String string = strings[i];
+            if (!string.matches("www|com|de|org|blogspot|wordpress")) {
+                builder.append(string);
+                if (i < (stringsLength - 1)) {
+                    builder.append(".");
+                }
+            }
+        }
+
+        if (builder.lastIndexOf(".") == builder.length() - 1) {
+            builder.deleteCharAt(builder.lastIndexOf("."));
+        }
+        // TODO: 28.09.2017 do sth better to make a sensible name
+        sourceName.set(builder.toString());
     }
 
     public static Source create(int id, String url, SourceType type) throws URISyntaxException {
@@ -79,7 +105,7 @@ public class Source extends EnterpriseEntry implements DataBase, Comparable<Sour
         return create(Default.VALUE, url, type);
     }
 
-    public void putPost(CreationEntry entry, Post post) {
+    public void putPost(Creation entry, Post post) {
         if (newestPosts.containsKey(entry)) {
             if (newestPosts.get(entry).getTimeStamp().compareTo(post.getTimeStamp()) < 0) {
                 newestPosts.put(entry, post);
@@ -87,30 +113,19 @@ public class Source extends EnterpriseEntry implements DataBase, Comparable<Sour
         }
     }
 
-    public Post getNewestPost(CreationEntry entry) {
+    public Post getNewestPost(Creation entry) {
         return newestPosts.get(entry);
     }
 
     @Override
-    public int getId() {
-        return id;
-    }
-
-    @Override
-    public void setId(int id, Table table) {
-        if (!(table instanceof DataTable)) {
-            throw new IllegalAccessError();
-        }
-        if (id <= 0) {
-            throw new IllegalArgumentException();
-        }
-        this.id = id;
-    }
-
-    @Override
-    @Deprecated
     protected void bindUpdated() {
-        throw new IllegalAccessError();
+        updated.bind(configs.updatedProperty());
+        updated.addListener((observable, oldValue, newValue) -> {
+            if (newValue && !newEntry) {
+                System.out.println("ready to update");
+                OpEntryCarrier.getInstance().addUpdate(this);
+            }
+        });
     }
 
     /**
@@ -186,19 +201,17 @@ public class Source extends EnterpriseEntry implements DataBase, Comparable<Sour
 
     @Override
     public void setUpdated() {
-        setEntryOld();
+        configs.setUpdated();
     }
 
     @Override
-    @Deprecated
     public boolean isUpdated() {
-        throw new IllegalAccessError();
+        return updated.get();
     }
 
     @Override
-    @Deprecated
     public BooleanProperty updatedProperty() {
-        throw new IllegalAccessError();
+        return updated;
     }
 
     Set<Sourceable> getSourceables() {

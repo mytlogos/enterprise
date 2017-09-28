@@ -1,11 +1,8 @@
 package Enterprise.gui.enterprise.controller;
 
 import Enterprise.ControlComm;
-import Enterprise.data.concurrent.GetCall;
 import Enterprise.data.concurrent.OnCloseRun;
 import Enterprise.data.concurrent.UpdateService;
-import Enterprise.data.intface.CreationEntry;
-import Enterprise.data.intface.SourceableEntry;
 import Enterprise.gui.anime.controller.AnimeController;
 import Enterprise.gui.book.controller.BookController;
 import Enterprise.gui.controller.ContentController;
@@ -13,7 +10,6 @@ import Enterprise.gui.controller.Controller;
 import Enterprise.gui.general.BasicModes;
 import Enterprise.gui.general.GuiPaths;
 import Enterprise.gui.general.ItemFactory;
-import Enterprise.gui.general.PostManager;
 import Enterprise.gui.manga.controller.MangaController;
 import Enterprise.gui.novel.controller.NovelController;
 import Enterprise.gui.series.controller.SeriesController;
@@ -32,16 +28,12 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.stage.WindowEvent;
-import scrape.concurrent.ScheduledScraper;
+import scrape.PostManager;
+import scrape.concurrent.ScheduledPostScraper;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.List;
 import java.util.ResourceBundle;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -111,7 +103,7 @@ public class EnterpriseController implements Initializable, Controller {
     private Stage postView = null;
 
     /**
-     * Shows Posts scraped from {@link ScheduledScraper} in a new Window.
+     * Shows Posts scraped from {@link ScheduledPostScraper} in a new Window.
      */
     @FXML
     void showPosts() {
@@ -129,6 +121,7 @@ public class EnterpriseController implements Initializable, Controller {
 
     @FXML
     void movingMode() {
+        // TODO: 28.09.2017
 
     }
 
@@ -137,6 +130,7 @@ public class EnterpriseController implements Initializable, Controller {
      */
     @FXML
     void closeList() {
+        // TODO: 28.09.2017
 
     }
 
@@ -154,6 +148,7 @@ public class EnterpriseController implements Initializable, Controller {
      */
     @FXML
     void deleteList() {
+        // TODO: 28.09.2017
 
     }
 
@@ -182,6 +177,7 @@ public class EnterpriseController implements Initializable, Controller {
      */
     @FXML
     void openLists() {
+        // TODO: 28.09.2017
 
     }
 
@@ -198,7 +194,7 @@ public class EnterpriseController implements Initializable, Controller {
      */
     @FXML
     void openAbout() {
-
+        // TODO: 28.09.2017
     }
 
     /**
@@ -262,7 +258,7 @@ public class EnterpriseController implements Initializable, Controller {
 
     /**
      * Executes tasks on a Window Close Request.
-     * Cancels the {@link ScheduledScraper} and
+     * Cancels the {@link ScheduledPostScraper} and
      * the {@link UpdateService}.
      * Starts the {@link OnCloseRun}.
      */
@@ -278,6 +274,7 @@ public class EnterpriseController implements Initializable, Controller {
 
     @Override
     public void open() {
+        // TODO: 28.09.2017
 
     }
 
@@ -386,48 +383,17 @@ public class EnterpriseController implements Initializable, Controller {
         seriesTab.setText(SERIES.tabName());
     }
 
-    /**
-     * Starts the {@link GetCall} to get all {@link CreationEntry}s from the source of data.
-     * Separates the Entries according to their {@link BasicModules}s.
-     * Makes the {@link Enterprise.data.intface.Sourceable}s available for the {@link ScheduledScraper}.
-     */
-    private void getDataFromDB() {
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        Future<List<? extends CreationEntry>> future = executor.submit(new GetCall());
-
-        List<? extends CreationEntry> futureEntries;
-        try {
-            futureEntries = future.get();
-
-                for (CreationEntry creationEntry : futureEntries) {
-
-                    if (creationEntry instanceof SourceableEntry && creationEntry.getModule() == ANIME) {
-                        ANIME.addEntry(creationEntry);
-                    }
-                    if (creationEntry instanceof SourceableEntry && creationEntry.getModule() == NOVEL) {
-                        NOVEL.addEntry(creationEntry);
-                    }
-                }
-
-            ANIME.getEntries().forEach(novelEntry -> PostManager.getInstance().addSearchEntries(((SourceableEntry) novelEntry).getSourceable()));
-            NOVEL.getEntries().forEach(animeEntry -> PostManager.getInstance().addSearchEntries(((SourceableEntry) animeEntry).getSourceable()));
-
-        } catch (InterruptedException | ExecutionException e) {
-            logger.log(Level.SEVERE, "error occurred while getting data from the database", e);
-        }
-    }
-
     private UpdateService service;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         ControlComm.getInstance().setEnterpriseController(this);
-        getDataFromDB();
 
         //starts the UpdateService
         service = new UpdateService();
-        service.start();
-        //starts the ScheduledScraper
+        // FIXME: 27.09.2017 out of service atm
+//        service.start();
+        //starts the ScheduledPostScraper
         PostManager.getInstance().startScheduledScraper();
 
         //ready the Graphical Content
@@ -436,10 +402,18 @@ public class EnterpriseController implements Initializable, Controller {
         paneFocus();
         setTabs();
 
+        calcViewMenuSeparator();
+        loadPanes();
+        Platform.runLater(this::setViewMenu);
+    }
+
+    private void calcViewMenuSeparator() {
         //space 'reserved' for the 'show/hide XYColumn' checkMenuItems
         indexFirstSep = viewMenu.getItems().indexOf(separator1);
         indexSecondSep = viewMenu.getItems().indexOf(separator2);
+    }
 
+    private void loadPanes() {
         try {
             loadContent(ANIME, animePane);
             loadContent(BOOK, bookPane);
@@ -450,9 +424,6 @@ public class EnterpriseController implements Initializable, Controller {
             logger.log(Level.SEVERE, "could not load content", e);
             e.printStackTrace();
         }
-
-        Platform.runLater(this::setViewMenu);
-
     }
 
     public Stage getStage() {

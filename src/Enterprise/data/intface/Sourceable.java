@@ -10,7 +10,7 @@ import java.util.List;
  * Represents an Entry which is Sourceable, meaning that this entry is accessible through the internet
  * (optional?: and has been translated from one Language, into another)
  */
-public interface Sourceable extends DataBase, Comparable<Sourceable> {
+public interface Sourceable extends DataEntry, Comparable<Sourceable> {
     /**
      * Gets the SourceList of this {@code Sourceable}.
      *

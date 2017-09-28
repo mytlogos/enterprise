@@ -6,7 +6,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.Text;
-import scrape.sources.Post;
+import scrape.Post;
 
 import java.io.IOException;
 

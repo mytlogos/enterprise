@@ -33,8 +33,6 @@ public class TitlesFilter implements ElementFilter<TitleElement> {
         },
         TITLE(".title", Type.INNER_LINK) {
         },
-        /*OUTER_ENTRY_TITLE("a > h1.entry-title", Type.OUTER_LINK) {
-        },*/
         OUTER_ENTRY_TITLE("a .entry-title", Type.PARENT_LINK),
         POST_LINK("a:contains(permalink)", "h2", Type.PERMALINK) {
         },

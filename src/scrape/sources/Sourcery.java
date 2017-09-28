@@ -8,15 +8,12 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
-import javafx.util.Duration;
-import org.controlsfx.control.Notifications;
-import scrape.sources.novels.NovelPosts;
+import scrape.Post;
+import scrape.sources.novels.PostScraper;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.ResourceBundle;
 
 /**
@@ -48,7 +45,7 @@ public class Sourcery implements Initializable {
     @FXML
     private ComboBox<Post> postsBox;
 
-    NovelPosts host;
+    PostScraper host;
 
     public Sourcery() throws URISyntaxException {
     }
@@ -66,66 +63,7 @@ public class Sourcery implements Initializable {
     }
 
     @FXML
-    void getPost(ActionEvent event) throws URISyntaxException, IOException {
-        /*
-        String url = urlField.getText();
-        String match = matchField.getText();
-        host = new NovelPosts(url);
-        Elements elements = host.getPosts(match);
-        postsBox.getItems().addAll(host.toPosts(elements));
-        */
-
-        List<String> uris = new ArrayList<>();
-        uris.add("https://honyakusite.wordpress.com/");
-        uris.add("http://www.wuxiaworld.com/");
-        uris.add("http://eccentrictranslations.com/");
-        uris.add("https://hikkinomori.mistbinder.org/");
-        uris.add("https://weitranslations.wordpress.com/");
-        uris.add("http://www.sousetsuka.com/");
-        uris.add("http://moonbunnycafe.com/");
-        uris.add("https://kobatochan.com/");
-        uris.add("https://larvyde.wordpress.com/");
-        uris.add("http://jigglypuffsdiary.com/");
-        uris.add("https://www.oppatranslations.com/");
-        uris.add("https://defiring.wordpress.com/");
-        uris.add("https://mayonaizeshrimp.wordpress.com/");
-        uris.add("http://zenithnovels.com/");
-        uris.add("http://volarenovels.com/");
-        uris.add("http://gravitytales.com/");
-        uris.add("http://www.oyasumireads.com/");
-        uris.add("https://lightnovelbastion.com/");
-        uris.add("https://shintranslations.com/");
-        uris.add("https://isekailunatic.wordpress.com/");
-        host = new NovelPosts();
-        for (String s : uris) {
-            Source source = Source.create(s, Source.SourceType.START);
-
-            // FIXME: 04.09.2017 "fix" this
-            postsBox.getItems().addAll(host.getPosts(source));
-            postsBox.getSelectionModel().select(0);
-            /*
-            Element element;
-            if (posts.size() != 0) {
-                element = posts.get(0);
-            } else {
-                element = new Element("");
-            }
-
-
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/scrape/sources/displayPost.fxml"));
-            Parent root = loader.load();
-            DisplayPost displayPost = loader.getController();
-            displayPost.setText(element.toString());
-            Stage primaryStage = new Stage();
-            primaryStage.setTitle("Enterprise");
-            primaryStage.setScene(new Scene(root));
-            primaryStage.show();
-            */
-        }
-
-        Post post = postsBox.getItems().get(0);
-
-        Notifications.create().title(post.getTitle()).text(post.getContentString()).hideAfter(Duration.seconds(10)).showInformation();
+    void getPost() throws URISyntaxException, IOException {
 
     }
 

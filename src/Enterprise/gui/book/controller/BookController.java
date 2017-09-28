@@ -1,8 +1,8 @@
 package Enterprise.gui.book.controller;
 
+import Enterprise.data.impl.CreationEntryImpl;
 import Enterprise.data.impl.CreationImpl;
 import Enterprise.data.impl.CreatorImpl;
-import Enterprise.data.impl.SimpleCreationEntry;
 import Enterprise.data.impl.SimpleUser;
 import Enterprise.data.intface.Creation;
 import Enterprise.data.intface.CreationEntry;
@@ -25,7 +25,7 @@ public class BookController extends ContentController<CreationEntry, BasicModule
         Creator creator = new CreatorImpl.CreatorBuilder(author).build();
         Creation creation = new CreationImpl.CreationImplBuilder(title).build();
 
-        return new SimpleCreationEntry(new SimpleUser(), creation, creator, module);
+        return new CreationEntryImpl(new SimpleUser(), creation, creator, module);
     }
 
     @Override

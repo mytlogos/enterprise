@@ -1,7 +1,7 @@
 package Enterprise.gui.controller;
 
-import Enterprise.data.impl.SimpleSourceable;
 import Enterprise.data.impl.SourceableEntryImpl;
+import Enterprise.data.impl.SourceableImpl;
 import Enterprise.data.intface.*;
 import Enterprise.gui.general.GlobalItemValues;
 import Enterprise.modules.BasicModules;
@@ -125,6 +125,6 @@ public abstract class SourceableAddController<E extends Enum<E> & Module> extend
         source.addAll(observableSource);
         String tlGroup = validateStringInput(translator);
 
-        return new SimpleSourceable(source, tlGroup);
+        return new SourceableImpl(source, tlGroup);
     }
 }

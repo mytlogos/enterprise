@@ -6,26 +6,24 @@ import Enterprise.data.intface.User;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
+
+import static Enterprise.data.database.DataColumn.Modifiers.NOT_NULL;
+import static Enterprise.data.database.DataColumn.Type.INTEGER;
+import static Enterprise.data.database.DataColumn.Type.TEXT;
 
 /**
  * DAO class of {@link User}.
  *
  * @see AbstractTable
  */
-class UserTable extends AbstractDataTable<User> {
+public class UserTable extends AbstractDataTable<User> {
 
-    private UserTable() throws SQLException {
-        super("USERTABLE", "USER_ID");
-    }
-
-    private static final String ownStatusC = "OWNSTATUS";
-    private static final String commentC = "COMMENT";
-    private static final String listC = "LIST";
-    private static final String processedPortionC = "PROCESSED";
-    private static final String ratingC = "RATING";
-    private static final String keyWordsC = "KEYWORDS";
-
+    private static final DataColumn ownStatusC = new DataColumn("OWNSTATUS", TEXT, NOT_NULL);
+    private static final DataColumn commentC = new DataColumn("COMMENT", TEXT, NOT_NULL);
+    private static final DataColumn listC = new DataColumn("LIST", TEXT, NOT_NULL);
+    private static final DataColumn processedPortionC = new DataColumn("PROCESSED", INTEGER, NOT_NULL);
+    private static final DataColumn ratingC = new DataColumn("RATING", INTEGER, NOT_NULL);
+    private static final DataColumn keyWordsC = new DataColumn("KEYWORDS", TEXT, NOT_NULL);
     private static UserTable instance;
 
     static {
@@ -34,6 +32,11 @@ class UserTable extends AbstractDataTable<User> {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    private UserTable() throws SQLException {
+        super("USERTABLE", "USER_ID");
+        init();
     }
 
     /**
@@ -50,23 +53,18 @@ class UserTable extends AbstractDataTable<User> {
     }
 
     @Override
-    protected final String getInsert() {
-        return "insert into " + getTableName() +
-                " values(?,?,?,?,?,?,?)";
-    }
-
-    @Override
     protected String createString() {
-        return "CREATE TABLE IF NOT EXISTS " +
+        return createDataTableHelper(getIdColumn(), ownStatusC, commentC, listC, processedPortionC, ratingC, keyWordsC);
+        /*return "CREATE TABLE IF NOT EXISTS " +
                 getTableName() +
-                "(" + tableId + " " + INTEGER + " PRIMARY KEY NOT NULL UNIQUE" +
+                "(" + getTableId() + " " + INTEGER + " PRIMARY KEY NOT NULL UNIQUE" +
                 "," + ownStatusC + " " + TEXT + " NOT NULL" +
                 "," + commentC + " " + TEXT + " NOT NULL" +
                 "," + listC + " " + TEXT + " NOT NULL" +
                 "," + processedPortionC + " " + INTEGER + " NOT NULL" +
                 "," + ratingC + " " + INTEGER + " NOT NULL" +
                 "," + keyWordsC + " " + TEXT + " NOT NULL" +
-                ")";
+                ")";*/
     }
 
     @Override
@@ -78,25 +76,25 @@ class UserTable extends AbstractDataTable<User> {
         String list = entry.getListName();
         String keyWords = entry.getKeyWords();
 
-        stmt.setNull(1,Types.INTEGER);
-        stmt.setString(2,ownStatus);
-        stmt.setString(3,comment);
-        stmt.setString(4,list);
-        stmt.setInt(5,processedPortion);
-        stmt.setInt(6,rating);
-        stmt.setString(7,keyWords);
+        setIntNull(stmt, getIdColumn());
+        setString(stmt, ownStatusC, ownStatus);
+        setString(stmt, commentC, comment);
+        setString(stmt, listC, list);
+        setInt(stmt, processedPortionC, processedPortion);
+        setInt(stmt, ratingC, rating);
+        setString(stmt, keyWordsC, keyWords);
     }
 
     @Override
     protected User getData(ResultSet rs) throws SQLException {
         User entry;
-        int id = rs.getInt(tableId);
-        String ownStatus = rs.getString(ownStatusC);
-        String comment = rs.getString(commentC);
-        int rating = rs.getInt(ratingC);
-        int processed = rs.getInt(processedPortionC);
-        String list = rs.getString(listC);
-        String keyWords = rs.getString(keyWordsC);
+        int id = getInt(rs, getIdColumn());
+        String ownStatus = getString(rs, ownStatusC);
+        String comment = getString(rs, commentC);
+        int rating = getInt(rs, ratingC);
+        int processed = getInt(rs, processedPortionC);
+        String list = getString(rs, listC);
+        String keyWords = getString(rs, keyWordsC);
 
 
         entry = new SimpleUser(id, ownStatus, comment, rating, list, processed, keyWords);

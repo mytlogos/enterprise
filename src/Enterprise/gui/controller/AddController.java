@@ -1,9 +1,9 @@
 package Enterprise.gui.controller;
 
 import Enterprise.data.Default;
+import Enterprise.data.impl.CreationEntryImpl;
 import Enterprise.data.impl.CreationImpl;
 import Enterprise.data.impl.CreatorImpl;
-import Enterprise.data.impl.SimpleCreationEntry;
 import Enterprise.data.impl.SimpleUser;
 import Enterprise.data.intface.Creation;
 import Enterprise.data.intface.CreationEntry;
@@ -35,7 +35,7 @@ public abstract class AddController<E extends Enum<E> & Module> extends ModifyEn
             e.printStackTrace();
         }
 
-        return new SimpleCreationEntry(user, creation, creator, module);
+        return new CreationEntryImpl(user, creation, creator, module);
     }
 
     @Override

@@ -7,7 +7,7 @@ import java.util.Collection;
 /**
  * Interface which represents a table holding foreign keys of other tables, marking their relationships.
  */
-public interface SubRelationTable<E extends DataBase> extends Table<E> {
+public interface SubRelationTable<E extends DataEntry> extends Table<E> {
     /**
      * Inserts an {@link Entry} with the given Connection.
      * This method is used for transaction, with manual commit.

@@ -7,7 +7,7 @@ import java.util.Iterator;
 /**
  *
  */
-public interface ArchiveSearcher {
+public interface ArchiveSearcher extends Filter {
     Iterator<Document> iterator(Document document);
 
     Iterator<Document> iterator(Document document, int maxMonthsDepth);

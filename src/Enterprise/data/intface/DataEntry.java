@@ -1,8 +1,10 @@
 package Enterprise.data.intface;
 
 import Enterprise.misc.SQLUpdate;
+import javafx.beans.property.BooleanProperty;
 
 /**
+ * Represents an Data Model Object, which will be saved into a persistent storage.
  * Classes, which will be saved into the Database, need to implement this Interface
  * Fields which will be saved into Database, need to be marked with the {@link SQLUpdate} Annotation
  * <p>
@@ -11,10 +13,10 @@ import Enterprise.misc.SQLUpdate;
  * Reflection.
  * </p>
  */
-public interface DataBase extends Entry {
+public interface DataEntry extends Entry {
 
     /**
-     * Gets the Id of this {@code DataBase}.
+     * Gets the Id of this {@code DataEntry}.
      *
      * @return id Database Id
      */
@@ -22,10 +24,18 @@ public interface DataBase extends Entry {
 
     /**
      * Set id only from instances of AbstractDataTable.
-     * // TODO: 26.08.2017 maybe some better 'security' measure
+     * // TODO: 26.08.2017 make a better 'security' measure
      * @param id id to set to this instance
      * @param table table - instance of {@link Enterprise.data.database.AbstractDataTable}
      * @throws IllegalArgumentException if id <= 0
+     * @throws IllegalAccessError if table is no instance of {@link DataTable}
      */
     void setId(int id, Table table);
+
+    /**
+     * Required for {@code BooleanBinding} of the Container-Class.
+     *
+     * @return updatedProperty returns the internal updateProperty {@code Property}
+     */
+    BooleanProperty updatedProperty();
 }

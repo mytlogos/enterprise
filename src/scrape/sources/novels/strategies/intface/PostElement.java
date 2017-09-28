@@ -8,5 +8,5 @@ import java.util.function.Function;
 /**
  *
  */
-public interface PostElement extends Function<Element, Elements> {
+public interface PostElement extends Function<Element, Elements>, Filter {
 }

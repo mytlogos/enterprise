@@ -3,7 +3,7 @@ package Enterprise.data.impl;
 import Enterprise.data.EnterpriseEntry;
 import Enterprise.data.intface.Creation;
 import Enterprise.data.intface.CreationEntry;
-import Enterprise.data.intface.DataBase;
+import Enterprise.data.intface.DataEntry;
 import Enterprise.data.intface.User;
 import Enterprise.modules.BasicModules;
 
@@ -13,21 +13,42 @@ import java.util.WeakHashMap;
 /**
  *
  */
-abstract class AbstractCreationEntry extends EnterpriseEntry {
+abstract class AbstractCreationEntry extends EnterpriseEntry implements CreationEntry {
     User user;
     Creation creation;
     BasicModules module;
 
-    private static Map<DataBase, Integer> references = new WeakHashMap<>();
+    private static Map<DataEntry, Integer> references = new WeakHashMap<>();
 
-    void incrementReferences(DataBase... dataBases) {
-        for (DataBase dataBase : dataBases) {
-            checkSupport(dataBase);
-            incCreationRef(dataBase);
+    @Override
+    public boolean readyUserRemoval() {
+        boolean onlyReference = checkOnlyReference(user);
+        decrementReferences();
+        return onlyReference;
+    }
+
+    @Override
+    public boolean readyCreationRemoval() {
+        boolean onlyReference = checkOnlyReference(creation);
+        decrementReferences();
+        return onlyReference;
+    }
+
+    @Override
+    public boolean readyCreatorRemoval() {
+        boolean onlyReference = checkOnlyReference(getCreator());
+        decrementReferences();
+        return onlyReference;
+    }
+
+    void incrementReferences(DataEntry... dataEntries) {
+        for (DataEntry dataEntry : dataEntries) {
+            checkSupport(dataEntry);
+            incCreationRef(dataEntry);
         }
     }
 
-    private void incCreationRef(DataBase base) {
+    private void incCreationRef(DataEntry base) {
         if (references.containsKey(base)) {
             int count = references.get(base);
             references.put(base, ++count);
@@ -36,33 +57,50 @@ abstract class AbstractCreationEntry extends EnterpriseEntry {
         }
     }
 
-    void decrementReferences(DataBase... bases) {
-        for (DataBase dataBase : bases) {
-            checkSupport(dataBase);
+    void decrementReferences(DataEntry... bases) {
+        for (DataEntry dataEntry : bases) {
+            checkSupport(dataEntry);
 
-            if (references.containsKey(dataBase)) {
-                int count = references.get(dataBase);
-                references.put(dataBase, --count);
+            if (references.containsKey(dataEntry)) {
+                int count = references.get(dataEntry);
+                references.put(dataEntry, --count);
                 if (count == 0) {
-                    references.remove(dataBase);
-                    dataBase.setDead();
+                    references.remove(dataEntry);
+                    dataEntry.setDead();
                 }
             }
         }
     }
 
-    boolean checkOnlyReference(DataBase dataBase) {
+    boolean checkOnlyReference(DataEntry dataEntry) {
         boolean checked = false;
 
-        if (references.containsKey(dataBase) && references.get(dataBase) == 1) {
+        if (references.containsKey(dataEntry) && references.get(dataEntry) == 1) {
             checked = true;
         }
         return checked;
     }
 
-    private void checkSupport(DataBase dataBase) {
-        if (dataBase instanceof CreationEntry) {
+    private void checkSupport(DataEntry dataEntry) {
+        if (dataEntry instanceof CreationEntry) {
             throw new UnsupportedOperationException();
         }
+    }
+
+    @Override
+    public void setUpdated() {
+        user.setUpdated();
+        creation.setUpdated();
+        getCreator().setUpdated();
+    }
+
+    @Override
+    public void fromDataBase() {
+        user.fromDataBase();
+        creation.fromDataBase();
+        getCreator().fromDataBase();
+
+        setUpdated();
+        setEntryOld();
     }
 }

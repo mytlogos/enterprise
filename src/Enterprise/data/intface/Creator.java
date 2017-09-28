@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * Represents the {@code Creator} of a {@link Creation}.
  */
-public interface Creator extends DataBase, Comparable<Creator> {
+public interface Creator extends DataEntry, Comparable<Creator> {
 
     /**
      * Getter of the personalInfo of this {@code Creator}.

@@ -1,26 +1,28 @@
 package Enterprise.data.impl;
 
 import Enterprise.data.OpEntryCarrier;
-import Enterprise.data.intface.*;
+import Enterprise.data.intface.Creation;
+import Enterprise.data.intface.CreationEntry;
+import Enterprise.data.intface.Creator;
+import Enterprise.data.intface.User;
 import Enterprise.modules.BasicModules;
-import javafx.beans.property.BooleanProperty;
 
 /**
  * Simple container class, representing an Entry of an Entertainment-element like a book, with user interactions,
  * meaning, in the context of the user processing the creation.
  * @see CreationEntry
  */
-public class SimpleCreationEntry extends AbstractCreationEntry implements CreationEntry {
+public class CreationEntryImpl extends AbstractCreationEntry implements CreationEntry {
 
     /**
-     * The constructor of {@code SimpleCreationEntry}.
+     * The constructor of {@code CreationEntryImpl}.
      *
      * @param user {@link User} which processes said {@link Creation}
      * @param creation Creation to be processed
      * @param creator {@link Creator} of said Creation
-     * @param module {@link BasicModules} of this {@code SimpleCreationEntry}
+     * @param module {@link BasicModules} of this {@code CreationEntryImpl}
      */
-    public SimpleCreationEntry(User user, Creation creation, Creator creator, BasicModules module) {
+    public CreationEntryImpl(User user, Creation creation, Creator creator, BasicModules module) {
         this.user = user;
         this.creation = creation;
         this.creation.setCreator(creator);
@@ -32,7 +34,7 @@ public class SimpleCreationEntry extends AbstractCreationEntry implements Creati
     }
 
     /**
-     * Validates the State of this {@code SimpleCreationEntry}
+     * Validates the State of this {@code CreationEntryImpl}
      *
      * @throws IllegalArgumentException if an argument is null or invalid
      */
@@ -60,27 +62,6 @@ public class SimpleCreationEntry extends AbstractCreationEntry implements Creati
     }
 
     @Override
-    public boolean readyUserRemoval() {
-        boolean onlyReference = checkOnlyReference(user);
-        decrementReferences();
-        return onlyReference;
-    }
-
-    @Override
-    public boolean readyCreationRemoval() {
-        boolean onlyReference = checkOnlyReference(creation);
-        decrementReferences();
-        return onlyReference;
-    }
-
-    @Override
-    public boolean readyCreatorRemoval() {
-        boolean onlyReference = checkOnlyReference(getCreator());
-        decrementReferences();
-        return onlyReference;
-    }
-
-    @Override
     public User getUser() {
         return user;
     }
@@ -96,13 +77,6 @@ public class SimpleCreationEntry extends AbstractCreationEntry implements Creati
     }
 
     @Override
-    public void setUpdated() {
-        user.setUpdated();
-        creation.setUpdated();
-        creation.getCreator().setUpdated();
-    }
-
-    @Override
     public boolean isUpdated() {
         return updated.get();
     }
@@ -110,10 +84,9 @@ public class SimpleCreationEntry extends AbstractCreationEntry implements Creati
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof SimpleCreationEntry)) return false;
+        if (!(o instanceof CreationEntryImpl)) return false;
 
-        SimpleCreationEntry that = (SimpleCreationEntry) o;
-
+        CreationEntryImpl that = (CreationEntryImpl) o;
         return user.equals(that.user) && creation.equals(that.creation);
     }
 
@@ -140,18 +113,4 @@ public class SimpleCreationEntry extends AbstractCreationEntry implements Creati
         return module;
     }
 
-    @Override @Deprecated
-    public BooleanProperty updatedProperty() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public int getId() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setId(int id, Table table) {
-        throw new UnsupportedOperationException();
-    }
 }

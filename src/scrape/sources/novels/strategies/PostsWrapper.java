@@ -3,13 +3,14 @@ package scrape.sources.novels.strategies;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import scrape.sources.novels.strategies.intface.Filter;
 
 import java.util.function.Function;
 
 /**
  *
  */
-public enum PostsWrapper implements Function<Document, Element> {
+public enum PostsWrapper implements Function<Document, Element>, Filter {
     CONTENT("div#content, div.content") {
     },
     MAIN(".main, #main") {
@@ -21,7 +22,7 @@ public enum PostsWrapper implements Function<Document, Element> {
     COLUMN_GRID(".column.grid_7"),
     CONTENT_WRAP("#content-wrap, .content-wrap"),
     X_CONTAINER(".site > .x-container.max.width.offset");
-    // TODO: 11.09.2017 better support`? for tumblr (column grid_7 is too specific)
+
     private final String selector;
 
     PostsWrapper(String s) {

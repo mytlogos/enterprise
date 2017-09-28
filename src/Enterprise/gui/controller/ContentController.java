@@ -5,7 +5,10 @@ import Enterprise.data.Default;
 import Enterprise.data.OpEntryCarrier;
 import Enterprise.data.intface.CreationEntry;
 import Enterprise.data.intface.SourceableEntry;
-import Enterprise.gui.general.*;
+import Enterprise.gui.general.BasicModes;
+import Enterprise.gui.general.Column;
+import Enterprise.gui.general.ColumnManager;
+import Enterprise.gui.general.Columns;
 import Enterprise.misc.EntrySingleton;
 import Enterprise.misc.Log;
 import Enterprise.modules.BasicModules;
@@ -26,6 +29,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 import org.controlsfx.control.SegmentedButton;
+import scrape.PostManager;
 
 import java.util.Arrays;
 import java.util.List;
@@ -246,7 +250,7 @@ public abstract class ContentController<E extends CreationEntry, R extends Enum<
             entry.setEntryOld();
             System.out.println(entry + " deleted");
             if (entry instanceof SourceableEntry) {
-                PostManager.getInstance().removeSearchEntries(entry.getUser().getKeyWordList());
+                PostManager.getInstance().removeSearchEntries((SourceableEntry) entry);
             }
         } else {
             logger.log(Level.WARNING, "row could not be deleted"

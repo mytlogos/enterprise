@@ -2,8 +2,10 @@ package Enterprise.data.impl;
 
 import Enterprise.data.CreationRelation;
 import Enterprise.data.Default;
-import Enterprise.data.EnterpriseEntry;
-import Enterprise.data.intface.*;
+import Enterprise.data.OpEntryCarrier;
+import Enterprise.data.intface.Creation;
+import Enterprise.data.intface.Creator;
+import Enterprise.data.intface.DataEntry;
 import Enterprise.misc.DataAccess;
 import Enterprise.misc.SQLUpdate;
 import javafx.beans.property.*;
@@ -17,9 +19,7 @@ import java.net.URISyntaxException;
  * @see Creation
  */
 @DataAccess(daoClass = "CreationTable")
-public class CreationImpl extends EnterpriseEntry implements DataBase, Creation {
-
-    private int creationId;
+public class CreationImpl extends AbstractDataEntry implements DataEntry, Creation {
 
     @SQLUpdate(stateGet = "isTitleChanged", valueGet = "getTitle", columnField = "titleC")
     private StringProperty title = new SimpleStringProperty();
@@ -56,27 +56,16 @@ public class CreationImpl extends EnterpriseEntry implements DataBase, Creation 
      *
      */
     private CreationImpl(CreationImplBuilder builder) {
+        super(builder.id);
         this.series.set(builder.buildSeries);
         this.title.set(builder.buildTitle);
         this.dateLastPortion.set(builder.buildDateLastPortion);
         this.numPortion.set(builder.buildNumPortion);
         this.workStatus.set(builder.buildWorkStatus);
         this.coverPath.set(builder.buildCoverPath);
-        creationId = builder.id;
 
         invalidListener();
         bindUpdated();
-    }
-
-    @Override
-    public void setId(int id, Table table) {
-        if (!(table instanceof DataTable)) {
-            throw new IllegalAccessError();
-        }
-        if (id <= 0) {
-            throw new IllegalArgumentException("should not be smaller than 1: " + id);
-        }
-        this.creationId = id;
     }
 
     /**
@@ -91,8 +80,14 @@ public class CreationImpl extends EnterpriseEntry implements DataBase, Creation 
         workStatus.addListener(observable -> workStatusChanged.set(true));
     }
 
+    @Override
     final protected void bindUpdated() {
         updated.bind(titleChanged.or(seriesChanged).or(dateLastPortionChanged).or(numPortionsChanged).or(coverPathChanged).or(workStatusChanged));
+        updated.addListener((observable, oldValue, newValue) -> {
+            if (newValue && !newEntry) {
+                OpEntryCarrier.getInstance().addUpdate(this);
+            }
+        });
     }
 
     @Override
@@ -108,11 +103,6 @@ public class CreationImpl extends EnterpriseEntry implements DataBase, Creation 
         } else {
             throw new NullPointerException();
         }
-    }
-
-    @Override
-    public int getId() {
-        return creationId;
     }
 
     @Override
@@ -262,6 +252,13 @@ public class CreationImpl extends EnterpriseEntry implements DataBase, Creation 
         return compare;
     }
 
+    @Override
+    public int hashCode() {
+        int result = getTitle().hashCode();
+        result = 31 * result + getSeries().hashCode();
+        return result;
+    }
+
     /**
      * The {@code CreationImplBuilder} for this {@code CreationImpl}.
      */
@@ -345,12 +342,5 @@ public class CreationImpl extends EnterpriseEntry implements DataBase, Creation 
                 throw new IllegalArgumentException(message);
             }
         }
-    }
-
-    @Override
-    public int hashCode() {
-        int result = getTitle().hashCode();
-        result = 31 * result + getSeries().hashCode();
-        return result;
     }
 }

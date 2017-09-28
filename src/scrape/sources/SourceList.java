@@ -152,6 +152,7 @@ public class SourceList extends SimpleListProperty<Source> implements Comparable
         }*/
         if (!this.contains(source)) {
             addedSources.add(source);
+            addSourceListener(source);
             return super.add(source);
         } else {
             return false;
@@ -228,6 +229,7 @@ public class SourceList extends SimpleListProperty<Source> implements Comparable
     @Override
     public boolean addAll(Collection<? extends Source> c) {
         removeAll(c);
+        c.forEach(this::addSourceListener);
         return super.addAll(c);
     }
 
@@ -249,6 +251,14 @@ public class SourceList extends SimpleListProperty<Source> implements Comparable
     @Override
     public int compareTo(SourceList o) {
         return this.size() - o.size();
+    }
+
+    private void addSourceListener(Source source) {
+        source.updatedProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue && !source.isNewEntry()) {
+                listChanged.set(true);
+            }
+        });
     }
 
     /*public void setSourceable(Sourceable sourceable) {

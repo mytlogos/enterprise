@@ -14,8 +14,6 @@ import static java.util.regex.Pattern.compile;
  * Utility class for parsing time.
  */
 public class ParseTime {
-
-
     private final static String IS_RELATIVE = "[0-5]?\\d\\s(minute(s)?|second(s)?|hour(s)?|day(s)?|week(s)?|month(s)?|year(s)?)\\sago|just now";
     private final static String HAS_DATE = "(?=^\\d{4})((\\d{4}\\W[0-1]?\\d\\W[0-3]?\\d))|(?=[a-zA-z]{3,10})([a-zA-z]{3,10}\\s[0-3]?\\d,\\s\\d{4})|(?=[0-3]?\\d\\s[a-zA-z]{3,10})([0-3]?\\d\\s[a-zA-z]{3,10}\\s\\d{4})|([0-3]?\\d\\W[0-1]?\\d\\W\\d{4})";
     private final static String HAS_TIME = "[0-2]?\\d:[0-5]\\d(:[0-5]\\d)?((.?((am)|(pm))).?)?((.?(\\+\\d{2}:00).?)|(.?((GMT)|(UTC)).?-\\d{1,2}).?)?";
@@ -27,8 +25,8 @@ public class ParseTime {
     private final static String TIME24 = "[0-2]?\\d:[0-5]\\d(:[0-5]\\d)?";
     private final static String OFFSETNUMB = "((\\+\\d{2}:00))";
     private final static String OFFSETCHAR = "(((GMT)|(UTC)).?-\\d{1,2})";
-    private static final String HAS_OFFSET = "((\\+\\d{2}:00))|(((GMT)|(UTC)).?-\\d{1,2})";
-    private static final int maxNumbers = String.valueOf(Instant.now().toEpochMilli()).length() + 1;
+    private final static String HAS_OFFSET = "((\\+\\d{2}:00))|(((GMT)|(UTC)).?-\\d{1,2})";
+    private final static int maxNumbers = String.valueOf(Instant.now().toEpochMilli()).length() + 1;
 
     public static boolean isParseAble(String s) {
         // TODO: 14.09.2017 do sth better

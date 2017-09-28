@@ -5,7 +5,7 @@ import Enterprise.modules.BasicModules;
 /**
  * Container class which represents an Entity of an Entry, with Creation, Creator and user procession of said Creation
  */
-public interface CreationEntry extends Comparable<CreationEntry>, DataBase {
+public interface CreationEntry extends Comparable<CreationEntry>, ContainerEntry {
 
     /**
      * Getter of the {@link User}-Field.

@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * Table interface for basic database operations
  */
-public interface Table<E extends DataBase> {
+public interface Table<E> {
     /**
      * Creates a new Table in the underlying Database, in case it does not exist.
      *

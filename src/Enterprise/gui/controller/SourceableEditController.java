@@ -3,13 +3,14 @@ package Enterprise.gui.controller;
 import Enterprise.data.Default;
 import Enterprise.data.intface.SourceableEntry;
 import Enterprise.gui.general.GlobalItemValues;
-import Enterprise.gui.general.PostManager;
 import Enterprise.modules.Module;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.text.Text;
+import scrape.PostManager;
+import scrape.concurrent.ScheduledPostScraper;
 import scrape.sources.Source;
 
 import java.net.URISyntaxException;
@@ -82,12 +83,12 @@ public abstract class SourceableEditController<R extends Enum<R> & Module> exten
      * Sets an EventHandler to the
      * {@link javafx.stage.WindowEvent#WINDOW_CLOSE_REQUEST}.
      * Unbinds the Nodes from the entry and makes the Sourceable data available for the
-     * {@link scrape.concurrent.ScheduledScraper}.
+     * {@link ScheduledPostScraper}.
      */
     protected void onCloseOperation() {
         Platform.runLater(() -> root.getScene().getWindow().setOnCloseRequest(event -> {
             unBindEntry();
-            PostManager.getInstance().addSearchEntries(creationEntry.getSourceable());
+            PostManager.getInstance().addSearchEntries(creationEntry);
         }));
     }
 

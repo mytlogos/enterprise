@@ -1,7 +1,9 @@
 package Enterprise.data;
 
-import Enterprise.data.intface.DataBase;
+import Enterprise.data.database.DataColumn;
+import Enterprise.data.intface.DataEntry;
 import Enterprise.misc.DataAccess;
+import Enterprise.misc.Log;
 import Enterprise.misc.SQLUpdate;
 import com.sun.istack.internal.NotNull;
 import javafx.beans.property.Property;
@@ -11,6 +13,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.logging.Level;
 
 /**
  * Reflection class.
@@ -21,10 +24,10 @@ import java.util.*;
  * The main theme is the reflection of several Classes related to the Data Model Classes.
  * The class {@link Enterprise.data.database.AbstractDataTable} requires dynamic update
  * statements.
- * These are provided through this class {@link #updateStrings(DataBase, String, String)}.
+ * These are provided through this class {@link #updateStrings(Object, Object, String, String)}.
  * </p>
  * <p>
- * The {@code ReflectUpdate} searches in an object derived from {@link DataBase}
+ * The {@code ReflectUpdate} searches in an object derived from {@link DataEntry}
  * for fields annotated with the {@link SQLUpdate}.
  * The class of the field to update needs to be annotated with {@link DataAccess} specifying
  * the corresponding DAO class.
@@ -76,61 +79,74 @@ public class ReflectUpdate {
 
     /**
      * Gets the Update SQL Statements by reflecting several classes.
-     * The {@link DataBase} object is required to have fields annotated with
+     * The {@link DataEntry} object is required to have fields annotated with
      * {@link SQLUpdate}.
      *
-     * @param o an implementation of the {@code DataBase} interface
+     * @param dataProvider an implementation of the {@code DataEntry} interface
      * @param tableName name of the table which will be updated
      * @param idColumn name of the Column with the primary key
      * @return updateString - {@code Set} of Strings of complete SQL statements
      * @throws IllegalArgumentException if no fields annotated with {@code SQLUpdate} were found in
      *                                  the parameter o
      */
-    public Set<String> updateStrings(@NotNull DataBase o, @NotNull String tableName, @NotNull String idColumn) {
-        if (tableName != null && !tableName.isEmpty()) {
-            this.tableName = tableName;
-        } else {
-            throw new NullPointerException("tableName needs to be non-null and non-empty");
-        }
-        if (idColumn != null && !idColumn.isEmpty()) {
-            this.idColumn = idColumn;
-        } else {
-            throw new NullPointerException("idColumn needs to be non-null and non-empty");
-        }
+    public Set<String> updateStrings(@NotNull Object dataProvider, @NotNull Object idProvider, @NotNull String tableName, @NotNull String idColumn) {
+        validate(dataProvider, idProvider, tableName, idColumn);
 
-        Objects.requireNonNull(o, "database object needs to be non-null");
-
-        List<Field> fieldList = getFieldsByAnnotation(o, SQLUpdate.class);
+        List<Field> fieldList = getFieldsByAnnotation(dataProvider, SQLUpdate.class);
         Set<String> statements = new HashSet<>();
 
         if (fieldList.isEmpty()) {
-            throw new IllegalArgumentException("database object " + o +
-                    " does not seem to have the required SQLUpdate annotation");
+            throw new IllegalArgumentException(dataProvider + " does not seem to have the required SQLUpdate annotation");
         }
 
-        List<DataObjectMethods> methodsList = getDataObjectMethods(o, fieldList);
+        try {
+            List<DataObjectMethods> methodsList = getDataObjectMethods(dataProvider, idProvider, fieldList);
 
-        methodsList.forEach(methods -> {
-            String updateString = setString(methods);
-            if (!updateString.isEmpty()) {
-                statements.add(updateString);
-            }
-        });
+            methodsList.forEach(methods -> {
+                String updateString;
+                try {
+                    updateString = setString(methods);
+                    if (!updateString.isEmpty()) {
+                        statements.add(updateString);
+                    }
+                } catch (ReflectiveOperationException e) {
+                    e.printStackTrace();
+                }
+            });
+        } catch (ReflectiveOperationException e) {
+            Log.classLogger(this).log(Level.SEVERE, "could not create updateStatements", e);
+        }
 
         return statements;
     }
 
-    private List<DataObjectMethods> getDataObjectMethods(@NotNull DataBase o, List<Field> fieldList) {
+
+    private void validate(@NotNull Object o, Object idProvider, @NotNull String tableName, @NotNull String idColumn) {
+        if (tableName != null && !tableName.isEmpty()) {
+            this.tableName = tableName;
+        } else {
+            throw new IllegalArgumentException("tableName needs to be non-null and non-empty");
+        }
+        if (idColumn != null && !idColumn.isEmpty()) {
+            this.idColumn = idColumn;
+        } else {
+            throw new IllegalArgumentException("idColumn needs to be non-null and non-empty");
+        }
+        Objects.requireNonNull(o, "dataProvider needs to be non-null");
+        Objects.requireNonNull(idProvider, "idProvider needs to be non-null");
+    }
+
+    private List<DataObjectMethods> getDataObjectMethods(@NotNull Object o, Object idProvider, List<Field> fieldList) throws ReflectiveOperationException {
         List<DataObjectMethods> methodsList = new ArrayList<>();
         for (Field field : fieldList) {
             SQLUpdate sql = field.getAnnotation(SQLUpdate.class);
 
             Method booleanMethod = getMethod(o, sql.stateGet());
             Method contentGetter = getMethod(o, sql.valueGet());
-            Method idGetter = getMethod(o, "getId");
+            Method idGetter = getMethod(idProvider, "getId");
             String columnName = getColumnName(o, sql);
 
-            methodsList.add(new DataObjectMethods(booleanMethod, contentGetter, idGetter, o, columnName));
+            methodsList.add(new DataObjectMethods(booleanMethod, contentGetter, idGetter, idProvider, o, columnName));
         }
         return methodsList;
     }
@@ -163,13 +179,13 @@ public class ReflectUpdate {
      * by reflecting the class specified by the {@link DataAccess}
      * annotation of the class of parameter {@code o}.
      *
-     * @param o implementation of the {@code DataBase} interface
+     * @param o implementation of the {@code DataEntry} interface
      * @param sqlUpdate annotation of the field to update the database with
      * @return columnName - the name of the column which will be updated
      */
-    private String getColumnName(DataBase o, SQLUpdate sqlUpdate) {
+    private String getColumnName(Object o, SQLUpdate sqlUpdate) throws ReflectiveOperationException {
         String columnName = "";
-        Class<?> tableClass = null;
+        Class<?> tableClass;
         DataAccess access = o.getClass().getAnnotation(DataAccess.class);
 
         if (access == null) {
@@ -178,131 +194,54 @@ public class ReflectUpdate {
         }
 
         //load dao class
+        String clazz = "Enterprise.data.database." + access.daoClass();
         try {
-            tableClass = Class.forName("Enterprise.data.database." + access.daoClass());
+            tableClass = Class.forName(clazz);
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            Log.classLogger(this.getClass()).log(Level.SEVERE, "could not find class " + clazz, e);
+            throw new ReflectiveOperationException(e);
         }
 
         if (tableClass != null) {
             try {
-                //load specified field
-                Field tableField = tableClass.getDeclaredField(sqlUpdate.columnField());
-                tableField.setAccessible(true);
-
-                //load getInstance method, to get an object of the dao class
-                Method getInstance = tableClass.getDeclaredMethod("getInstance", (Class<?>[]) null);
-                //set accessible to true, to invoke the method without throwing an exception
-                getInstance.setAccessible(true);
-                //get the value
-                columnName = (String) tableField.get(getInstance.invoke(null, (Object[]) null));
-
+                columnName = getColumnField(sqlUpdate, tableClass);
             } catch (NoSuchFieldException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-                // TODO: 30.08.2017 log this
-                e.printStackTrace();
+                Log.classLogger(this.getClass()).log(Level.SEVERE, "could not get columnName ", e);
+                throw new ReflectiveOperationException(e);
             }
         }
         return columnName;
     }
 
-    /**
-     * Internal data transfer class of an entity with the corresponding getter.
-     * Is immutable.
+    /***
+     *
+     * @param sqlUpdate
+     * @param tableClass
+     * @return
+     * @throws ReflectiveOperationException
      */
-    private class DataObjectMethods {
-        private Method booleanMethod;
-        private Method contentGetter;
-        private Method idGetter;
-        private Object object;
-        private String columnName;
+    private String getColumnField(SQLUpdate sqlUpdate, Class<?> tableClass) throws ReflectiveOperationException {
+        String columnName;//load specified field
+        Field tableField = tableClass.getDeclaredField(sqlUpdate.columnField());
+        tableField.setAccessible(true);
 
-        /**
-         * The constructor of {@code DataObjectMethods}.
-         *
-         * @param booleanMethod the stateChanged getter
-         * @param contentGetter the value getter
-         * @param idGetter the getter of the id of the DMO
-         * @param object the DMO object itself
-         * @param columnName name of the column which will be updated
-         */
-        DataObjectMethods(Method booleanMethod, Method contentGetter, Method idGetter, Object object, String columnName) {
-            this.booleanMethod = booleanMethod;
-            this.contentGetter = contentGetter;
-            this.idGetter = idGetter;
-            this.object = object;
-            this.columnName = columnName;
-            validateState();
+        //load getInstance method, to get an object of the dao class
+        Method getInstance = tableClass.getDeclaredMethod("getInstance", (Class<?>[]) null);
+        //set accessible to true, to invoke the method without throwing an exception
+        getInstance.setAccessible(true);
+
+        if (String.class.isAssignableFrom(tableField.getType())) {
+            //get the value
+            columnName = (String) tableField.get(getInstance.invoke(null, (Object[]) null));
+
+        } else if (DataColumn.class.isAssignableFrom(tableField.getType())) {
+            //gets the columnName from the DataColumn field
+            DataColumn column = (DataColumn) tableField.get(getInstance.invoke(null, (Object[]) null));
+            columnName = column.getName();
+        } else {
+            throw new ReflectiveOperationException("unknown column field type");
         }
-
-        /**
-         * Validates the state of this {@code DataObjectMethods} object.
-         */
-        private void validateState() {
-            if (booleanMethod == null) {
-                throw new NullPointerException();
-            }
-            if (contentGetter == null) {
-                throw new NullPointerException();
-
-            }
-
-            if (idGetter == null) {
-                throw new NullPointerException();
-
-            }
-
-            if (object == null) {
-                throw new NullPointerException();
-
-            }
-
-            if (columnName == null || columnName.isEmpty()) {
-                throw new IllegalStateException();
-            }
-        }
-
-        /**
-         * Gets the stateChanged-Getter
-         *
-         * @return method
-         */
-        Method getBooleanMethod() {
-            return booleanMethod;
-        }
-
-        /**
-         * Gets the Getter-method of the {@code Field}.
-         *
-         * @return method
-         */
-        Method getContentGetter() {
-            return contentGetter;
-        }
-
-        /**
-         * Gets the Id-Getter.
-         *
-         * @return method - the 'getId' method
-         */
-        Method getIdGetter() {
-            return idGetter;
-        }
-
-        /**
-         * Gets the implementation instance of the {@link DataBase} interface.
-         * @return database
-         */
-        Object getObject() {
-            return object;
-        }
-
-        /**
-         * Gets the name of the Column.
-         * @return string - name of the Column in the Database
-         */
-        String getColumnName() {
-            return columnName;
-        }
+        return columnName;
     }
 
     /**
@@ -312,7 +251,7 @@ public class ReflectUpdate {
      * @param methods the internal Data transfer object
      * @return setString - the complete SQL update statement
      */
-    private String setString(DataObjectMethods methods) {
+    private String setString(DataObjectMethods methods) throws ReflectiveOperationException {
         String setString;
 
         String columnName = methods.getColumnName();
@@ -323,7 +262,7 @@ public class ReflectUpdate {
         if (changed) {
             String value = getStringFromMethod(methods.getContentGetter(),methods.getObject());
 
-            String idString = getStringFromMethod(methods.getIdGetter(), methods.getObject());
+            String idString = getStringFromMethod(methods.getIdGetter(), methods.getIdProvider());
             int id = Integer.parseInt(idString);
             setString = setString(columnName, value, id);
         } else {
@@ -339,17 +278,18 @@ public class ReflectUpdate {
      * @param o object which the method will be invoked from
      * @return string - return value as an {@code String}
      */
-    private String getStringFromMethod(Method method, Object o) {
-        String string = "";
+    private String getStringFromMethod(Method method, Object o) throws ReflectiveOperationException {
+        String string;
         try {
-            if (method.getReturnType().equals(String.class)) {
+            if (Object.class.isAssignableFrom(method.getReturnType())) {
                 //wraps the String for the SQL statement in quotation marks ''
                 string = "'" + String.valueOf(method.invoke(o, (Object[]) null)) + "'";
             } else {
                 string = String.valueOf(method.invoke(o, (Object[]) null));
             }
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            e.printStackTrace();
+        } catch (IllegalAccessException | InvocationTargetException | IllegalArgumentException e) {
+            Log.classLogger(this.getClass()).log(Level.SEVERE, "could not invoke " + method + " on " + o.getClass().getSimpleName(), e);
+            throw new ReflectiveOperationException(e);
         }
         return string;
     }
@@ -365,8 +305,7 @@ public class ReflectUpdate {
      * @param type enum marker for appending at the beginning or end
      * @return method - Method which is part of the class of Object o
      */
-    private Method getMethod(Object o, Field field, String fragment, FixType type) {
-        Method method = null;
+    private Method getMethod(Object o, Field field, String fragment, FixType type) throws ReflectiveOperationException {
         String fieldName = field.getName();
         fieldName = fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
 
@@ -377,10 +316,12 @@ public class ReflectUpdate {
         } else {
             methodName = fragment + fieldName ;
         }
+        Method method;
         try {
             method = o.getClass().getDeclaredMethod(methodName, (Class<?>[]) null);
         } catch (NoSuchMethodException e) {
-            e.printStackTrace();
+            Log.classLogger(this.getClass()).log(Level.SEVERE, "method " + methodName + " does not exist in " + o.getClass().getSimpleName(), e);
+            throw new ReflectiveOperationException(e);
         }
         return method;
     }
@@ -393,12 +334,13 @@ public class ReflectUpdate {
      * @param methodName name of the sought method
      * @return method - Method which is part of the class of Object o
      */
-    private Method getMethod(Object o, String methodName) {
-        Method method = null;
+    private Method getMethod(Object o, String methodName) throws ReflectiveOperationException {
+        Method method;
         try {
-            method = o.getClass().getDeclaredMethod(methodName, (Class<?>[]) null);
+            method = o.getClass().getMethod(methodName, (Class<?>[]) null);
         } catch (NoSuchMethodException e) {
-            e.printStackTrace();
+            Log.classLogger(this.getClass()).log(Level.SEVERE, "method " + methodName + " does not exist in " + o.getClass().getSimpleName(), e);
+            throw new ReflectiveOperationException(e);
         }
         return method;
     }
@@ -414,8 +356,8 @@ public class ReflectUpdate {
      * @param field enum marker for appending at the beginning or end
      * @return method - Method which is part of the class of Object o
      */
-    private Method getMethod(Object o, Field field, String prefix, String suffix) {
-        Method method = null;
+    private Method getMethod(Object o, Field field, String prefix, String suffix) throws ReflectiveOperationException {
+        Method method;
 
         String fieldName = field.getName();
         fieldName = fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
@@ -425,9 +367,112 @@ public class ReflectUpdate {
         try {
             method = o.getClass().getDeclaredMethod(methodName, (Class<?>[]) null);
         } catch (NoSuchMethodException e) {
-            e.printStackTrace();
+            Log.classLogger(this.getClass()).log(Level.SEVERE, "method " + methodName + " does not exist in " + o.getClass().getSimpleName(), e);
+            throw new ReflectiveOperationException(e);
         }
         return method;
+    }
+
+    /**
+     * Internal data transfer class of an entity with the corresponding getter.
+     * Is immutable.
+     */
+    private class DataObjectMethods {
+        private Method booleanMethod;
+        private Method contentGetter;
+        private Method idGetter;
+        private Object object;
+        private Object idProvider;
+        private String columnName;
+
+        /**
+         * The constructor of {@code DataObjectMethods}.
+         *
+         * @param booleanMethod the stateChanged getter
+         * @param contentGetter the value getter
+         * @param idGetter      the getter of the id of the DMO
+         * @param idProvider    the object declaring the idGetter
+         * @param object        the DMO object itself
+         * @param columnName    name of the column which will be updated
+         */
+        DataObjectMethods(Method booleanMethod, Method contentGetter, Method idGetter, Object idProvider, Object object, String columnName) {
+            this.booleanMethod = booleanMethod;
+            this.contentGetter = contentGetter;
+            this.idGetter = idGetter;
+            this.object = object;
+            this.idProvider = idProvider;
+            this.columnName = columnName;
+            validateState();
+        }
+
+        /**
+         * Validates the state of this {@code DataObjectMethods} object.
+         */
+        private void validateState() {
+            Objects.requireNonNull(booleanMethod);
+            Objects.requireNonNull(contentGetter);
+            Objects.requireNonNull(idGetter);
+            Objects.requireNonNull(object);
+            Objects.requireNonNull(idProvider);
+
+            if (columnName == null || columnName.isEmpty()) {
+                throw new IllegalArgumentException();
+            }
+        }
+
+        /**
+         * Gets the stateChanged-Getter
+         *
+         * @return method, not null
+         */
+        Method getBooleanMethod() {
+            return booleanMethod;
+        }
+
+        /**
+         * Gets the Getter-method of the {@code Field}.
+         *
+         * @return method, not null
+         */
+        Method getContentGetter() {
+            return contentGetter;
+        }
+
+        /**
+         * Gets the Id-Getter.
+         *
+         * @return method - the 'getId' method, not null
+         */
+        Method getIdGetter() {
+            return idGetter;
+        }
+
+        /**
+         * Gets the implementation instance of the {@link DataEntry} interface.
+         *
+         * @return database, not null
+         */
+        Object getObject() {
+            return object;
+        }
+
+        /**
+         * Gets the Object instance which declared the id-Getter Method.
+         *
+         * @return object, not null
+         */
+        Object getIdProvider() {
+            return idProvider;
+        }
+
+        /**
+         * Gets the name of the Column.
+         *
+         * @return string - name of the Column in the Database, not null or empty
+         */
+        String getColumnName() {
+            return columnName;
+        }
     }
 
     /**

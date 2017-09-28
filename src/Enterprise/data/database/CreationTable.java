@@ -4,42 +4,34 @@ import Enterprise.data.impl.CreationImpl;
 import Enterprise.data.intface.Creation;
 import Enterprise.data.intface.DataTable;
 
-import java.sql.*;
-import java.util.Collection;
-import java.util.Iterator;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import static Enterprise.data.database.DataColumn.Modifiers.NOT_NULL;
+import static Enterprise.data.database.DataColumn.Type.INTEGER;
+import static Enterprise.data.database.DataColumn.Type.TEXT;
 
 /**
  * DAO class responsible for the table holding the data of {@code Creation}entries.
  */
-class CreationTable extends AbstractDataTable<Creation> implements DataTable<Creation> {
-    private static final String titleC;
-    private static final String seriesC;
-    private static final String dateLastPortionC;
-    private static final String numPortionC;
-    private static final String coverPathC;
-    private static final String workStatusC;
+public class CreationTable extends AbstractDataTable<Creation> implements DataTable<Creation> {
+    private static final DataColumn titleC = new DataColumn("TITLE", TEXT, NOT_NULL);
+    private static final DataColumn seriesC = new DataColumn("SERIES", TEXT, NOT_NULL);
+    private static final DataColumn dateLastPortionC = new DataColumn("DATELASTPORTION", TEXT, NOT_NULL);
+    private static final DataColumn numPortionC = new DataColumn("NUMPORTION", INTEGER, NOT_NULL);
+    private static final DataColumn coverPathC = new DataColumn("COVERPATH", TEXT, NOT_NULL);
+    private static final DataColumn workStatusC = new DataColumn("WORKSTATUS", TEXT, NOT_NULL);
 
     private static CreationTable INSTANCE;
 
-    static {
-        titleC = "TITLE";
-        seriesC = "SERIES";
-        dateLastPortionC = "DATELASTPORTION";
-        numPortionC = "NUMPORTION";
-        coverPathC = "COVERPATH";
-        workStatusC = "WORKSTATUS";
 
+    static {
         try {
             INSTANCE = new CreationTable();
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    }
-
-    @Override
-    protected String getInsert() {
-        return "insert into " + getTableName() +
-                " values(?,?,?,?,?,?,?)";
     }
 
     /**
@@ -49,6 +41,7 @@ class CreationTable extends AbstractDataTable<Creation> implements DataTable<Cre
      */
     private CreationTable() throws SQLException {
         super("CREATIONTABLE", "CREATION_ID");
+        init();
     }
 
     /**
@@ -61,41 +54,50 @@ class CreationTable extends AbstractDataTable<Creation> implements DataTable<Cre
 
     @Override
     protected String createString() {
-        return "CREATE TABLE IF NOT EXISTS " +
+        return createDataTableHelper(getIdColumn(), titleC, seriesC, dateLastPortionC, numPortionC, coverPathC, workStatusC);
+        /*return "CREATE TABLE IF NOT EXISTS " +
                 getTableName() +
-                "(" + tableId + " " + INTEGER + " PRIMARY KEY NOT NULL UNIQUE" +
+                "(" + getTableId() + " " + INTEGER + " PRIMARY KEY NOT NULL UNIQUE" +
                 "," + titleC + " " + TEXT + " NOT NULL" +
                 "," + seriesC + " " + TEXT + " NOT NULL" +
                 "," + dateLastPortionC + " " + TEXT + " NOT NULL" +
                 "," + numPortionC + " " + INTEGER + " NOT NULL" +
                 "," + coverPathC + " " + TEXT + " NOT NULL" +
                 "," + workStatusC + " " + TEXT + " NOT NULL" +
-                ")";
+                ")";*/
     }
 
     @Override
     protected void setInsertData(Creation entry, PreparedStatement stmt) throws SQLException {
         // TODO: 23.08.2017 check the sql statement of stmt if it is an INSERT operation
 
-        stmt.setNull(1,Types.INTEGER);
+        setIntNull(stmt, getIdColumn());
+        setString(stmt, titleC, entry.getTitle());
+        setString(stmt, seriesC, entry.getSeries());
+        setString(stmt, dateLastPortionC, entry.getDateLastPortion());
+        setString(stmt, coverPathC, entry.getCoverPath());
+        setString(stmt, workStatusC, entry.getWorkStatus());
+        setInt(stmt, numPortionC, entry.getNumPortion());
+
+        /*stmt.setNull(1,Types.INTEGER);
         stmt.setString(2,entry.getTitle());
         stmt.setString(3,entry.getSeries());
         stmt.setString(4,entry.getDateLastPortion());
         stmt.setInt(5,entry.getNumPortion());
         stmt.setString(6,entry.getCoverPath());
-        stmt.setString(7,entry.getWorkStatus());
+        stmt.setString(7,entry.getWorkStatus());*/
     }
 
     @Override
     protected Creation getData(ResultSet rs) throws SQLException {
         Creation entry;
-        int authorId = rs.getInt(tableId);
-        String title = rs.getString(titleC);
-        String series = rs.getString(seriesC);
-        String dateLastPortion = rs.getString(dateLastPortionC);
-        int numPortion = rs.getInt(numPortionC);
-        String coverPath = rs.getString(coverPathC);
-        String workStatus = rs.getString(workStatusC);
+        int authorId = getInt(rs, getIdColumn());
+        String title = getString(rs, titleC);
+        String series = getString(rs, seriesC);
+        String dateLastPortion = getString(rs, dateLastPortionC);
+        int numPortion = getInt(rs, numPortionC);
+        String coverPath = getString(rs, coverPathC);
+        String workStatus = getString(rs, workStatusC);
 
         entry = new CreationImpl.CreationImplBuilder(title).
                 setId(authorId).
@@ -108,28 +110,5 @@ class CreationTable extends AbstractDataTable<Creation> implements DataTable<Cre
 
         entry.setEntryOld();
         return entry;
-    }
-
-    @Deprecated
-    public int[] insertCreations(Collection<? extends  Creation> creations, Connection connection) {
-        int[] inserted = new int[0];
-        Iterator<? extends Creation> iterator = creations.iterator();
-        try (PreparedStatement stmt = connection.prepareStatement(getInsert())) {
-
-            while (iterator.hasNext()) {
-                Creation entry = iterator.next();
-
-                if (entry.isNewEntry()) {
-                    setInsertData(entry, stmt);
-                    stmt.addBatch();
-                }
-            }
-
-            inserted = stmt.executeBatch();
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return inserted;
     }
 }

@@ -1,6 +1,6 @@
 package Enterprise.data.database;
 
-import Enterprise.data.impl.SimpleCreationEntry;
+import Enterprise.data.impl.CreationEntryImpl;
 import Enterprise.data.impl.SourceableEntryImpl;
 import Enterprise.data.intface.*;
 import Enterprise.misc.SetList;
@@ -8,10 +8,13 @@ import Enterprise.modules.BasicModules;
 
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
+
+import static Enterprise.data.database.DataColumn.Modifiers.NOT_NULL;
+import static Enterprise.data.database.DataColumn.Type.INTEGER;
+import static Enterprise.data.database.DataColumn.Type.TEXT;
 
 /**
  * The Main Part of the Data Access Layer, responsible for holding the foreign keys of the EntryParts {@link Creation},
@@ -24,15 +27,15 @@ import java.util.logging.Level;
  * will be constructed.
  * </p>
  */
-public class CreationEntryTable extends AbstractTable<CreationEntry> {
+public class CreationEntryTable extends AbstractRelationTable<CreationEntry> {
 
     private final String selectAll = "SELECT * FROM " + getTableName();
 
-    private final String userIdC = "USER_ID";
-    private final String creationIdC = "CREATION_ID";
-    private final String creatorIdC = "CREATOR_ID";
-    private final String sourceableIdC = "SOURCEABLE_ID";
-    private final String moduleC = "MODULE";
+    private static final DataColumn userIdC = new DataColumn("USER_ID", INTEGER, NOT_NULL);
+    private static final DataColumn creationIdC = new DataColumn("CREATION_ID", INTEGER, NOT_NULL);
+    private static final DataColumn creatorIdC = new DataColumn("CREATOR_ID", INTEGER, NOT_NULL);
+    private static final DataColumn sourceableIdC = new DataColumn("SOURCEABLE_ID", INTEGER, NOT_NULL);
+    private static final DataColumn moduleC = new DataColumn("MODULE", TEXT, NOT_NULL);
 
     private static CreationEntryTable INSTANCE;
 
@@ -44,19 +47,14 @@ public class CreationEntryTable extends AbstractTable<CreationEntry> {
         }
     }
 
-// TODO: 23.08.2017 maybe do this with a singleton pattern
     /**
      * The constructor of {@code CreationEntryTable}.
      *
      * @throws SQLException if there was a problem with the database, while trying to create the table
      */
-    public CreationEntryTable() throws SQLException {
+    private CreationEntryTable() throws SQLException {
         super("CREATIONENTRYTABLE");
-    }
-
-    @Override
-    protected final String getInsert() {
-        return "insert into " + getTableName() + " values(?,?,?,?,?)";
+        init();
     }
 
     /**
@@ -65,7 +63,7 @@ public class CreationEntryTable extends AbstractTable<CreationEntry> {
      * @return instance - an instance of this class
      * @throws RuntimeException if class could not be instantiated
      */
-    public static CreationEntryTable getInstance() throws RuntimeException {
+    public static CreationEntryTable getInstance() {
         if (INSTANCE == null) {
             throw new IllegalStateException();
         } else {
@@ -73,10 +71,30 @@ public class CreationEntryTable extends AbstractTable<CreationEntry> {
         }
     }
 
+    final String getDelete() {
+        return "Delete from " + getTableName() + " where " + userIdC + " = ?";
+    }
+
+    /**
+     * Creates the table schema for the table.
+     *
+     * @return createString - the SQL statement to create the table
+     */
+    protected String createString() {
+        return createRelationTableHelper(creationIdC, userIdC, creatorIdC, sourceableIdC, moduleC);
+       /* return "CREATE TABLE IF NOT EXISTS " +
+                getTableName() +
+                "(" + creationIdC + " INTEGER NOT NULL" +
+                "," + userIdC + " INTEGER NOT NULL" +
+                "," + creatorIdC + " INTEGER NOT NULL" +
+                "," + sourceableIdC + " INTEGER" +
+                "," + moduleC + " TEXT NOT NULL" +
+                ")";*/
+    }
 
     @Override
     public boolean insert(CreationEntry entry) {
-        return Connections.getConnection(connection -> isInserted(entry, connection));
+        return Connections.getConnection(connection -> insert(entry, connection));
     }
 
     /**
@@ -88,18 +106,21 @@ public class CreationEntryTable extends AbstractTable<CreationEntry> {
      * @param connection connection to the database
      * @return true, if inserting was successful
      */
-    private boolean isInserted(CreationEntry entry, Connection connection) throws SQLException {
+    private boolean insert(CreationEntry entry, Connection connection) throws SQLException {
         boolean inserted = false;
         if (entry.isNewEntry()) {
-            //auto-commit on false, so that the transaction will be done in one swoop
-            try (PreparedStatement stmt = connection.prepareStatement(getInsert())) {
+
+            try (PreparedStatement stmt = connection.prepareStatement(insert)) {
                 //inserts new parts and sets their id´s, if not set
                 insertNewParts(entry, connection);
+
+                //check for invalid id
+                checkId(entry);
 
                 //inserts the parameters
                 insertIds(entry, stmt);
                 // TODO: 15.07.2017 do sth about execute/executeUpdate
-                if (stmt.executeUpdate() == 0) {
+                if (stmt.executeUpdate() == 1) {
                     inserted = true;
                 }
             }
@@ -107,22 +128,42 @@ public class CreationEntryTable extends AbstractTable<CreationEntry> {
         return inserted;
     }
 
+    private void checkId(CreationEntry entry) throws SQLException {
+        if (entry.getUser().getId() == 0 ||
+                entry.getCreation().getId() == 0 ||
+                entry.getCreator().getId() == 0) {
+            throw new SQLException("illegal id, error in inserting process");
+        }
+
+        if (entry instanceof SourceableEntry) {
+            SourceableEntry entryS = (SourceableEntry) entry;
+            if (entryS.getSourceable().getId() == 0 ||
+                    (entryS.getSourceable().getSourceList().stream().anyMatch(source -> source.getId() == 0))) {
+                throw new SQLException("illegal id, error in inserting process");
+            }
+        }
+    }
+
     @Override
     public boolean insert(Collection<? extends CreationEntry> entries) {
+        if (entries.isEmpty()) {
+            return false;
+        }
         return Connections.getConnection(connection -> {
             int inserts = 0;
-            try (PreparedStatement stmt = connection.prepareStatement(getInsert())) {
+            try (PreparedStatement stmt = connection.prepareStatement(insert)) {
                 for (CreationEntry entry : entries) {
 
                     //inserts new Parts of the Entry and gets their generated id
                     insertNewParts(entry, connection);
 
+                    //check for invalid Id´s
+                    checkId(entry);
+
                     //populates the PreparedStatement with id parameters
                     insertIds(entry, stmt);
 
                     if (stmt.executeUpdate() != 1) {
-                        throw new SQLException("incongruent data");
-                    } else {
                         inserts++;
                     }
                 }
@@ -141,32 +182,23 @@ public class CreationEntryTable extends AbstractTable<CreationEntry> {
      * Updates the database with the input parameter.
      *
      * @param entry {@code CreationEntry}, with the data to update the database
-     * @return updated - integer {@code Array} holding the number of affected rows per statements per position
      */
-    public boolean updateEntry(CreationEntry entry) {
-
+    public void updateEntry(CreationEntry entry) {
         User user = entry.getUser();
         Creation creation = entry.getCreation();
         Creator creator = entry.getCreator();
         Sourceable sourceable;
 
-
-        boolean creatorsUpdated;
-        boolean creationsUpdated;
-        boolean usersUpdated;
-        boolean sourceablesUpdated = false;
-
-        creatorsUpdated = CreatorTable.getInstance().updateEntry(creator);
-        creationsUpdated = CreationTable.getInstance().updateEntry(creation);
-        usersUpdated = UserTable.getInstance().updateEntry(user);
+        CreatorTable.getInstance().updateEntry(creator);
+        CreationTable.getInstance().updateEntry(creation);
+        UserTable.getInstance().updateEntry(user);
 
         if (entry instanceof SourceableEntryImpl) {
             sourceable = (((SourceableEntryImpl) entry).getSourceable());
-            sourceablesUpdated = SourceableTable.getInstance().updateEntry(sourceable);
+            SourceableTable.getInstance().updateEntry(sourceable);
         }
 
 
-        return creationsUpdated || creatorsUpdated || usersUpdated || sourceablesUpdated;
     }
 
     /**
@@ -181,10 +213,9 @@ public class CreationEntryTable extends AbstractTable<CreationEntry> {
         boolean usersUpdated;
         boolean sourceablesUpdated = false;
 
-
-            creatorsUpdated = checkForCreatorUpdates(entries);
-            creationsUpdated = checkForCreationUpdates(entries);
-            usersUpdated = checkForUserUpdates(entries);
+        creatorsUpdated = checkForCreatorUpdates(entries);
+        creationsUpdated = checkForCreationUpdates(entries);
+        usersUpdated = checkForUserUpdates(entries);
         try {
             sourceablesUpdated = checkForSourceableUpdates(entries);
         } catch (SQLException e) {
@@ -211,17 +242,16 @@ public class CreationEntryTable extends AbstractTable<CreationEntry> {
                 if (!rs.isClosed()) {
                     while (rs.next()) {
                         try {
-                            entries.add(constructEntry(rs,stmt.getConnection()));
+                            entries.add(constructEntry(rs, stmt.getConnection()));
                         } catch (SQLException | IllegalArgumentException e) {
                             logger.log(Level.SEVERE, "possible corrupt data, entry could not be constructed", e);
-                            e.printStackTrace();
                         }
                     }
                 } else {
                     logger.log(Level.INFO, "No Entries found in " + getTableName());
-                    System.out.println("No Entries found in " + getTableName());
                 }
             }
+            entries.forEach(Entry::fromDataBase);
             return entries;
         });
     }
@@ -242,10 +272,6 @@ public class CreationEntryTable extends AbstractTable<CreationEntry> {
         });
     }
 
-    final String getDelete() {
-        return "Delete from " + getTableName() + " where " + userIdC + " = ?";
-    }
-
     /**
      * Deletes a row of foreign keys in this table and checks for dead Entries,
      * which will be deleted by their responsible DAO´s class.
@@ -263,41 +289,18 @@ public class CreationEntryTable extends AbstractTable<CreationEntry> {
             try (PreparedStatement statement = connection.prepareStatement(getDelete())) {
                 for (CreationEntry entry : entries) {
                     removeDead(entry, connection);
-
                     setDeleteData(entry, statement);
-
                     statement.addBatch();
 
                     System.out.println("Einige Einträge von " + entry.getClass().getSimpleName() + " ID " + entry.getUser().getId() + " wurden gelöscht!");
                 }
 
-                // FIXME: 01.09.2017 id in database and creatorId does not match, fault lies in cache and ?
-                if (!Arrays.asList(statement.executeBatch()).isEmpty()) {
+                if (statement.executeBatch().length == entries.size()) {
                     deleted = true;
                 }
             }
             return deleted;
         });
-    }
-
-    /**
-     * Creates the table schema for the table.
-     *
-     * @return createString - the SQL statement to create the table
-     */
-    protected String createString() {
-        return "CREATE TABLE IF NOT EXISTS " +
-                getTableName() +
-                "(" + creationIdC + " INTEGER NOT NULL" +
-                "," + userIdC + " INTEGER NOT NULL" +
-                "," + creatorIdC + " INTEGER NOT NULL" +
-                "," + sourceableIdC + " INTEGER" +
-                "," + moduleC + " TEXT NOT NULL" +
-                ")";
-    }
-
-    String getFromId(int id) {
-        return "Select * from " + getTableName() + " where " + userIdC + " = " + id;
     }
 
     /**
@@ -311,11 +314,12 @@ public class CreationEntryTable extends AbstractTable<CreationEntry> {
      * @throws SQLException if the ResultSet is invalid or DAO´s from other tables throw one
      */
     private CreationEntry constructEntry(ResultSet rs, Connection connection) throws SQLException {
-        int userId = rs.getInt(userIdC);
-        int creationId = rs.getInt(creationIdC);
-        int creatorId = rs.getInt(creatorIdC);
-        int sourceableId = rs.getInt(sourceableIdC);
-        String modl  = rs.getString(moduleC);
+        int userId = getInt(rs, userIdC);
+        int creationId = getInt(rs, creationIdC);
+        int creatorId = getInt(rs, creatorIdC);
+        int sourceableId = getInt(rs, sourceableIdC);
+        String modl = getString(rs, moduleC);
+
         BasicModules module = BasicModules.valueOf(modl);
 
         //delegates getUser to UserTable DAO
@@ -326,15 +330,19 @@ public class CreationEntryTable extends AbstractTable<CreationEntry> {
         Creator creator = CreatorTable.getInstance().getEntry(creatorId, connection);
 
         CreationEntry entry;
+
         if (sourceableId > 0) {
             Sourceable sourceable = SourceableTable.getInstance().getEntry(sourceableId, connection);
-
             entry = new SourceableEntryImpl(user, creation, creator, sourceable, module);
         } else {
-            entry = new SimpleCreationEntry(user, creation, creator, module);
+            entry = new CreationEntryImpl(user, creation, creator, module);
         }
 
-        entry.setEntryOld();
+        entry.getModule().addEntry(entry);
+
+        if (entry.getModule().isSourceable()) {
+
+        }
         return entry;
     }
 
@@ -493,19 +501,19 @@ public class CreationEntryTable extends AbstractTable<CreationEntry> {
         checkId(creatorId);
         checkId(userId);
 
-        statement.setInt(1,creationId);
-        statement.setInt(2, userId);
-        statement.setInt(3, creatorId);
-        statement.setString(5,module);
+        setInt(statement, creationIdC, creationId);
+        setInt(statement, userIdC, userId);
+        setInt(statement, creatorIdC, creatorId);
+        setString(statement, moduleC, module);
 
         //sets sourceableId to id of this entry or to null if it is an instance of SourceableEntry
         if (entry instanceof SourceableEntry) {
             int sourceableId = ((SourceableEntry) entry).getSourceable().getId();
             checkId(sourceableId);
-            statement.setInt(4,sourceableId);
+            setInt(statement, sourceableIdC, sourceableId);
         }else {
             // FIXME: 27.08.2017 probable bug: will maybe handle it like an id and increment in the database
-            statement.setNull(4, Types.INTEGER);
+            setIntNull(statement, sourceableIdC);
         }
     }
 
@@ -529,70 +537,15 @@ public class CreationEntryTable extends AbstractTable<CreationEntry> {
      * @see UserTable
      */
     private void insertNewParts(CreationEntry entry, Connection connection) throws SQLException {
-        if (entry.getUser().isNewEntry()) {
-            UserTable.getInstance().insert(entry.getUser(), connection);
-        }
-        if (entry.getCreation().isNewEntry()) {
-            CreationTable.getInstance().insert(entry.getCreation(), connection);
-        }
-        if (entry.getCreator().isNewEntry()) {
-            CreatorTable.getInstance().insert(entry.getCreator(), connection);
-        }
+        UserTable.getInstance().insert(entry.getUser(), connection);
+        CreationTable.getInstance().insert(entry.getCreation(), connection);
+        CreatorTable.getInstance().insert(entry.getCreator(), connection);
 
         if (entry instanceof SourceableEntry) {
-
             SourceableEntry sourceableEntry = (SourceableEntry) entry;
-
-            if (sourceableEntry.getSourceable().isNewEntry()) {
-                EntrySourceTable.getInstance().insert(sourceableEntry.getSourceable(), connection);
-            }
+            EntrySourceTable.getInstance().insert(sourceableEntry.getSourceable(), connection);
         }
 
     }
 
-    /**
-     * Checks for new EntryParts and inserts them,
-     * if they were not added to the database before.
-     *
-     * @param entries Collection of {@code CreationEntry}s to be checked
-     * @param connection {@code Connection} to be used for manual commit
-     * @throws SQLException if there are problems while inserting in the delegating DAO´s
-     *
-     * @see SourceableTable
-     * @see CreationTable
-     * @see CreatorTable
-     * @see UserTable
-     */
-    private void insertNewParts(Collection<? extends CreationEntry> entries, Connection connection) throws SQLException {
-        List<Creation> creations = new ArrayList<>();
-        List<Creator> creators = new ArrayList<>();
-        List<User> users = new ArrayList<>();
-        List<Sourceable> sourceables = new ArrayList<>();
-
-        for (CreationEntry entry : entries) {
-            if (entry.getCreation().isNewEntry()) {
-                creations.add(entry.getCreation());
-            }
-            if (entry.getCreator().isNewEntry()) {
-                creators.add(entry.getCreator());
-            }
-            if (entry.getUser().isNewEntry()) {
-                users.add(entry.getUser());
-            }
-
-            if (entry instanceof SourceableEntryImpl) {
-
-                SourceableEntryImpl sourceableCreationEntry = (SourceableEntryImpl) entry;
-
-                if (sourceableCreationEntry.getSourceable().isNewEntry()) {
-                    sourceables.add(sourceableCreationEntry.getSourceable());
-                }
-            }
-        }
-
-        CreationTable.getInstance().insert(creations, connection);
-        CreatorTable.getInstance().insert(creators, connection);
-        UserTable.getInstance().insert(users, connection);
-        SourceableTable.getInstance().insert(sourceables, connection);
-    }
 }

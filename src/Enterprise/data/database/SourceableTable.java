@@ -1,22 +1,25 @@
 package Enterprise.data.database;
 
-import Enterprise.data.impl.SimpleSourceable;
+import Enterprise.data.impl.SourceableImpl;
 import Enterprise.data.intface.Sourceable;
 import scrape.sources.SourceList;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
+
+import static Enterprise.data.database.DataColumn.Modifiers.NOT_NULL;
+import static Enterprise.data.database.DataColumn.Type.TEXT;
 
 /**
  * DAO class of {@link Sourceable}.
  */
 public class SourceableTable extends AbstractDataTable<Sourceable> {
 
-    private static final String translatorC = "TRANSLATOR";
+    private static final DataColumn translatorC = new DataColumn("TRANSLATOR", TEXT, NOT_NULL);
 
     private static SourceableTable INSTANCE;
+
 
     static  {
         try {
@@ -33,6 +36,7 @@ public class SourceableTable extends AbstractDataTable<Sourceable> {
      */
     private SourceableTable() throws SQLException {
         super("SOURCEABLETABLE", "SOURCEABLE_ID");
+        init();
     }
 
     /**
@@ -41,7 +45,7 @@ public class SourceableTable extends AbstractDataTable<Sourceable> {
      * @return instance - Instance of this {@code SourceableTable}
      * @see #SourceableTable()
      */
-    static SourceableTable getInstance() {
+    public static SourceableTable getInstance() {
         if (INSTANCE == null) {
             throw new IllegalStateException();
         } else {
@@ -51,36 +55,34 @@ public class SourceableTable extends AbstractDataTable<Sourceable> {
 
     @Override
     protected String createString() {
-        return "CREATE TABLE IF NOT EXISTS " +
+        return createDataTableHelper(getIdColumn(), translatorC);
+        /*return "CREATE TABLE IF NOT EXISTS " +
                 getTableName() +
-                "(" + tableId + " " + INTEGER + " PRIMARY KEY NOT NULL UNIQUE" +
+                "(" + getTableId() + " " + INTEGER + " PRIMARY KEY NOT NULL UNIQUE" +
                 "," + translatorC + " " + TEXT + " NOT NULL" +
-                ")";
+                ")";*/
     }
 
     @Override
     protected void setInsertData(Sourceable entry, PreparedStatement stmt) throws SQLException {
-        stmt.setNull(1,Types.INTEGER);
-        stmt.setString(2,entry.getTranslator());
+        setIntNull(stmt, getIdColumn());
+        setString(stmt, translatorC, entry.getTranslator());
+//        stmt.setString(2,entry.getTranslator());
     }
 
     @Override
     protected Sourceable getData(ResultSet rs) throws SQLException {
         Sourceable entry;
-        int id = rs.getInt(tableId);
+        int id = rs.getInt(getTableId());
         // TODO: 23.08.2017 look at this more, maybe other solution,
         // SubRelationTable gives the whole ResultSet with the whole data to this method
         SourceList sources = (SourceList) EntrySourceTable.getInstance().getSources(id);
-        String tl = rs.getString(translatorC);
+        String tl = getString(rs, translatorC);
 
-        entry = new SimpleSourceable(id,sources,tl);
+        entry = new SourceableImpl(id, sources, tl);
 //        sources.setSourceable(entry);
         entry.setEntryOld();
         return entry;
     }
 
-    @Override
-    protected String getInsert() {
-        return "insert into " + getTableName() + " values(?,?)";
-    }
 }

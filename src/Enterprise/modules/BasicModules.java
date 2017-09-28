@@ -11,7 +11,7 @@ import java.util.List;
  *
  */
 public enum BasicModules implements Module {
-    ANIME("Anime") {
+    ANIME("Anime", true) {
         List<CreationEntry> entries = new SetList<>();
         List<String> distinctionList = new SetList<>();
 
@@ -26,7 +26,7 @@ public enum BasicModules implements Module {
         }
 
     },
-    BOOK("Bücher") {
+    BOOK("Bücher", false) {
         List<CreationEntry> entries = new SetList<>();
         List<String> distinctionList = new ArrayList<>();
 
@@ -41,7 +41,7 @@ public enum BasicModules implements Module {
             return distinctionList;
         }
     },
-    MANGA("Manga") {
+    MANGA("Manga", false) {
         List<CreationEntry> entries = new SetList<>();
         List<String> distinctionList = new ArrayList<>();
 
@@ -56,7 +56,7 @@ public enum BasicModules implements Module {
             return distinctionList;
         }
     },
-    NOVEL("Novel") {
+    NOVEL("Novel", true) {
         List<CreationEntry> entries = new SetList<>();
         List<String> distinctionList = new ArrayList<>();
 
@@ -71,7 +71,7 @@ public enum BasicModules implements Module {
             return distinctionList;
         }
     },
-    SERIES("Serien") {
+    SERIES("Serien", false) {
         List<CreationEntry> entries = new SetList<>();
         List<String> distinctionList = new ArrayList<>();
 
@@ -87,10 +87,16 @@ public enum BasicModules implements Module {
         }
     };
 
+    private final boolean sourceable;
     private final String tabName;
 
-    BasicModules(String tabName) {
+    BasicModules(String tabName, boolean sourceable) {
+        this.sourceable = sourceable;
         this.tabName = tabName;
+    }
+
+    public boolean isSourceable() {
+        return sourceable;
     }
 
     @Override

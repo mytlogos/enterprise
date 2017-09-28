@@ -27,7 +27,7 @@ public class NovelController extends SourceableContentCont<BasicModules> impleme
         Creator creator = new CreatorImpl.CreatorBuilder(author).build();
         Creation creation = new CreationImpl.CreationImplBuilder(title).build();
 
-        return new SourceableEntryImpl(new SimpleUser(), creation, creator, new SimpleSourceable(), module);
+        return new SourceableEntryImpl(new SimpleUser(), creation, creator, new SourceableImpl(), module);
     }
 
     @Override

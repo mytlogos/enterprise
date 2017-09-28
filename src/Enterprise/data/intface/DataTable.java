@@ -9,10 +9,10 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * DataTable interface which represents an Data Model Object extending from {@code DataBase},
+ * DataTable interface which represents an Data Model Object extending from {@code DataEntry},
  * which will be saved into the table.
  */
-public interface DataTable<E extends DataBase> extends Table<E> {
+public interface DataTable<E extends DataEntry> extends Table<E> {
     /**
      * Inserts an generic entry into the database.
      * Uses the given {@code Connection}.
@@ -41,7 +41,7 @@ public interface DataTable<E extends DataBase> extends Table<E> {
 
     /**
      * Updates an {@code Entry} from the database.
-     * For more information see {@link #updateEntry(DataBase, Connection)}.
+     * For more information see {@link #updateEntry(DataEntry, Connection)}.
      *
      * @param entry {@link Entry} to update
      * @return updated - integer {@code Array} holding the number of affected rows per statements per position

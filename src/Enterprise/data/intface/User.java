@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * This class represents a user who processes a {@link Creation} and gives personal Information, like comments about it.
  */
-public interface User extends DataBase, Comparable<User> {
+public interface User extends DataEntry, Comparable<User> {
 
     /**
      * Gets the Value of the {@code ownStatus}-{@code StringProperty}.

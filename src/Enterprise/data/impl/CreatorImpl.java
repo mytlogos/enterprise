@@ -2,9 +2,11 @@ package Enterprise.data.impl;
 
 import Enterprise.data.Cache;
 import Enterprise.data.Default;
-import Enterprise.data.EnterpriseEntry;
+import Enterprise.data.OpEntryCarrier;
 import Enterprise.data.Person;
-import Enterprise.data.intface.*;
+import Enterprise.data.intface.Creation;
+import Enterprise.data.intface.Creator;
+import Enterprise.data.intface.DataEntry;
 import Enterprise.misc.DataAccess;
 import Enterprise.misc.SQLUpdate;
 import Enterprise.misc.SetList;
@@ -16,6 +18,7 @@ import javafx.util.Builder;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Implementation of Creator
@@ -23,8 +26,7 @@ import java.util.List;
  * @see Creator
  */
 @DataAccess(daoClass = "CreatorTable")
-public class CreatorImpl extends EnterpriseEntry implements DataBase, Comparable<Creator>, Creator {
-    private int creatorId;
+public class CreatorImpl extends AbstractDataEntry implements DataEntry, Comparable<Creator>, Creator {
 
     @SQLUpdate(stateGet = "isNameChanged", valueGet = "getName", columnField = "nameC")
     private StringProperty name = new SimpleStringProperty();
@@ -48,28 +50,16 @@ public class CreatorImpl extends EnterpriseEntry implements DataBase, Comparable
 
     /**
      * The constructor of {@code CreatorImpl}
-     *
      */
     private CreatorImpl(CreatorBuilder builder) {
+        super(builder.id);
         this.name.set(builder.name);
         this.sortName.set(builder.sortName);
         this.status.set(builder.status);
         this.personalInfo = builder.person;
-        creatorId = builder.id;
 
         invalidListener();
         bindUpdated();
-    }
-
-    @Override
-    public void setId(int id, Table table) {
-        if (!(table instanceof DataTable)) {
-            throw new IllegalAccessError();
-        }
-        if (id <= 0) {
-            throw new IllegalArgumentException("should not be smaller than 1: " + id);
-        }
-        this.creatorId = id;
     }
 
     /**
@@ -84,6 +74,11 @@ public class CreatorImpl extends EnterpriseEntry implements DataBase, Comparable
 
     @Override
     protected void bindUpdated() {
+        updated.addListener((observable, oldValue, newValue) -> {
+            if (newValue && !newEntry) {
+                OpEntryCarrier.getInstance().addUpdate(this);
+            }
+        });
         updated.bind(nameChanged.or(sortNameChanged).or(statusChanged));
     }
 
@@ -180,11 +175,6 @@ public class CreatorImpl extends EnterpriseEntry implements DataBase, Comparable
     }
 
     @Override
-    public int getId() {
-        return creatorId;
-    }
-
-    @Override
     public boolean equals(Object o) {
         boolean equals = false;
         if (o instanceof CreatorImpl) {
@@ -235,6 +225,11 @@ public class CreatorImpl extends EnterpriseEntry implements DataBase, Comparable
         return compared;
     }
 
+    @Override
+    public int hashCode() {
+        return name.get().hashCode() /* + personalInfo.hashCode()*/;
+    }
+
     public static class CreatorBuilder implements Builder<CreatorImpl> {
 
         private final String name;
@@ -270,7 +265,16 @@ public class CreatorImpl extends EnterpriseEntry implements DataBase, Comparable
         @Override
         public CreatorImpl build() {
             validateState();
-            return creatorCache.checkCache(new CreatorImpl(this), CreatorImpl::getName);
+            return creatorCache.checkCache(
+                    new CreatorImpl(this),
+                    CreatorImpl::getName,
+                    (creator, creator2) -> {
+                        if (creator2.getName().isEmpty()) {
+                            return creator2;
+                        } else {
+                            return Objects.equals(creator, creator2) ? creator : creator2;
+                        }
+                    });
         }
 
         /**
@@ -299,11 +303,6 @@ public class CreatorImpl extends EnterpriseEntry implements DataBase, Comparable
                 throw new IllegalArgumentException(message);
             }
         }
-    }
-
-    @Override
-    public int hashCode() {
-        return name.get().hashCode() /* + personalInfo.hashCode()*/;
     }
 
 }

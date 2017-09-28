@@ -19,7 +19,6 @@ public class PostsFilter implements ElementFilter {
         return new ArrayList<>(Arrays.asList(Posts.values()));
     }
 
-
     /**
      *
      */
@@ -50,22 +49,7 @@ public class PostsFilter implements ElementFilter {
 
         @Override
         public Elements apply(Element body) {
-            Elements postElements = body.select(selector);
-            /*for (Element postElement : postElements) {
-
-                //if no title link is available, try to get it from the parent (too specific)
-                if (postElement.parent().tagName().equals("a") && !postElement.children().hasAttr("href")) {
-
-                    Element parent = new Element(Tag.valueOf("a"), postElement.baseUri());
-                    parent.attr("href", postElement.parent().attr("href"));
-
-                    for (Element element : postElement.getElementsByTag("h3")) {
-                        parent.text(element.text());
-                        element.replaceWith(parent);
-                    }
-                }
-            }*/
-            return postElements;
+            return body.select(selector);
         }
     }
 }

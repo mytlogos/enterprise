@@ -81,9 +81,13 @@ public class PostFormat {
         for (Element element : elements) {
             Element post = new Element(POST_TAG);
 
+            if (element.hasClass("sticky")) {
+                post.addClass("sticky");
+            }
+
             setPost(element, post, configs.getTitle());
             setPost(element, post, configs.getTime());
-            setPost(element, post, configs.getPostBody());
+            setPost(element, post, configs.getPostContent());
             setPost(element, post, configs.getFooter());
             posts.add(post);
         }

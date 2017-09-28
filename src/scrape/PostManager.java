@@ -1,22 +1,21 @@
-package Enterprise.gui.general;
+package scrape;
 
-import Enterprise.data.intface.Sourceable;
+import Enterprise.data.intface.Creation;
+import Enterprise.data.intface.SourceableEntry;
 import Enterprise.gui.enterprise.controller.PostView;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.concurrent.ScheduledService;
-import javafx.concurrent.Worker;
 import javafx.util.Duration;
 import org.controlsfx.control.Notifications;
-import scrape.concurrent.ScheduledScraper;
-import scrape.concurrent.ScrapeService;
-import scrape.sources.Post;
+import scrape.concurrent.ScheduledPostScraper;
+import scrape.sources.Source;
 import scrape.sources.SourceList;
 
-import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Set;
 
 /**
  * A Singleton to provide global Access and Functions to
@@ -31,13 +30,9 @@ public class PostManager {
     /**
      * This [{@code Map} maps a {@code List} of keyWords to an {@link SourceList}.
      */
-    private final Map<List<String>, SourceList> searchMap = new ConcurrentHashMap<>();
+    private final Set<SearchEntry> searchEntries = new HashSet<>();
 
-    LocalDateTime localDateTime;
-
-    private final ScrapeService service = new ScrapeService();
-
-    private final ScheduledScraper scheduledScraper = new ScheduledScraper();
+    private final ScheduledPostScraper scheduledScraper = new ScheduledPostScraper();
     private final List<Post> newPosts = new PostList();
 
     /**
@@ -49,17 +44,6 @@ public class PostManager {
         if (MANAGER != null) {
             throw new IllegalStateException();
         }
-        service.setOnSucceeded(event -> {
-            System.out.println("Succeeded");
-            List<Post> postList;
-            postList = service.getValue();
-
-            posts.removeAll(postList);
-            posts.addAll(postList);
-            System.out.println(posts);
-            System.out.println(posts.size() + " Anzahl Posts");
-        });
-
         initScheduled();
     }
 
@@ -68,15 +52,11 @@ public class PostManager {
     }
 
     private void initScheduled() {
-        scheduledScraper.progressProperty().addListener((observable, oldValue, newValue) -> System.out.println(newValue));
-        scheduledScraper.messageProperty().addListener((observable, oldValue, newValue) -> System.out.println(newValue));
-
         scheduledScraper.setOnSucceeded(event -> {
             List<Post> postList;
             postList = scheduledScraper.getValue();
 
             postList.removeAll(posts);
-
             posts.addAll(postList);
 
             newPosts.clear();
@@ -105,44 +85,44 @@ public class PostManager {
     }
 
     /**
-     * Adds key-Value pairs of the {@code Sourceable} to the {@link #searchMap}.
+     * Adds entry to the {@link #searchEntries}.
      *
-     * @param entry {@code Sourceable} with data to add a new key-value pair
+     * @param sourceableEntry {@code Sourceable} with data to add a new key-value pair
      */
-    public void addSearchEntries(Sourceable entry) {
-        List<String> stringList = entry.getKeyWordList();
-        SourceList sources = entry.getSourceList();
-
-        searchMap.put(stringList, sources);
+    public void addSearchEntries(SourceableEntry sourceableEntry) {
+        List<SearchEntry> entries = convert(sourceableEntry);
+        searchEntries.addAll(entries);
     }
 
-    public void removeSearchEntries(List<String> stringList) {
-        searchMap.remove(stringList);
+    private List<SearchEntry> convert(SourceableEntry sourceableEntry) {
+        List<String> keyWords = sourceableEntry.getUser().getKeyWordList();
+        Creation creation = sourceableEntry.getCreation();
+
+        List<SearchEntry> entries = new ArrayList<>();
+
+        for (Source source : sourceableEntry.getSourceable().getSourceList()) {
+            SearchEntry entry = new SearchEntry(creation, source, keyWords);
+            entries.add(entry);
+        }
+
+        return entries;
+    }
+
+    public void removeSearchEntries(SourceableEntry entry) {
+        searchEntries.removeAll(convert(entry));
     }
 
     /**
-     * Starts the {@link ScrapeService}.
-     */
-    public void startSearching() {
-        if (!(service.getState() == Worker.State.SCHEDULED) && !(service.getState() == Worker.State.RUNNING)) {
-            service.reset();
-            service.setSearchMap(searchMap);
-            service.start();
-        }else
-            System.out.println("Service läuft noch.");
-    }
-
-    /**
-     * Gets the instance of the {@link ScheduledScraper} in this class.
+     * Gets the instance of the {@link ScheduledPostScraper} in this class.
      *
-     * @return instance of {@code ScheduledScraper}
+     * @return instance of {@code ScheduledPostScraper}
      */
-    public ScheduledScraper getScheduledScraper() {
+    public ScheduledPostScraper getScheduledScraper() {
         return scheduledScraper;
     }
 
     /**
-     * Starts this instance of the {@link ScheduledScraper}.
+     * Starts this instance of the {@link ScheduledPostScraper}.
      *
      * @see ScheduledService#start()
      */
@@ -151,7 +131,7 @@ public class PostManager {
     }
 
     /**
-     * Cancels the {@link ScheduledScraper}.
+     * Cancels the {@link ScheduledPostScraper}.
      *
      * @see ScheduledService#cancel()
      */
@@ -187,20 +167,11 @@ public class PostManager {
     }
 
     /**
-     * Returns the one-time executing {@code ScrapeService}.
-     *
-     * @return instance of {@code ScrapeService}
-     */
-    public ScrapeService getService() {
-        return service;
-    }
-
-    /**
      * Returns the {@code searchMap} instance.
      *
      * @return map
      */
-    public Map<List<String>, SourceList> getSearchMap() {
-        return searchMap;
+    public Set<SearchEntry> getSearch() {
+        return searchEntries;
     }
 }

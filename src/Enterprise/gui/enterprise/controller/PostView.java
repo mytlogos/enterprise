@@ -1,7 +1,6 @@
 package Enterprise.gui.enterprise.controller;
 
 import Enterprise.ControlComm;
-import Enterprise.gui.general.PostManager;
 import Enterprise.misc.Log;
 import javafx.beans.binding.DoubleBinding;
 import javafx.fxml.FXML;
@@ -20,8 +19,9 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 import org.controlsfx.control.Notifications;
 import org.controlsfx.control.StatusBar;
-import scrape.concurrent.ScheduledScraper;
-import scrape.sources.Post;
+import scrape.Post;
+import scrape.PostManager;
+import scrape.concurrent.ScheduledPostScraper;
 
 import java.awt.*;
 import java.io.IOException;
@@ -173,17 +173,17 @@ public class PostView implements Initializable{
 
     @FXML
     private void showAll() {
-        listView.itemsProperty().bind(PostManager.getInstance().getPosts());
+        PostManager.getInstance().getPosts().bindToList(listView.itemsProperty());
     }
 
     @FXML
     private void showNew() {
-        listView.itemsProperty().bind(PostManager.getInstance().getNewPosts());
+        PostManager.getInstance().getNewPosts().bindToList(listView.itemsProperty());
     }
 
     private void setStatusBar() {
         // FIXME: 24.09.2017 statusbar does not display progress or message or it will be displayed too short
-        ScheduledScraper scraper = PostManager.getInstance().getScheduledScraper();
+        ScheduledPostScraper scraper = PostManager.getInstance().getScheduledScraper();
 
         statusBar.progressProperty().bind(scraper.progressProperty());
         statusBar.textProperty().bind(scraper.messageProperty());

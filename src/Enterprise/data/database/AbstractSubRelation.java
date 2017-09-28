@@ -1,18 +1,17 @@
 package Enterprise.data.database;
 
-import Enterprise.data.intface.DataBase;
+import Enterprise.data.intface.DataEntry;
 import Enterprise.data.intface.SubRelationTable;
 import scrape.sources.Source;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
 
 /**
  * Abstract class of {@code SubRelationTable}.
  */
-abstract class AbstractSubRelation<E extends DataBase> extends AbstractTable<E> implements SubRelationTable<E> {
+abstract class AbstractSubRelation<E extends DataEntry> extends AbstractTable<E> implements SubRelationTable<E> {
     private final String mainId;
         /**
      * The constructor of {@code AbstractSubRelation}.
@@ -37,12 +36,30 @@ abstract class AbstractSubRelation<E extends DataBase> extends AbstractTable<E> 
         return "Select * from " + getTableName() + " where " + mainId + " = " + id;
     }
 
+    protected String createRelationTableHelper(DataColumn... dataColumns) {
+        StringBuilder builder = new StringBuilder();
+
+        int counter = 0;
+        builder.append("CREATE TABLE IF NOT EXISTS ").
+                append(getTableName()).
+                append("(");
+
+        for (DataColumn column : dataColumns) {
+            builder.append(",").
+                    append(column.getName()).
+                    append(" ").
+                    append(column.getType());
+
+            appendModifier(column, builder);
+
+            counter = setIndex(column, counter);
+        }
+        builder.append(")");
+        setInsert(counter);
+        return builder.toString().replaceFirst(",", "");
+    }
+
     abstract Source getData(Connection connection, ResultSet rs) throws SQLException;
 
     abstract String getDelete();
-
-    abstract boolean removeDead(E entry, Connection connection) throws SQLException;
-
-    abstract boolean removeDead(Collection<? extends E> entries, Connection connection) throws SQLException;
-
 }

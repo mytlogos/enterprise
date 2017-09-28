@@ -1,9 +1,12 @@
-package scrape.sources;
+package scrape;
 
 import Enterprise.data.Default;
-import Enterprise.data.intface.DataBase;
-import Enterprise.data.intface.Table;
+import Enterprise.data.impl.AbstractDataEntry;
+import Enterprise.data.intface.Creation;
+import Enterprise.data.intface.DataEntry;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import scrape.sources.Source;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -13,29 +16,41 @@ import java.util.List;
  * This class represents a Post of a blog.
  * It is immutable.
  */
-public class Post implements Comparable<Post>, DataBase {
-
+public class Post extends AbstractDataEntry implements Comparable<Post>, DataEntry {
+    private boolean sticky;
     private Source source;
     private String followLink;
     private String title;
     private List<String> content = new ArrayList<>();
     private String footer = Default.STRING;
     private LocalDateTime timeStamp;
+    private Creation creation;
 
 
     /**
      * The constructor of {@code Post}.
      */
-    public Post(Source source, String title, LocalDateTime dateTime, String followLink) {
+    public Post(Source source, String title, LocalDateTime dateTime, String followLink, Creation creation, boolean isSticky) {
+        this(Default.VALUE, source, title, dateTime, followLink, creation, isSticky);
+    }
+
+    public Post(int id, Source source, String title, LocalDateTime dateTime, String followLink, Creation creation, boolean isSticky) {
+        super(id);
         this.title = title;
-        this.source = source;
         this.timeStamp = dateTime;
         this.followLink = followLink;
+        this.creation = creation;
+        this.sticky = isSticky;
+        if (source != null) {
+            this.source = source;
+        } else {
+            this.source = Default.SOURCE;
+        }
         validateState();
     }
 
-    public Post(Source source, String title, List<String> content, String footer, LocalDateTime timeStamp, String followLink) {
-        this(source, title, timeStamp, followLink);
+    public Post(Source source, String title, List<String> content, String footer, LocalDateTime timeStamp, String followLink, boolean isSticky) {
+        this(source, title, timeStamp, followLink, null, isSticky);
         this.content = content;
         this.footer = footer;
         validateState();
@@ -64,6 +79,10 @@ public class Post implements Comparable<Post>, DataBase {
         if (!message.isEmpty()) {
             throw new IllegalArgumentException(message);
         }
+    }
+
+    public Creation getCreation() {
+        return creation;
     }
 
     /**
@@ -161,6 +180,13 @@ public class Post implements Comparable<Post>, DataBase {
         return builder.toString();
     }
 
+    /**
+     * @return
+     */
+    public boolean isSticky() {
+        return sticky;
+    }
+
     @Override
     public String toString() {
         return title;
@@ -195,48 +221,7 @@ public class Post implements Comparable<Post>, DataBase {
     }
 
     @Override
-    public int getId() {
-        return 0;
-    }
-
-    @Override
-    public void setId(int id, Table table) {
-
-    }
-
-    @Override
-    public void setDead() {
-
-    }
-
-    @Override
-    public void setAlive() {
-
-    }
-
-    @Override
-    public void setEntryNew() {
-
-    }
-
-    @Override
-    public void setEntryOld() {
-
-    }
-
-    @Override
-    public boolean isDead() {
-        return false;
-    }
-
-    @Override
-    public boolean isNewEntry() {
-        return false;
-    }
-
-    @Override
     public void setUpdated() {
-
     }
 
     @Override
@@ -246,6 +231,11 @@ public class Post implements Comparable<Post>, DataBase {
 
     @Override
     public BooleanProperty updatedProperty() {
-        return null;
+        return new SimpleBooleanProperty();
+    }
+
+    @Override
+    protected void bindUpdated() {
+        throw new IllegalAccessError();
     }
 }

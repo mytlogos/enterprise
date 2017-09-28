@@ -1,13 +1,11 @@
 package Enterprise.data.impl;
 
 import Enterprise.data.Default;
-import Enterprise.data.EnterpriseEntry;
-import Enterprise.data.intface.DataTable;
-import Enterprise.data.intface.Table;
+import Enterprise.data.OpEntryCarrier;
 import Enterprise.data.intface.User;
 import Enterprise.misc.DataAccess;
-import Enterprise.misc.KeyWordList;
 import Enterprise.misc.SQLUpdate;
+import Enterprise.misc.SetList;
 import javafx.beans.property.*;
 
 import java.util.List;
@@ -17,9 +15,7 @@ import java.util.List;
  * @see User
  */
 @DataAccess(daoClass = "UserTable")
-public class SimpleUser extends EnterpriseEntry implements User{
-    private int userId;
-    private static int idCounter = 1;
+public class SimpleUser extends AbstractDataEntry implements User {
 
     @SQLUpdate(stateGet = "isOwnStatusChanged", valueGet = "getOwnStatus", columnField = "ownStatusC")
     private StringProperty ownStatus = new SimpleStringProperty();
@@ -38,9 +34,6 @@ public class SimpleUser extends EnterpriseEntry implements User{
 
     @SQLUpdate(stateGet = "isKeyWordsChanged", valueGet = "getKeyWords", columnField = "keyWordsC")
     private StringProperty keyWords = new SimpleStringProperty();
-
-    private List<String> keyWordList = new KeyWordList();
-
 
     private BooleanProperty ownStatusChanged = new SimpleBooleanProperty(false);
     private BooleanProperty commentChanged = new SimpleBooleanProperty(false);
@@ -82,13 +75,13 @@ public class SimpleUser extends EnterpriseEntry implements User{
      * @param keyWords search keyWords for the {@code Creation}
      */
     public SimpleUser(int id, String ownStatus, String comment, int rating, String listName, int processedPortion, String keyWords) {
+        super(id);
         this.ownStatus.set(ownStatus);
         this.comment.set(comment);
         this.rating.set(rating);
         this.listName.set(listName);
         this.processedPortion.set(processedPortion);
         this.keyWords.set(keyWords);
-        userId = id;
 
         validateState();
         invalidListeners();
@@ -102,8 +95,8 @@ public class SimpleUser extends EnterpriseEntry implements User{
      */
     private void validateState() {
         String message = "";
-        if (userId < 0) {
-            message = message + "userId is invalid: " + userId + ",";
+        if (getId() < 0) {
+            message = message + "userId is invalid: " + getId() + ",";
         }
         if (ownStatus.get() == null) {
             message = message + "ownStatus is null, ";
@@ -131,6 +124,11 @@ public class SimpleUser extends EnterpriseEntry implements User{
 
     @Override
     protected void bindUpdated() {
+        updated.addListener((observable, oldValue, newValue) -> {
+            if (newValue && !newEntry) {
+                OpEntryCarrier.getInstance().addUpdate(this);
+            }
+        });
         updated.bind(ownStatusChanged.or(commentChanged).or(ratingChanged).or(processedPortionChanged).or(listNameChanged).or(keyWordsChanged));
     }
 
@@ -143,25 +141,7 @@ public class SimpleUser extends EnterpriseEntry implements User{
         rating.addListener(observable -> ratingChanged.set(true));
         processedPortion.addListener(observable -> processedPortionChanged.set(true));
         listName.addListener(observable -> listNameChanged.set(true));
-        keyWords.addListener(observable -> {
-            keyWordsChanged.set(true);
-
-            String keyWords = getKeyWords();
-            if (keyWords == null) {
-                keyWords = "";
-            }
-
-            List<String> stringList = new KeyWordList();
-            for (String string : keyWords.split("[\\s,]")) {
-                if (!string.isEmpty() && !stringList.contains(string)) {
-                    stringList.add(string);
-                }
-            }
-            //removes all 'old' keyWords, adds only 'new' keyWords
-            keyWordList.retainAll(stringList);
-            stringList.removeAll(keyWordList);
-            keyWordList.addAll(stringList);
-        });
+        keyWords.addListener(observable -> keyWordsChanged.set(true));
     }
 
     @Override
@@ -182,22 +162,6 @@ public class SimpleUser extends EnterpriseEntry implements User{
         commentChanged.set(false);
         ownStatusChanged.set(false);
         keyWordsChanged.set(false);
-    }
-
-    @Override
-    public int getId() {
-        return userId;
-    }
-
-    @Override
-    public void setId(int id, Table table) {
-        if (!(table instanceof DataTable)) {
-            throw new IllegalAccessError();
-        }
-        if (id <= 0) {
-            throw new IllegalArgumentException("should not be smaller than 1: " + id);
-        }
-        this.userId = id;
     }
 
     @Override
@@ -297,7 +261,19 @@ public class SimpleUser extends EnterpriseEntry implements User{
 
     @Override
     public List<String> getKeyWordList() {
-        return keyWordList;
+        String keyWords = getKeyWords();
+        if (keyWords == null) {
+            keyWords = "";
+        }
+
+        List<String> stringList = new SetList<>();
+        for (String string : keyWords.split("[\\s,]")) {
+            if (!string.isEmpty() && !stringList.contains(string)) {
+                stringList.add(string);
+            }
+        }
+        //removes all 'old' keyWords, adds only 'new' keyWords
+        return stringList;
     }
 
     @Override

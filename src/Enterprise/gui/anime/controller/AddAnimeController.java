@@ -5,13 +5,13 @@ import Enterprise.data.OpEntryCarrier;
 import Enterprise.data.impl.SourceableEntryImpl;
 import Enterprise.gui.controller.SourceableAddController;
 import Enterprise.gui.general.BasicModes;
-import Enterprise.gui.general.PostManager;
 import Enterprise.modules.BasicModules;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.stage.Stage;
+import scrape.PostManager;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -47,7 +47,7 @@ public class AddAnimeController extends SourceableAddController<BasicModules> im
             OpEntryCarrier.getInstance().addNewEntry(entry);
 
             //Make content available for Scraping
-            PostManager.getInstance().addSearchEntries(entry.getSourceable());
+            PostManager.getInstance().addSearchEntries(entry);
         } else {
             System.out.println("Adding the entry failed.");
 

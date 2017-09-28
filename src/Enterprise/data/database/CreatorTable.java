@@ -7,19 +7,20 @@ import Enterprise.data.intface.Creator;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
+
+import static Enterprise.data.database.DataColumn.Modifiers.NOT_NULL;
+import static Enterprise.data.database.DataColumn.Type.TEXT;
 
 /**
  * DAO class of {@link Creator}.
  */
 public class CreatorTable extends AbstractDataTable<Creator> {
-    private static final String nameC = "AUTHOR";
-
-    private static final String sortNameC = "AUTHORSORT";
-
-    private static final String statusC = "AUTHORSTATUS";
+    private static final DataColumn nameC = new DataColumn("AUTHOR", TEXT, NOT_NULL);
+    private static final DataColumn sortNameC = new DataColumn("AUTHORSORT", TEXT, NOT_NULL);
+    private static final DataColumn statusC = new DataColumn("AUTHORSTATUS", TEXT, NOT_NULL);
 
     private static CreatorTable INSTANCE;
+
 
     static {
         try {
@@ -36,6 +37,7 @@ public class CreatorTable extends AbstractDataTable<Creator> {
      */
     private CreatorTable() throws SQLException {
         super("CREATORTABLE", "AUTHOR_ID");
+        init();
     }
 
     /**
@@ -54,13 +56,14 @@ public class CreatorTable extends AbstractDataTable<Creator> {
 
     @Override
     protected String createString() {
-        return "CREATE TABLE IF NOT EXISTS " +
+        return createDataTableHelper(getIdColumn(), nameC, sortNameC, statusC);
+        /*return "CREATE TABLE IF NOT EXISTS " +
                 getTableName() +
-                "(" + tableId + " " + INTEGER + " PRIMARY KEY NOT NULL UNIQUE" +
+                "(" + getTableId() + " " + INTEGER + " PRIMARY KEY NOT NULL UNIQUE" +
                 "," + nameC + " " + TEXT + " NOT NULL" +
                 "," + sortNameC + " " + TEXT + " NOT NULL" +
                 "," + statusC + " " + TEXT + " NOT NULL" +
-                ")";
+                ")";*/
     }
 
     @Override
@@ -69,23 +72,29 @@ public class CreatorTable extends AbstractDataTable<Creator> {
         String authSortName = entry.getSortName();
         String authStat = entry.getStatus();
 
-        stmt.setNull(1,Types.INTEGER);
+        setIntNull(stmt, getIdColumn());
+        setString(stmt, nameC, authName);
+        setString(stmt, sortNameC, authSortName);
+        setString(stmt, statusC, authStat);
+        /*
         stmt.setString(2,authName);
         stmt.setString(3,authSortName);
-        stmt.setString(4,authStat);
+        stmt.setString(4,authStat);*/
+
     }
 
     @Override
     protected Creator getData(ResultSet rs) throws SQLException {
-        Creator entry;
-        int authorId = rs.getInt(tableId);
-        String name = rs.getString(nameC);
-        String sortName = rs.getString(sortNameC);
-        String stat = rs.getString(statusC);
+
+        int authorId = getInt(rs, getIdColumn());
+        String name = getString(rs, nameC);
+        String sortName = getString(rs, sortNameC);
+        String stat = getString(rs, statusC);
+
         // TODO: 12.08.2017 implement personTable
         Person person = new Person();
 
-        entry = new CreatorImpl.CreatorBuilder(name).
+        Creator entry = new CreatorImpl.CreatorBuilder(name).
                 setId(authorId).
                 setSortName(sortName).
                 setStatus(stat).
@@ -94,10 +103,5 @@ public class CreatorTable extends AbstractDataTable<Creator> {
 
         entry.setEntryOld();
         return entry;
-    }
-
-    @Override
-    protected String getInsert() {
-        return "insert into " + getTableName() + " values(?,?,?,?)";
     }
 }

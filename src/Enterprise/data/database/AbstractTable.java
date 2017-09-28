@@ -1,6 +1,6 @@
 package Enterprise.data.database;
 
-import Enterprise.data.intface.DataBase;
+import Enterprise.data.intface.DataEntry;
 import Enterprise.data.intface.Table;
 import Enterprise.misc.Log;
 
@@ -11,10 +11,10 @@ import java.util.logging.Logger;
 /**
  * This class represents a table in a SQL database.
  */
-abstract class AbstractTable<E extends DataBase> implements Table<E> {
+abstract class AbstractTable<E> implements Table<E> {
     private final String tableName;
-    static final String INTEGER = "INTEGER";
-    static final String TEXT = "TEXT";
+    protected String insert;
+    protected String create;
 
     Logger logger = Log.packageLogger(this);
 
@@ -29,6 +29,10 @@ abstract class AbstractTable<E extends DataBase> implements Table<E> {
      */
     AbstractTable(String tableName) throws SQLException {
         this.tableName = tableName;
+    }
+
+    protected void init() {
+        create = createString();
         createTable();
     }
 
@@ -37,7 +41,7 @@ abstract class AbstractTable<E extends DataBase> implements Table<E> {
      *
      * @return string - name of the table
      */
-    final String getTableName() {
+    protected final String getTableName() {
         return tableName;
     }
 
@@ -56,7 +60,7 @@ abstract class AbstractTable<E extends DataBase> implements Table<E> {
         if (!tableExists()) {
             created = Connections.getConnection(connection -> {
                 Statement statement = connection.createStatement();
-                statement.execute(createString());
+                statement.execute(create);
                 return tableExists(connection);
             });
         }
@@ -114,13 +118,6 @@ abstract class AbstractTable<E extends DataBase> implements Table<E> {
      */
     protected abstract String createString();
 
-    /**
-     * Gets the SQL statement for a INSERT operation. Inserts only one row in the table.
-     *
-     * @return string - the complete SQL statement
-     */
-    protected abstract String getInsert();
-
     @Override
     final public void deleteAll() {
         String deleteAll = "Delete from " + getTableName();
@@ -132,13 +129,13 @@ abstract class AbstractTable<E extends DataBase> implements Table<E> {
         });
     }
 
-    void validate(DataBase dataBase, Connection connection) throws SQLException {
-        if (dataBase == null || connection == null || connection.isClosed()) {
+    void validate(DataEntry dataEntry, Connection connection) throws SQLException {
+        if (dataEntry == null || connection == null || connection.isClosed()) {
             throw new IllegalArgumentException();
         }
     }
 
-    void validate(Collection<? extends DataBase> entries, Connection connection) throws SQLException {
+    void validate(Collection<? extends DataEntry> entries, Connection connection) throws SQLException {
         if (entries == null || connection == null || connection.isClosed()) {
             throw new IllegalArgumentException();
         }
@@ -148,5 +145,76 @@ abstract class AbstractTable<E extends DataBase> implements Table<E> {
         if (connection == null || connection.isClosed()) {
             throw new IllegalArgumentException();
         }
+    }
+
+    int setIndex(DataColumn column, int counter) {
+        counter++;
+        column.setIndex(counter);
+        return counter;
+    }
+
+    void appendModifier(DataColumn tableIdColumn, StringBuilder start) {
+        for (String s : tableIdColumn.getModifiers()) {
+            start.append(" ").append(s);
+        }
+    }
+
+    void setInsert(int count) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("insert into ").
+                append(getTableName()).
+                append(" values(");
+        for (int i = 0; i < count; i++) {
+            builder.append("?,");
+        }
+        builder.deleteCharAt(builder.length() - 1);
+        builder.append(")");
+        insert = builder.toString();
+    }
+
+    protected void setIntNull(PreparedStatement statement, DataColumn column) throws SQLException {
+        statement.setNull(column.getIndex(), Types.INTEGER);
+    }
+
+    protected void setStringNull(PreparedStatement statement, DataColumn column) throws SQLException {
+        statement.setNull(column.getIndex(), Types.VARCHAR);
+    }
+
+    protected int getInt(ResultSet set, DataColumn column) throws SQLException {
+        return set.getInt(column.getName());
+    }
+
+    protected String getString(ResultSet set, DataColumn column) throws SQLException {
+        return set.getString(column.getName());
+    }
+
+    protected boolean getBoolean(ResultSet set, DataColumn column) throws SQLException {
+        return set.getBoolean(column.getName());
+    }
+
+    protected void setString(PreparedStatement statement, DataColumn column, String string) throws SQLException {
+        int index = column.getIndex();
+        if (index < 1) {
+            System.out.println(column.getName());
+            throw new IllegalArgumentException();
+        }
+        statement.setString(index, string);
+    }
+
+    protected void setBoolean(PreparedStatement statement, DataColumn column, boolean b) throws SQLException {
+        int index = column.getIndex();
+        if (index < 1) {
+            System.out.println(column.getName());
+            throw new IllegalArgumentException();
+        }
+        statement.setBoolean(index, b);
+    }
+
+    protected void setInt(PreparedStatement statement, DataColumn column, int i) throws SQLException {
+        if (column.getIndex() < 1) {
+            System.out.println(column.getName());
+            throw new IllegalArgumentException();
+        }
+        statement.setInt(column.getIndex(), i);
     }
 }

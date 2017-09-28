@@ -10,7 +10,7 @@ import javafx.beans.property.StringProperty;
  * </p>
  * <p> This Class is not Thread-safe</p>
  */
-public interface Creation extends DataBase, Comparable<Creation>{
+public interface Creation extends DataEntry, Comparable<Creation> {
     /**
      * Gets the {@code Creator} of this Work
      *

@@ -5,10 +5,10 @@ import Enterprise.data.OpEntryCarrier;
 import Enterprise.data.intface.SourceableEntry;
 import Enterprise.gui.controller.SourceableAddController;
 import Enterprise.gui.general.BasicModes;
-import Enterprise.gui.general.PostManager;
 import Enterprise.modules.BasicModules;
 import javafx.scene.control.Alert;
 import javafx.stage.Stage;
+import scrape.PostManager;
 
 /**
  * // TODO: 25.08.2017 do the javadoc and functionality
@@ -30,7 +30,7 @@ public class AddMangaController extends SourceableAddController<BasicModules> {
             OpEntryCarrier.getInstance().addNewEntry(entry);
 
             //Make content available for Scraping
-            PostManager.getInstance().addSearchEntries(entry.getSourceable());
+            PostManager.getInstance().addSearchEntries(entry);
         } else {
             //show alert for trying to add an already existing entry
             Alert alert = new Alert(Alert.AlertType.ERROR, "Eintrag existiert schon!");

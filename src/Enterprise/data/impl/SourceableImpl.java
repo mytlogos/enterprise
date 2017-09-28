@@ -1,14 +1,12 @@
 package Enterprise.data.impl;
 
 import Enterprise.data.Default;
-import Enterprise.data.EnterpriseEntry;
-import Enterprise.data.intface.DataTable;
+import Enterprise.data.OpEntryCarrier;
+import Enterprise.data.intface.Entry;
 import Enterprise.data.intface.Sourceable;
-import Enterprise.data.intface.Table;
 import Enterprise.data.intface.User;
 import Enterprise.misc.DataAccess;
 import Enterprise.misc.SQLUpdate;
-import javafx.beans.InvalidationListener;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -22,10 +20,7 @@ import java.util.List;
  * @see Sourceable
  */
 @DataAccess(daoClass = "SourceableTable")
-public class SimpleSourceable extends EnterpriseEntry implements Sourceable{
-    private int sourceableId;
-    private static int idCounter = 1;
-
+public class SourceableImpl extends AbstractDataEntry implements Sourceable {
     private SourceList sourceList = new SourceList();
 
     private User user;
@@ -37,48 +32,47 @@ public class SimpleSourceable extends EnterpriseEntry implements Sourceable{
     private BooleanProperty translatorChanged = new SimpleBooleanProperty(false);
 
     /**
-     *The constructor of {@code SimpleSourceable}
+     *The constructor of {@code SourceableImpl}
      */
-    public SimpleSourceable() {
+    public SourceableImpl() {
         this(Default.VALUE,new SourceList(), Default.STRING);
         user = new SimpleUser();
     }
 
     /**
-     * The constructor of {@code SimpleSourceable}
+     * The constructor of {@code SourceableImpl}
      *
-     * @param sourceList list of sources for this {@code SimpleSourceable}
-     * @param translator translator of this {@code SimpleSourceable}
+     * @param sourceList list of sources for this {@code SourceableImpl}
+     * @param translator translator of this {@code SourceableImpl}
      */
-    public SimpleSourceable(SourceList sourceList, String translator) {
+    public SourceableImpl(SourceList sourceList, String translator) {
         this(Default.VALUE, sourceList, translator);
     }
 
     /**
-     * The constructor of {@code SimpleSourceable}
-     * @param id database id of this {@code SimpleSourceable}
-     * @param sourceList list of sources for this {@code SimpleSourceable}
-     * @param translator translator of this {@code SimpleSourceable}
+     * The constructor of {@code SourceableImpl}
+     * @param id database id of this {@code SourceableImpl}
+     * @param sourceList list of sources for this {@code SourceableImpl}
+     * @param translator translator of this {@code SourceableImpl}
      */
-    public SimpleSourceable(int id, SourceList sourceList, String translator) {
+    public SourceableImpl(int id, SourceList sourceList, String translator) {
+        super(id);
         this.sourceList = sourceList;
         this.translator.set(translator);
-        sourceableId = id;
 
         validateState();
-        invalidListener();
         bindUpdated();
     }
 
     /**
-     * validates the State of this {@code SimpleSourceable}
+     * validates the State of this {@code SourceableImpl}
      *
      * @throws IllegalArgumentException if any fields are {@code null} or invalid
      */
     private void validateState() {
         String message = "";
-        if (sourceableId < 0) {
-            message = message + "Id is invalid: " + sourceableId + ", ";
+        if (getId() < 0) {
+            message = message + "Id is invalid: " + getId() + ", ";
         }
         if (sourceList == null) {
             message = message + "sourceList is null, ";
@@ -107,35 +101,32 @@ public class SimpleSourceable extends EnterpriseEntry implements Sourceable{
     }
 
     @Override
-    public int getId() {
-        return sourceableId;
-    }
-
-    @Override
-    public void setId(int id, Table table) {
-        if (!(table instanceof DataTable)) {
-            throw new IllegalAccessError();
-        }
-        if (id <= 0) {
-            throw new IllegalArgumentException("should not be smaller than 1: " + id);
-        }
-        this.sourceableId = id;
-    }
-
-    @Override
     public String getTranslator() {
         return translator.get();
     }
 
     @Override
+    public void fromDataBase() {
+        super.fromDataBase();
+        sourceList.forEach(Entry::setEntryOld);
+        sourceList.setUpdated();
+    }
+
+    @Override
     public void setUpdated() {
-        sourceListChanged.set(false);
+        sourceList.setUpdated();
         translatorChanged.set(false);
     }
 
     @Override
     protected void bindUpdated() {
-        updated.bind(sourceListChanged.or(translatorChanged));
+        updated.addListener((observable, oldValue, newValue) -> {
+            if (newValue && !newEntry) {
+                OpEntryCarrier.getInstance().addUpdate(this);
+            }
+        });
+        translator.addListener(observable -> translatorChanged.set(true));
+        updated.bind(sourceList.listChangedProperty().or(translatorChanged));
     }
 
     @Override
@@ -146,16 +137,6 @@ public class SimpleSourceable extends EnterpriseEntry implements Sourceable{
     @Override
     public BooleanProperty updatedProperty() {
         return updated;
-    }
-
-    /**
-     * adds invalidListeners to the dataField-Properties of this {@code SimpleSourceable},
-     * sets stateChanged fields to true, if state has changed
-     */
-    private void invalidListener() {
-        sourceList.addListener((InvalidationListener) observable -> sourceListChanged.set(true));
-        sourceList.listChangedProperty().addListener(observable -> sourceListChanged.set(true));
-        translator.addListener(observable -> translatorChanged.set(true));
     }
 
     @Override
@@ -178,11 +159,16 @@ public class SimpleSourceable extends EnterpriseEntry implements Sourceable{
     }
 
     @Override
+    public List<String> getKeyWordList() {
+        return user.getKeyWordList();
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof SimpleSourceable)) return false;
+        if (!(o instanceof SourceableImpl)) return false;
 
-        SimpleSourceable that = (SimpleSourceable) o;
+        SourceableImpl that = (SourceableImpl) o;
 
         return user.equals(that.user) && translator.get().equals(that.translator.get());
     }
@@ -201,10 +187,5 @@ public class SimpleSourceable extends EnterpriseEntry implements Sourceable{
             compare = this.sourceList.compareTo(o.getSourceList());
         }
         return compare;
-    }
-
-    @Override
-    public List<String> getKeyWordList() {
-        return user.getKeyWordList();
     }
 }

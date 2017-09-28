@@ -3,15 +3,18 @@ package scrape.sources.novels;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import scrape.sources.Feed;
 import scrape.sources.Source;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  *  // TODO: 09.09.2017 make a function strategy from this
  */
-public class Feed {
-
+public class FeedGetter {
 
     public static boolean hasFeed(Source source) {
         boolean hasFeed;
@@ -50,7 +53,11 @@ public class Feed {
         return Jsoup.connect(uri).get();
     }
 
-    private enum Types {
+    public static List<Feed> getFilter() {
+        return new ArrayList<>(Arrays.asList(Types.values()));
+    }
+
+    private enum Types implements Feed {
         RSS {
             @Override
             String[] getAppends() {
