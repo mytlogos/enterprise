@@ -12,7 +12,7 @@
   
   <property name="compiler.debug" value="on"/>
   <property name="compiler.generate.no.warnings" value="off"/>
-  <property name="compiler.args" value=""/>
+  <property name="compiler.args" value="-Xlint:unchecked"/>
   <property name="compiler.max.memory" value="700m"/>
   <patternset id="ignored.files">
     <exclude name="**/*.hprof/**"/>
@@ -90,15 +90,15 @@
   <!-- Project Libraries -->
   
   <path id="library.controlsfx-8.40.12.classpath">
-    <pathelement location="${basedir}/lib/controlsfx-8.40.12.jar"/>
+    <pathelement location="${basedir}/src/Enterprise/lib/controlsfx-8.40.12.jar"/>
   </path>
   
   <path id="library.jsoup-1.10.3.classpath">
-    <pathelement location="${basedir}/lib/jsoup-1.10.3.jar"/>
+    <pathelement location="${basedir}/src/Enterprise/lib/jsoup-1.10.3.jar"/>
   </path>
   
   <path id="library.sqlite-jdbc-3.19.3.classpath">
-    <pathelement location="${basedir}/lib/sqlite-jdbc-3.19.3.jar"/>
+    <pathelement location="${basedir}/src/Enterprise/lib/sqlite-jdbc-3.19.3.jar"/>
   </path>
   
   
@@ -106,7 +106,6 @@
   
   <path id="library.jsoup-1.10.3.classpath"/>
   <!-- Register Custom Compiler Taskdefs -->
-    <property name="idea.home" value=""/>
     <property name="javac2.home" value="${idea.home}/lib"/>
   <path id="javac2.classpath">
     <pathelement location="${javac2.home}/javac2.jar"/>

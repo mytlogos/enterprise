@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import org.controlsfx.control.StatusBar?>
+<VBox xmlns:fx="http://javafx.com/fxml/1" fx:id="root" xmlns="http://javafx.com/javafx/8.0.111">
+    <children>
+        <FlowPane alignment="CENTER" columnHalignment="CENTER" hgap="5.0" vgap="5.0" VBox.vgrow="SOMETIMES">
+            <VBox.margin>
+                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+            </VBox.margin>
+            <children>
+                <ToggleButton fx:id="allToggle" mnemonicParsing="false" onAction="#showAll" text="Zeig alle Posts">
+                    <toggleGroup>
+                        <ToggleGroup fx:id="showThisThat"/>
+                    </toggleGroup>
+                </ToggleButton>
+                <ToggleButton fx:id="newToggle" mnemonicParsing="false" onAction="#showNew" text="Zeig neue Posts"
+                              toggleGroup="$showThisThat"/>
+                <Button mnemonicParsing="false" onAction="#emptyNew" text="Leer neu"/>
+                <ComboBox fx:id="sortBy" onAction="#sort" prefHeight="25.0" prefWidth="129.0"
+                          promptText="Sortieren nach..."/>
+            </children>
+        </FlowPane>
+        <ListView fx:id="listView" VBox.vgrow="ALWAYS"/>
+        <StatusBar fx:id="statusBar" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="25.0" progress="0.9"
+                   VBox.vgrow="NEVER"/>
+    </children>
+</VBox>

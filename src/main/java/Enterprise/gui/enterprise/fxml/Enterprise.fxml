@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:id="root" xmlns="http://javafx.com/javafx/8.0.111"
+            fx:controller="Enterprise.gui.enterprise.controller.EnterpriseController">
+    <center>
+        <TabPane fx:id="tabPane" prefHeight="510.0" prefWidth="727.0" tabClosingPolicy="UNAVAILABLE">
+            <tabs>
+                <Tab id="animeTab" fx:id="animeTab" closable="false">
+                    <content>
+                        <Pane fx:id="animePane" prefHeight="512.0" prefWidth="727.0"/>
+                    </content>
+                </Tab>
+                <Tab fx:id="bookTab" closable="false">
+                    <content>
+                        <Pane fx:id="bookPane" prefHeight="200.0" prefWidth="200.0"/>
+                    </content>
+                </Tab>
+                <Tab fx:id="mangaTab" closable="false">
+                    <content>
+                        <Pane fx:id="mangaPane" prefHeight="200.0" prefWidth="200.0"/>
+                    </content>
+                </Tab>
+                <Tab fx:id="novelTab" closable="false">
+                    <content>
+                        <Pane fx:id="novelPane"/>
+                    </content>
+                </Tab>
+                <Tab fx:id="seriesTab" closable="false">
+                    <content>
+                        <Pane fx:id="seriesPane" prefHeight="200.0" prefWidth="200.0"/>
+                    </content>
+                </Tab>
+            </tabs>
+        </TabPane>
+    </center>
+    <top>
+        <VBox BorderPane.alignment="CENTER">
+            <children>
+                <MenuBar maxHeight="-Infinity" minHeight="-Infinity" prefHeight="25.0">
+                    <menus>
+                        <Menu mnemonicParsing="false" text="Datei">
+                            <items>
+                                <MenuItem fx:id="saveItem" mnemonicParsing="false" onAction="#saveData"
+                                          text="Speichern"/>
+                                <MenuItem fx:id="openListItem" mnemonicParsing="false" onAction="#openLists"
+                                          text="Liste öffnen"/>
+                                <MenuItem fx:id="newListItem" mnemonicParsing="false" onAction="#newList"
+                                          text="Neue Liste erstellen"/>
+                                <MenuItem fx:id="closeListItem" mnemonicParsing="false" onAction="#closeList"
+                                          text="Aktuelle Liste schließen"/>
+                                <MenuItem fx:id="deleteListItem" mnemonicParsing="false" onAction="#deleteList"
+                                          text="Aktuelle Liste löschen"/>
+                                <MenuItem fx:id="closeItem" mnemonicParsing="false" onAction="#closeProgram"
+                                          text="Programm beenden"/>
+                            </items>
+                        </Menu>
+                        <Menu mnemonicParsing="false" text="Bearbeiten">
+                            <items>
+                                <MenuItem mnemonicParsing="false" text="Delete"/>
+                            </items>
+                        </Menu>
+                        <Menu fx:id="viewMenu" mnemonicParsing="false" text="Ansicht">
+                            <items>
+                                <MenuItem mnemonicParsing="false" text="Action 1"/>
+                                <SeparatorMenuItem fx:id="separator1" mnemonicParsing="false"/>
+                                <SeparatorMenuItem fx:id="separator2" mnemonicParsing="false"/>
+                            </items>
+                        </Menu>
+                        <Menu fx:id="columnMenu" mnemonicParsing="false" text="Spalten">
+                            <items>
+                                <MenuItem mnemonicParsing="false" text="Action 1"/>
+                            </items>
+                        </Menu>
+                        <Menu mnemonicParsing="false" text="Hilfe">
+                            <items>
+                                <MenuItem fx:id="aboutItem" mnemonicParsing="false" onAction="#openAbout" text="About"/>
+                            </items>
+                        </Menu>
+                    </menus>
+                </MenuBar>
+                <ToolBar onMouseClicked="#paneFocus" prefHeight="40.0" prefWidth="200.0">
+                    <items>
+                        <Button fx:id="showPostsBtn" mnemonicParsing="false" onAction="#showPosts" prefWidth="100.0"
+                                text="Zeige Posts"/>
+                        <ToggleButton fx:id="enableMoving" mnemonicParsing="false" onAction="#movingMode"
+                                      text="Verschieben"/>
+                        <ComboBox fx:id="moveToBox" prefWidth="150.0" promptText="Verschieben nach.."/>
+                    </items>
+                </ToolBar>
+            </children>
+        </VBox>
+    </top>
+    <bottom>
+        <HBox prefHeight="24.0" prefWidth="727.0" BorderPane.alignment="CENTER">
+            <children>
+                <Separator prefWidth="200.0" HBox.hgrow="ALWAYS"/>
+            </children>
+        </HBox>
+    </bottom>
+</BorderPane>
