@@ -39,7 +39,13 @@ public class EnterpriseStart extends Application {
         getSavedPosts();
         executor.shutdown();
 
-        FXMLLoader loader = new FXMLLoader(getClass().getResource(GuiPaths.getMainPath()));
+        String string = GuiPaths.getMainPath();
+        System.out.println(this.getClass().getClassLoader().getResource(
+                string));
+        System.out.println(System.getProperty("user.dir"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource(string));
+        System.out.println(string);
+        System.out.println(loader.getLocation());
         Parent root = loader.load();
 
         primaryStage.setTitle("Enterprise");

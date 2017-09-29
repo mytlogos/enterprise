@@ -11,7 +11,7 @@ import java.util.List;
 public class GuiPaths {
 
     private static String constructFXMLPath(Module module) {
-        String guiPath = "/Enterprise/gui/";
+        String guiPath = "/Enterprise/target/classes/Enterprise/gui/";
         return guiPath.concat(module.toString()).concat("/fxml/");
     }
 
@@ -65,7 +65,7 @@ public class GuiPaths {
     }
 
     private static String getFxmlDirectory() {
-        return "/Enterprise/gui/fxml/";
+        return "/Enterprise/target/classes/Enterprise/gui/fxml/";
     }
     /*public static String getPath(Module module, Mode mode) {
         String fxmlEnding = ".fxml";
