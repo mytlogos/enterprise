@@ -8,7 +8,7 @@ import Enterprise.data.intface.SourceableEntry;
 import Enterprise.gui.general.BasicModes;
 import Enterprise.gui.general.Column;
 import Enterprise.gui.general.ColumnManager;
-import Enterprise.gui.general.Columns;
+import Enterprise.gui.general.ContentColumns;
 import Enterprise.misc.EntrySingleton;
 import Enterprise.misc.Log;
 import Enterprise.modules.BasicModules;
@@ -16,7 +16,7 @@ import Enterprise.modules.Module;
 import com.sun.javafx.collections.ObservableListWrapper;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
-import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -27,12 +27,11 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.util.Callback;
 import org.controlsfx.control.SegmentedButton;
 import scrape.PostManager;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.function.BooleanSupplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -40,7 +39,6 @@ import java.util.stream.Collectors;
 /**
  * The basic controller for all controller with {@link BasicModes#CONTENT}.
  * Provides common fields and functionality.
- * // FIXME: 02.09.2017 entry appears twice in entrytable, when adding with simpleAdd
  */
 public abstract class ContentController<E extends CreationEntry, R extends Enum<R> & Module> extends AbstractController<R, BasicModes> {
     protected Logger logger = Log.packageLogger(this);
@@ -70,48 +68,41 @@ public abstract class ContentController<E extends CreationEntry, R extends Enum<
     protected Button editBtn;
     @FXML
     private Menu moveToMenu;
-    private TableColumn<E, String> titleColumn;
-    private TableColumn<E, String> creatorNameColumn;
-    private TableColumn<E, Number> presentColumn;
-    private TableColumn<E, Number> processedColumn;
-    private TableColumn<E, String> ownStatusColumn;
-    private TableColumn<E, String> seriesColumn;
-    private TableColumn<E, String> lastEpColumn;
-    private TableColumn<E, Number> ratingColumn;
-    private TableColumn<E, String> creatorSortNameColumn;
-    private TableColumn<E, String> workStatColumn;
-    private TableColumn<E, String> commentColumn;
-    private TableColumn<E, String> keyWordsColumn;
 
     @Override
     final protected void setMode() {
         mode = BasicModes.CONTENT;
     }
 
-    // TODO: 02.09.2017 test this thing
-    private ColumnManager<E> columnManager = new ColumnManager<>(entryTable, ContentColumns.asList());
+    private ColumnManager<E> columnManager;
 
-    protected void initSegmentButtons() {
-        segmentedButtons.setToggleGroup(new ToggleGroup());
-        ToggleButton standardButton = toggleButtonFactory(Default.LIST);
-        segmentedButtons.getButtons().add(standardButton);
+    private void initColumnManager() {
+        columnManager = new ColumnManager<>(entryTable, getColumnList());
+    }
 
-        //selects the showAll toggle and shows all entries, if no button (newValue == null) would have been selected
-        segmentedButtons.getToggleGroup().selectedToggleProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue == null) {
-                segmentedButtons.getToggleGroup().selectToggle(standardButton);
-                Platform.runLater(this::showAllToggle);
-                // TODO: 01.09.2017 do sth better?
-            }
-        });
-        module.getListNames().forEach(s -> {
-            if (!s.equals(Default.LIST)) {
-                segmentedButtons.getButtons().add(toggleButtonFactory(s));
-            }
-        });
-        standardButton.setSelected(true);
-        showAllToggle();
-        paneBox.getChildren().add(0, segmentedButtons);
+    private void initSegmentButtons() {
+        if (segmentedButtons != null) {
+            segmentedButtons.setToggleGroup(new ToggleGroup());
+            ToggleButton standardButton = toggleButtonFactory(Default.LIST);
+            segmentedButtons.getButtons().add(standardButton);
+
+            //selects the showAll toggle and shows all entries, if no button (newValue == null) would have been selected
+            segmentedButtons.getToggleGroup().selectedToggleProperty().addListener((observable, oldValue, newValue) -> {
+                if (newValue == null) {
+                    segmentedButtons.getToggleGroup().selectToggle(standardButton);
+                    Platform.runLater(this::showAllToggle);
+                    // TODO: 01.09.2017 do sth better?
+                }
+            });
+            module.getListNames().forEach(s -> {
+                if (!s.equals(Default.LIST)) {
+                    segmentedButtons.getButtons().add(toggleButtonFactory(s));
+                }
+            });
+            standardButton.setSelected(true);
+            showAllToggle();
+            paneBox.getChildren().add(0, segmentedButtons);
+        }
     }
 
     private ToggleButton toggleButtonFactory(String s) {
@@ -119,34 +110,18 @@ public abstract class ContentController<E extends CreationEntry, R extends Enum<
         if (s.equals(Default.LIST)) {
             button.setOnMouseClicked(event -> showAllToggle());
         } else {
-            button.setOnMouseClicked(event -> {
-                List<CreationEntry> entries = module.getEntries().
-                        stream().
-                        filter(entry -> entry.getUser().getListName().equals(s)).
-                        collect(Collectors.toList());
-
-                entryTable.setItems(new ObservableListWrapper<>((List<E>) entries));
-            });
+            button.setOnMouseClicked(event -> showTargetList(s));
         }
         return button;
     }
 
-    /**
-     * Adds the keyWords column to the {@code entryTable TableView}
-     * after going through the {@link #stringColumnFactory(String, double, Callback)}.
-     */
-    public void showKeyWordsColumn() {
-        keyWordsColumn = stringColumnFactory(Columns.getKeyWords(module), 80,
-                data -> data.getValue().getUser().keyWordsProperty());
-        //'shows' the column in the TableView
-        entryTable.getColumns().add(keyWordsColumn);
-    }
+    private void showTargetList(String s) {
+        List<CreationEntry> entries = module.getEntries().
+                stream().
+                filter(entry -> entry.getUser().getListName().equals(s)).
+                collect(Collectors.toList());
 
-    /**
-     * Removes the keyWords Column from the {@code entryTable TableView}.
-     */
-    public void hideKeyWordsColumn() {
-        entryTable.getColumns().remove(keyWordsColumn);
+        entryTable.setItems((ObservableList<E>) new ObservableListWrapper<>(entries));
     }
 
     /**
@@ -168,7 +143,7 @@ public abstract class ContentController<E extends CreationEntry, R extends Enum<
             entryTable.getItems().add(entry);
         } else {
             logger.log(Level.SEVERE, "error while adding a new entry; entryTable: "
-                                            + entryTable + "; entry: " + entry);
+                    + entryTable + "; entry: " + entry);
         }
 
     }
@@ -200,8 +175,8 @@ public abstract class ContentController<E extends CreationEntry, R extends Enum<
     }
 
     private void showAllToggle() {
-        List<CreationEntry> entries = module.getEntries();
-        entryTable.setItems(new ObservableListWrapper<>((List<E>) entries));
+        List<? extends CreationEntry> entries = module.getEntries();
+        entryTable.setItems((ObservableList<E>) entries);
     }
 
     /**
@@ -212,7 +187,7 @@ public abstract class ContentController<E extends CreationEntry, R extends Enum<
      * @param event {@code KeyEvent} which will be filtered
      */
     @FXML
-    protected void deleteRow(KeyEvent event) {
+    protected void keyHandler(KeyEvent event) {
         if (event.getCode() == KeyCode.DELETE) {
             deleteSelected();
         }
@@ -244,8 +219,16 @@ public abstract class ContentController<E extends CreationEntry, R extends Enum<
     @FXML
     protected void deleteSelected() {
         E entry = entryTable.getSelectionModel().getSelectedItem();
+        if (entryTable.getItems() == module.getEntries()) {
+            deleteEntry(() -> module.deleteEntry(entry), entry);
+        } else {
+            deleteEntry(() -> entryTable.getItems().remove(entry), entry);
+            entry.getUser().setListName(Default.LIST);
+        }
+    }
 
-        if (entryTable.getItems().remove(entry) && module.deleteEntry(entry)) {
+    private void deleteEntry(BooleanSupplier supplier, E entry) {
+        if (supplier.getAsBoolean()) {
             //prevents getting the entry to be added to the database
             entry.setEntryOld();
             System.out.println(entry + " deleted");
@@ -339,7 +322,10 @@ public abstract class ContentController<E extends CreationEntry, R extends Enum<
      * Sets the value of textProperty of several {@link javafx.scene.text.Text}
      * and {@link javafx.scene.control.Label}.
      */
-    protected abstract void setGui();
+    protected void setGui() {
+        initColumnManager();
+        initSegmentButtons();
+    }
 
     private ContextMenu tableViewContextMenu() {
         ContextMenu menu = new ContextMenu();
@@ -359,7 +345,7 @@ public abstract class ContentController<E extends CreationEntry, R extends Enum<
     }
 
     @FXML
-    protected void loadLists() {
+    private void loadLists() {
         for (String s : module.getListNames()) {
             MenuItem item = menuItemFactory(s, event -> moveToList(s));
 
@@ -376,498 +362,18 @@ public abstract class ContentController<E extends CreationEntry, R extends Enum<
         return item;
     }
 
-    /**
-     * Creates a {@link TableColumn} with {@code Number} as it´s value type.
-     * Sets the data provider through the {@link Callback}, the Name of the Column
-     * and the preferred width.
-     *
-     * @param columnName name of the column
-     * @param prefWidth preferred width of the column
-     * @param callback callback to add to the {@code CelValueFactory} of the  {@code TableColumn}
-     * @return column - a complete {@code TableColumn}
-     */
-    private TableColumn<E, Number> numberColumnFactory(
-            String columnName, double prefWidth,
-            Callback<TableColumn.CellDataFeatures<E, Number>, ObservableValue<Number>> callback) {
-
-        TableColumn<E, Number> column = new TableColumn<>();
-        column.setPrefWidth(prefWidth);
-        column.setMinWidth(40);
-        column.setEditable(true);
-        column.setText(columnName);
-        column.setCellValueFactory(callback);
-        return column;
-    }
-
-    /**
-     * Creates a {@link TableColumn} with {@code String} as it´s value type.
-     * Sets the data provider through the {@link Callback}, the Name of the Column
-     * and the preferred width.
-     *
-     * @param columnName name of the column
-     * @param prefWidth preferred width of the column
-     * @param callback callback to add to the {@code CelValueFactory} of the  {@code TableColumn}
-     * @return column - a complete {@code TableColumn}
-     */
-    TableColumn<E, String> stringColumnFactory(String columnName, double prefWidth, Callback<TableColumn.CellDataFeatures<E, String>, ObservableValue<String>> callback) {
-        TableColumn<E, String> column = new TableColumn<>();
-        column.setPrefWidth(prefWidth);
-        column.setMinWidth(40);
-        column.setEditable(true);
-        column.setText(columnName);
-        column.setCellValueFactory(callback);
-        return column;
-    }
-
     private void moveToList(String listName) {
         entryTable.getSelectionModel().getSelectedItem().getUser().setListName(listName);
     }
 
-    // TODO: 02.09.2017 test this thing
     public ColumnManager<E> getColumnManager() {
         return columnManager;
     }
 
-    // TODO: 02.09.2017 test this thing
-    public enum ContentColumns implements Column<CreationEntry> {
-        TITLE(210, true) {
-            Module module;
-
-            @Override
-            public void setColumnModule(Module module) {
-                this.module = module;
-            }
-
-            @Override
-            public Callback<TableColumn.CellDataFeatures<CreationEntry, String>, ObservableValue<String>> getCallBack() {
-                return param -> param.getValue().getCreation().titleProperty();
-            }
-
-            @Override
-            public String getName() {
-                return "Titel";
-            }
-        },
-        CREATORNAME(80, true) {
-            Module module;
-
-            @Override
-            public void setColumnModule(Module module) {
-                this.module = module;
-            }
-
-            @Override
-            public Callback<TableColumn.CellDataFeatures<CreationEntry, String>, ObservableValue<String>> getCallBack() {
-                return param -> param.getValue().getCreation().getCreator().nameProperty();
-            }
-
-            @Override
-            public String getName() {
-                return "Autor";
-            }
-        },
-        PRESENTPORTIONS(80, true) {
-            Module module;
-
-            @Override
-            public void setColumnModule(Module module) {
-                this.module = module;
-            }
-
-            @Override
-            public Callback<TableColumn.CellDataFeatures<CreationEntry, Number>, ObservableValue<Number>> getCallBack() {
-                return param -> param.getValue().getCreation().numPortionProperty();
-            }
-
-            @Override
-            public String getName() {
-                return module == BasicModules.ANIME ? "Anzahl Episoden" :
-                        module == BasicModules.BOOK ? "Anzahl Kapitel" :
-                                module == BasicModules.MANGA ? "Anzahl Kapitel" :
-                                        module == BasicModules.NOVEL ? "Anzahl Kapitel" :
-                                                module == BasicModules.SERIES ? "Anzahl Episoden" :
-                                                        "";
-            }
-        },
-        PROCESSEDPORTIONS(80, true) {
-            Module module;
-
-            @Override
-            public void setColumnModule(Module module) {
-                this.module = module;
-            }
-
-            @Override
-            public Callback<TableColumn.CellDataFeatures<CreationEntry, Number>, ObservableValue<Number>> getCallBack() {
-                return param -> param.getValue().getUser().processedPortionProperty();
-            }
-
-            @Override
-            public String getName() {
-                return module == BasicModules.ANIME ? "Gesehen" :
-                        module == BasicModules.BOOK ? "Gelesen" :
-                                module == BasicModules.MANGA ? "Gelesen" :
-                                        module == BasicModules.NOVEL ? "Gelesen" :
-                                                module == BasicModules.SERIES ? "Gesehen" :
-                                                        "";
-            }
-        },
-        LASTPORTION(80, false) {
-            Module module;
-
-            @Override
-            public void setColumnModule(Module module) {
-                this.module = module;
-            }
-
-            @Override
-            public Callback<TableColumn.CellDataFeatures<CreationEntry, String>, ObservableValue<String>> getCallBack() {
-                return param -> param.getValue().getCreation().dateLastPortionProperty();
-            }
-
-            @Override
-            public String getName() {
-                return module == BasicModules.ANIME ? "Datum letzter Folge" :
-                        module == BasicModules.BOOK ? "Datum letztes Kapitel" :
-                                module == BasicModules.MANGA ? "Datum letztes Kapitel" :
-                                        module == BasicModules.NOVEL ? "Datum letztes Kapitel" :
-                                                module == BasicModules.SERIES ? "Datum letzter Folge" :
-                                                        "";
-            }
-        },
-        OWNSTATUS(80, true) {
-            Module module;
-
-            @Override
-            public void setColumnModule(Module module) {
-                this.module = module;
-            }
-
-            @Override
-            public Callback<TableColumn.CellDataFeatures<CreationEntry, String>, ObservableValue<String>> getCallBack() {
-                return param -> param.getValue().getUser().ownStatusProperty();
-            }
-
-            @Override
-            public String getName() {
-                return "Eigener Status";
-            }
-        },
-        SERIES(120, true) {
-            Module module;
-
-            @Override
-            public void setColumnModule(Module module) {
-                this.module = module;
-            }
-
-            @Override
-            public Callback<TableColumn.CellDataFeatures<CreationEntry, String>, ObservableValue<String>> getCallBack() {
-                return param -> param.getValue().getCreation().seriesProperty();
-            }
-
-            @Override
-            public String getName() {
-                return "Reihe";
-            }
-        },
-        RATING(80, true) {
-            Module module;
-
-            @Override
-            public void setColumnModule(Module module) {
-                this.module = module;
-            }
-
-            @Override
-            public Callback<TableColumn.CellDataFeatures<CreationEntry, Number>, ObservableValue<Number>> getCallBack() {
-                return param -> param.getValue().getUser().ratingProperty();
-            }
-
-            @Override
-            public String getName() {
-                return "Bewertung";
-            }
-        },
-        CREATORSORT(120, false) {
-            Module module;
-
-            @Override
-            public void setColumnModule(Module module) {
-                this.module = module;
-            }
-
-            @Override
-            public Callback<TableColumn.CellDataFeatures<CreationEntry, String>, ObservableValue<String>> getCallBack() {
-                return param -> param.getValue().getCreation().getCreator().sortNameProperty();
-            }
-
-            @Override
-            public String getName() {
-                return "Autor/-ensortierung";
-            }
-        },
-        WORKSTATUS(120, false) {
-            Module module;
-
-            @Override
-            public void setColumnModule(Module module) {
-                this.module = module;
-            }
-
-            @Override
-            public Callback<TableColumn.CellDataFeatures<CreationEntry, String>, ObservableValue<String>> getCallBack() {
-                return param -> param.getValue().getCreation().workStatusProperty();
-            }
-
-            @Override
-            public String getName() {
-                return "Status";
-            }
-        },
-        COMMENT(200, false) {
-            Module module;
-
-            @Override
-            public void setColumnModule(Module module) {
-                this.module = module;
-            }
-
-            @Override
-            public Callback<TableColumn.CellDataFeatures<CreationEntry, String>, ObservableValue<String>> getCallBack() {
-                return param -> param.getValue().getUser().commentProperty();
-            }
-
-            @Override
-            public String getName() {
-                return "Kommentar";
-            }
-        },
-        KEYWORDS(120, false) {
-            Module module;
-
-            @Override
-            public void setColumnModule(Module module) {
-                this.module = module;
-            }
-
-            @Override
-            public Callback<TableColumn.CellDataFeatures<CreationEntry, String>, ObservableValue<String>> getCallBack() {
-                return param -> param.getValue().getUser().keyWordsProperty();
-            }
-
-            @Override
-            public String getName() {
-                return "Stichwörter";
-            }
-        };
-
-        final int prefWidth;
-        final boolean defaultSelect;
-
-        ContentColumns(int i, boolean b) {
-            prefWidth = i;
-            defaultSelect = b;
-        }
-
-        /**
-         * Returns the values of this {@code ContentColumns} as an {@code List}.
-         *
-         * @return list of the enum values
-         */
-        public static List<Column> asList() {
-            return Arrays.asList(ContentColumns.values());
-        }
-
-        @Override
-        public double getPrefWidth() {
-            return prefWidth;
-        }
-
-        @Override
-        public boolean getDefaultSelect() {
-            return defaultSelect;
-        }
-
-        public abstract void setColumnModule(Module module);
+    protected List<Column<E>> getColumnList() {
+        List<Column<E>> list = new ContentColumns<E>().asList();
+        list.forEach(column -> column.setColumnModule(module));
+        return list;
     }
-
-    /**
-     * Adds the title column to the {@code entryTable TableView}
-     * after going through the {@link #stringColumnFactory(String, double, Callback)}.
-     */
-    public void showTitleColumn() {
-        titleColumn = stringColumnFactory(Columns.getTitle(module), 210, data -> data.getValue().getCreation().titleProperty());
-        entryTable.getColumns().add(titleColumn);
-    }
-
-    /**
-     * Adds the creator column to the {@code entryTable TableView}
-     * after going through the {@link #stringColumnFactory(String, double, Callback)}.
-     */
-    public void showCreatorColumn() {
-        creatorNameColumn = stringColumnFactory(Columns.getCreatorName(module), 80, data -> data.getValue().getCreator().nameProperty());
-        entryTable.getColumns().add(creatorNameColumn);
-    }
-
-    /**
-     * Adds the present column to the {@code entryTable TableView}
-     * after going through the {@link #numberColumnFactory(String, double, Callback)}.
-     */
-    public void showPresentColumn() {
-        presentColumn = numberColumnFactory(Columns.getNumPortion(module), 120, data -> data.getValue().getCreation().numPortionProperty());
-        entryTable.getColumns().add(presentColumn);
-    }
-
-    /**
-     * Adds the processed column to the {@code entryTable TableView}
-     * after going through the {@link #numberColumnFactory(String, double, Callback)}.
-     */
-    public void showProcessedColumn() {
-        processedColumn = numberColumnFactory(Columns.getProcessed(module), 125, data -> data.getValue().getUser().processedPortionProperty());
-        entryTable.getColumns().add(processedColumn);
-    }
-
-    /**
-     * Adds the ownStatus column to the {@code entryTable TableView}
-     * after going through the {@link #stringColumnFactory(String, double, Callback)}.
-     */
-    public void showOwnStatusColumn() {
-        ownStatusColumn = stringColumnFactory(Columns.getOwnStat(module), 80, data -> data.getValue().getUser().ownStatusProperty());
-        entryTable.getColumns().add(ownStatusColumn);
-    }
-
-    /**
-     * Adds the series column to the {@code entryTable TableView}
-     * after going through the {@link #stringColumnFactory(String, double, Callback)}.
-     */
-    public void showSeriesColumn() {
-        seriesColumn = stringColumnFactory(Columns.getSeries(module), 80, data -> data.getValue().getCreation().seriesProperty());
-        entryTable.getColumns().add(seriesColumn);
-    }
-
-    /**
-     * Adds the lastEp column to the {@code entryTable TableView}
-     * after going through the {@link #stringColumnFactory(String, double, Callback)}.
-     */
-    public void showLastPortionColumn() {
-        lastEpColumn = stringColumnFactory(Columns.getLastPortion(module), 80, data -> data.getValue().getCreation().dateLastPortionProperty());
-        entryTable.getColumns().add(lastEpColumn);
-    }
-
-    /**
-     * Adds the rating column to the {@code entryTable TableView}
-     * after going through the {@link #numberColumnFactory(String, double, Callback)}.
-     */
-    public void showRatingColumn() {
-        ratingColumn = numberColumnFactory(Columns.getRating(module), 80, data -> data.getValue().getUser().ratingProperty());
-        entryTable.getColumns().add(ratingColumn);
-    }
-
-
-    /**
-     * Adds the creatorSort column to the {@code entryTable TableView}
-     * after going through the {@link #stringColumnFactory(String, double, Callback)}.
-     */
-    public void showCreatorSortColumn() {
-        creatorSortNameColumn = stringColumnFactory(Columns.getCreatorSort(module), 80, data -> data.getValue().getCreator().sortNameProperty());
-        entryTable.getColumns().add(creatorSortNameColumn);
-    }
-
-    /**
-     * Adds the workStat column to the {@code entryTable TableView}
-     * after going through the {@link #stringColumnFactory(String, double, Callback)}.
-     */
-    public void showWorkStatColumn() {
-        workStatColumn = stringColumnFactory(Columns.getWorkStat(module), 80, data -> data.getValue().getCreation().workStatusProperty());
-        entryTable.getColumns().add(workStatColumn);
-    }
-
-    /**
-     * Adds the comment column to the {@code entryTable TableView}
-     * after going through the {@link #stringColumnFactory(String, double, Callback)}.
-     */
-    public void showCommentColumn() {
-        commentColumn = stringColumnFactory(Columns.getComment(module), 80, data -> data.getValue().getUser().commentProperty());
-        entryTable.getColumns().add(commentColumn);
-    }
-
-    /**
-     * Removes the title Column from the {@code entryTable TableView}.
-     */
-    public void hideTitleColumn() {
-        entryTable.getColumns().remove(titleColumn);
-    }
-
-    /**
-     * Removes the series Column from the {@code entryTable TableView}.
-     */
-    public void hideSeriesColumn() {
-        entryTable.getColumns().remove(seriesColumn);
-    }
-
-    /**
-     * Removes the lastEp Column from the {@code entryTable TableView}.
-     */
-    public void hideLastPortionColumn() {
-        entryTable.getColumns().remove(lastEpColumn);
-    }
-
-    /**
-     * Removes the present Column from the {@code entryTable TableView}.
-     */
-    public void hidePresentColumn() {
-        entryTable.getColumns().remove(presentColumn);
-    }
-
-    /**
-     * Removes the processed Column from the {@code entryTable TableView}.
-     */
-    public void hideProcessedColumn() {
-        entryTable.getColumns().remove(processedColumn);
-    }
-
-    /**
-     * Removes the rating Column from the {@code entryTable TableView}.
-     */
-    public void hideRatingColumn() {
-        entryTable.getColumns().remove(ratingColumn);
-    }
-
-    /**
-     * Removes the creator Column from the {@code entryTable TableView}.
-     */
-    public void hideCreatorColumn() {
-        entryTable.getColumns().remove(creatorNameColumn);
-    }
-
-    /**
-     * Removes the creatorSort Column from the {@code entryTable TableView}.
-     */
-    public void hideCreatorSortColumn() {
-        entryTable.getColumns().remove(creatorSortNameColumn);
-    }
-
-    /**
-     * Removes the workStat Column from the {@code entryTable TableView}.
-     */
-    public void hideWorkStatColumn() {
-        entryTable.getColumns().remove(workStatColumn);
-    }
-
-    /**
-     * Removes the ownStatus Column from the {@code entryTable TableView}.
-     */
-    public void hideOwnStatusColumn() {
-        entryTable.getColumns().remove(ownStatusColumn);
-    }
-
-    /**
-     * Removes the comment Column from the {@code entryTable TableView}.
-     */
-    public void hideCommentColumn() {
-        entryTable.getColumns().remove(commentColumn);
-    }
-
 
 }

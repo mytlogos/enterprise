@@ -15,6 +15,8 @@ import scrape.sources.novels.PostScraper;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -102,19 +104,22 @@ public class ScheduledPostScraper extends ScheduledService<List<Post>> {
              *
              * @param postList list of {@link Post}s, to be operated on
              */
-            private void searchForPosts(List<Post> postList) {
-                PostScraper scraper;
+            private void searchForPosts(final List<Post> postList) {
+                ExecutorService service = Executors.newFixedThreadPool(20);
 
-                for (Source source : searchMap.keySet()) {
+                for (final Source source : searchMap.keySet()) {
                     updateMessage("Lade Posts von " + source.getSourceName());
-                    try {
-                        scraper = PostScraper.scraper(source);
-                        for (SearchEntry searchEntry : searchMap.get(source)) {
-                            postList.addAll(scraper.getPosts(searchEntry));
+
+                    service.submit(() -> {
+                        try {
+                            PostScraper scraper = PostScraper.scraper(source);
+                            for (SearchEntry searchEntry : searchMap.get(source)) {
+                                postList.addAll(scraper.getPosts(searchEntry));
+                            }
+                        } catch (IOException e) {
+                            logger.log(Level.WARNING, "Failed in getting the html Document", e);
                         }
-                    } catch (IOException e) {
-                        logger.log(Level.WARNING, "Failed in getting the html Document", e);
-                    }
+                    });
                     progress++;
                     updateProgress(progress, maxWork);
 
@@ -127,6 +132,14 @@ public class ScheduledPostScraper extends ScheduledService<List<Post>> {
                                         progress);
                     }
                 }
+                service.shutdown();
+                while (!service.isTerminated()) {
+                    try {
+                        Thread.sleep(10);
+                    } catch (InterruptedException ignored) {
+                    }
+                }
+                System.out.println("finally terminated");
             }
 
             /**

@@ -6,6 +6,7 @@ import Enterprise.data.intface.CreationEntry;
 import Enterprise.data.intface.Creator;
 import Enterprise.data.intface.User;
 import Enterprise.modules.BasicModules;
+import Enterprise.modules.Module;
 
 /**
  * Simple container class, representing an Entry of an Entertainment-element like a book, with user interactions,
@@ -22,7 +23,7 @@ public class CreationEntryImpl extends AbstractCreationEntry implements Creation
      * @param creator {@link Creator} of said Creation
      * @param module {@link BasicModules} of this {@code CreationEntryImpl}
      */
-    public CreationEntryImpl(User user, Creation creation, Creator creator, BasicModules module) {
+    public CreationEntryImpl(User user, Creation creation, Creator creator, Module module) {
         this.user = user;
         this.creation = creation;
         this.creation.setCreator(creator);
@@ -109,7 +110,7 @@ public class CreationEntryImpl extends AbstractCreationEntry implements Creation
     }
 
     @Override
-    public BasicModules getModule() {
+    public Module getModule() {
         return module;
     }
 

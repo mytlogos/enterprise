@@ -8,6 +8,7 @@ import javafx.util.Callback;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Should create column with settings specified by the {@link Column}.
@@ -15,30 +16,35 @@ import java.util.Map;
  * {@code TableColumn} from the user when calling {@link #showColumn(Column)},
  * {@link #hideColumn(Column)}.
  * <p>
- * // TODO: 02.09.2017 do sth with this or delete this shit
  */
 public class ColumnManager<E> {
-    private Map<Column, TableColumn<E, ?>> consumerMap = new HashMap<>();
+    private final Map<Column<E>, TableColumn<E, ?>> columnMap = new HashMap<>();
+    private final TableView<E> tableView;
 
-    private TableView<E> tableView;
-
-    public ColumnManager(TableView<E> tableView, List<Column> columns) {
+    public ColumnManager(TableView<E> tableView, List<Column<E>> columns) {
         this.tableView = tableView;
-        columns.forEach(column ->
-                consumerMap.put(
-                        column,
-                        columnFactory(
-                                column.getName(),
-                                column.getPrefWidth(),
-                                column.getCallBack())));
+        columns.forEach((Column<E> column) -> columnMap.put(
+                column,
+                columnFactory(
+                        column.getName(),
+                        column.getPrefWidth(),
+                        column.getCallBack())));
     }
 
+
     public void hideColumn(Column column) {
-        tableView.getColumns().remove(consumerMap.get(column));
+        tableView.getColumns().remove(columnMap.get(column));
     }
 
     public void showColumn(Column column) {
-        tableView.getColumns().add(consumerMap.get(column));
+        TableColumn<E, ?> tableColumn = columnMap.get(column);
+        if (!tableView.getColumns().contains(tableColumn)) {
+            tableView.getColumns().add(tableColumn);
+        }
+    }
+
+    public Set<Column<E>> getColumns() {
+        return columnMap.keySet();
     }
 
     /**
@@ -47,8 +53,8 @@ public class ColumnManager<E> {
      * and the preferred width.
      *
      * @param columnName name of the column
+     * @param callback the data provider callback
      * @param prefWidth  preferred width of the column
-     * @param callback   callback to add to the {@code CelValueFactory} of the  {@code TableColumn}
      * @return column - a complete {@code TableColumn}
      */
     private TableColumn<E, Object> columnFactory(String columnName, double prefWidth,

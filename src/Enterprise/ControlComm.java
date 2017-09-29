@@ -1,30 +1,14 @@
 package Enterprise;
 
-import Enterprise.gui.anime.controller.AddAnimeController;
-import Enterprise.gui.anime.controller.AnimeController;
-import Enterprise.gui.anime.controller.EditAnimeController;
-import Enterprise.gui.anime.controller.ShowAnimeController;
-import Enterprise.gui.book.controller.AddBookController;
-import Enterprise.gui.book.controller.BookController;
-import Enterprise.gui.book.controller.EditBookController;
-import Enterprise.gui.book.controller.ShowBookController;
 import Enterprise.gui.controller.Controller;
+import Enterprise.gui.controller.add.*;
+import Enterprise.gui.controller.content.*;
+import Enterprise.gui.controller.edit.*;
+import Enterprise.gui.controller.show.*;
 import Enterprise.gui.enterprise.controller.EnterpriseController;
 import Enterprise.gui.general.BasicModes;
 import Enterprise.gui.general.GuiPaths;
 import Enterprise.gui.general.Mode;
-import Enterprise.gui.manga.controller.AddMangaController;
-import Enterprise.gui.manga.controller.EditMangaController;
-import Enterprise.gui.manga.controller.MangaController;
-import Enterprise.gui.manga.controller.ShowMangaController;
-import Enterprise.gui.novel.controller.AddNovelController;
-import Enterprise.gui.novel.controller.EditNovelController;
-import Enterprise.gui.novel.controller.NovelController;
-import Enterprise.gui.novel.controller.ShowNovelController;
-import Enterprise.gui.series.controller.AddSeriesController;
-import Enterprise.gui.series.controller.EditSeriesController;
-import Enterprise.gui.series.controller.SeriesController;
-import Enterprise.gui.series.controller.ShowSeriesController;
 import Enterprise.modules.BasicModules;
 import Enterprise.modules.Module;
 

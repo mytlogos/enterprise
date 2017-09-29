@@ -3,16 +3,11 @@ package Enterprise.gui.enterprise.controller;
 import Enterprise.ControlComm;
 import Enterprise.data.concurrent.OnCloseRun;
 import Enterprise.data.concurrent.UpdateService;
-import Enterprise.gui.anime.controller.AnimeController;
-import Enterprise.gui.book.controller.BookController;
 import Enterprise.gui.controller.ContentController;
 import Enterprise.gui.controller.Controller;
 import Enterprise.gui.general.BasicModes;
 import Enterprise.gui.general.GuiPaths;
 import Enterprise.gui.general.ItemFactory;
-import Enterprise.gui.manga.controller.MangaController;
-import Enterprise.gui.novel.controller.NovelController;
-import Enterprise.gui.series.controller.SeriesController;
 import Enterprise.misc.Log;
 import Enterprise.modules.BasicModules;
 import javafx.application.Platform;
@@ -242,18 +237,20 @@ public class EnterpriseController implements Initializable, Controller {
      * and binds it to the Container Pane.
      *
      * @param module module to load
-     * @param pane Pane to load the Content in
+     * @param pane   Pane to load the Content in
      * @throws IOException if content could not be loaded
      */
     private void loadContent(BasicModules module, Pane pane) throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource(GuiPaths.getPath(module, BasicModes.CONTENT)));
+        String location = GuiPaths.getPath(module, BasicModes.CONTENT);
+        FXMLLoader loader = new FXMLLoader(getClass().getResource(location));
 
-        Pane pane1;
-        pane1 = loader.load();
+        Pane contentPane;
+        loader.setController(ControlComm.getInstance().getController(module, BasicModes.CONTENT));
+        contentPane = loader.load();
 
-        pane1.prefHeightProperty().bind(pane.heightProperty());
-        pane1.prefWidthProperty().bind(pane.widthProperty());
-        pane.getChildren().add(pane1);
+        contentPane.prefHeightProperty().bind(pane.heightProperty());
+        contentPane.prefWidthProperty().bind(pane.widthProperty());
+        pane.getChildren().add(contentPane);
     }
 
     /**
@@ -296,6 +293,7 @@ public class EnterpriseController implements Initializable, Controller {
      */
     private void setViewMenu() {
         ItemFactory factory = new ItemFactory();
+
         tabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             String selectedTab = newValue.getText();
             String oldTab = oldValue.getText();
@@ -305,7 +303,7 @@ public class EnterpriseController implements Initializable, Controller {
 
         });
         tabPane.getSelectionModel().select(animeTab);
-        viewMenu.getItems().addAll(indexFirstSep +1, factory.getAnimeMenuItems());
+        viewMenu.getItems().addAll(indexFirstSep + 1, factory.getCheckMenuItems(BasicModules.ANIME));
     }
 
     /**
@@ -315,10 +313,12 @@ public class EnterpriseController implements Initializable, Controller {
      * @see BasicModules#tabName()
      */
     private void onOldTab(String oldTab) {
-        if (ANIME.tabName().equalsIgnoreCase(oldTab)) {
-            AnimeController controller = (AnimeController) ControlComm.getInstance().getController(ANIME, BasicModes.CONTENT);
-            controller.clearColumns();
-        }
+        for (BasicModules basicModule : BasicModules.values()) {
+            if (basicModule.tabName().equalsIgnoreCase(oldTab)) {
+                ContentController controller = (ContentController) ControlComm.getInstance().getController(basicModule, BasicModes.CONTENT);
+                controller.clearColumns();
+            }
+        }/*
         if (BOOK.tabName().equalsIgnoreCase(oldTab)) {
             BookController controller = (BookController) ControlComm.getInstance().getController(BOOK, BasicModes.CONTENT);
             //controller.clearColumns();
@@ -335,21 +335,24 @@ public class EnterpriseController implements Initializable, Controller {
         if (SERIES.tabName().equalsIgnoreCase(oldTab)) {
             SeriesController controller = (SeriesController) ControlComm.getInstance().getController(SERIES, BasicModes.CONTENT);
             //controller.clearColumns();
-        }
+        }*/
     }
 
     /**
      * Sets the 'hide/show XYColumns' menuItems to the {@code viewMenu}
      * and removes the old ones from the {@code viewMenu}.
-     * @param factory menuItemFactory for the 'hide/show XYColumns'
+     *
+     * @param factory     menuItemFactory for the 'hide/show XYColumns'
      * @param selectedTab name of the selected Tab
      */
     private void onNewTab(ItemFactory factory, String selectedTab) {
-        if (selectedTab.equalsIgnoreCase(ANIME.tabName())) {
-            clearViewMenu();
-            viewMenu.getItems().addAll(indexFirstSep +1, factory.getAnimeMenuItems());
+        for (BasicModules basicModule : BasicModules.values()) {
+            if (selectedTab.equalsIgnoreCase(basicModule.tabName())) {
+                clearViewMenu();
+                viewMenu.getItems().addAll(indexFirstSep + 1, factory.getCheckMenuItems(basicModule));
+            }
         }
-        if (selectedTab.equalsIgnoreCase(BOOK.tabName())) {
+        /*if (selectedTab.equalsIgnoreCase(BOOK.tabName())) {
             clearViewMenu();
         }
         if (selectedTab.equalsIgnoreCase(MANGA.tabName())) {
@@ -357,11 +360,11 @@ public class EnterpriseController implements Initializable, Controller {
         }
         if (selectedTab.equalsIgnoreCase(NOVEL.tabName())) {
             clearViewMenu();
-            viewMenu.getItems().addAll(indexFirstSep +1, factory.getNovelMenuItems());
+            viewMenu.getItems().addAll(indexFirstSep + 1, factory.getCheckMenuItems(BasicModules.NOVEL));
         }
         if (selectedTab.equalsIgnoreCase(SERIES.tabName())) {
             clearViewMenu();
-        }
+        }*/
     }
 
     /**
@@ -403,8 +406,10 @@ public class EnterpriseController implements Initializable, Controller {
         setTabs();
 
         calcViewMenuSeparator();
-        loadPanes();
-        Platform.runLater(this::setViewMenu);
+        Platform.runLater(() -> {
+            loadPanes();
+            setViewMenu();
+        });
     }
 
     private void calcViewMenuSeparator() {

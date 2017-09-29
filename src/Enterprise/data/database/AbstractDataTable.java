@@ -185,9 +185,11 @@ public abstract class AbstractDataTable<E extends DataEntry> extends AbstractTab
                 ResultSet rs = stmt.executeQuery(getAll());
                 if (!rs.isClosed()) {
                     while (rs.next()) {
-
                         entry = getData(rs);
-                        entries.add(entry);
+
+                        if (entry != null) {
+                            entries.add(entry);
+                        }
                     }
                 } else {
                     System.out.println("Es scheint das keine Einträge in " + getTableName() + "vorhanden sind!");
@@ -219,14 +221,12 @@ public abstract class AbstractDataTable<E extends DataEntry> extends AbstractTab
                     entry = getData(rs);
 
                 } else {
-                    System.out.println("Es scheint das keine Einträge in " + getTableName() + "vorhanden sind!");
                     logger.log(Level.INFO, "no entries in " + getTableName() +
                                                 " with SQL statement: " + getString);
                 }
             }
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "error occurred while getting data", e);
-            e.printStackTrace();
         }
         return entry;
     }
@@ -253,11 +253,7 @@ public abstract class AbstractDataTable<E extends DataEntry> extends AbstractTab
 
     @Override
     public boolean delete(Collection<? extends E> deletedEntries) {
-        boolean deleted = false;
-        for (E e : deletedEntries) {
-            deleted = delete(e);
-        }
-        return deleted;
+        return Connections.getConnectionAuto(connection -> delete(deletedEntries, connection));
     }
 
     /**
@@ -270,11 +266,13 @@ public abstract class AbstractDataTable<E extends DataEntry> extends AbstractTab
     boolean delete(Collection<? extends E> deletedEntries, Connection connection) throws SQLException {
         validate(deletedEntries, connection);
 
-        boolean deleted = false;
-        for (E e : deletedEntries) {
-            deleted = delete(e, connection);
+        try (PreparedStatement statement = connection.prepareStatement(getDelete())) {
+            for (E e : deletedEntries) {
+                statement.setInt(1, e.getId());
+                logger.log(Level.INFO, e.getClass().getSimpleName() + " with id " + e.getId() + " will be deleted.");
+            }
+            return statement.executeBatch().length == deletedEntries.size();
         }
-        return deleted;
     }
 
     /**
@@ -317,6 +315,15 @@ public abstract class AbstractDataTable<E extends DataEntry> extends AbstractTab
      */
     private String getDelete(E entry) {
         return "Delete from " + getTableName() + " where " + getTableId() + "=" + entry.getId();
+    }
+
+    /**
+     * Gets the SQL statement for a DELETE operation. Deletes only one row from the table.
+     *
+     * @return string - the complete SQL statement
+     */
+    private String getDelete() {
+        return "Delete from " + getTableName() + " where " + getTableId() + "=?";
     }
 
     protected String getTableId() {

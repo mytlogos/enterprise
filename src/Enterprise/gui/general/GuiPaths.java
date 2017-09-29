@@ -56,6 +56,18 @@ public class GuiPaths {
      * @return path - a relative path to the current working environment
      */
     public static String getPath(Module module, Mode mode) {
+        String directory = getFxmlDirectory();
+        String filePath = directory + mode.toString().toLowerCase();
+        if (mode != BasicModes.CONTENT && module.isSourceable()) {
+            filePath = filePath + "Sourceable";
+        }
+        return filePath + ".fxml";
+    }
+
+    private static String getFxmlDirectory() {
+        return "/Enterprise/gui/fxml/";
+    }
+    /*public static String getPath(Module module, Mode mode) {
         String fxmlEnding = ".fxml";
         String path;
 
@@ -72,7 +84,7 @@ public class GuiPaths {
                     .concat(fxmlEnding);
         }
         return path;
-    }
+    }*/
 
     public static String getMainPath() {
         String fxmlEnding = ".fxml";
@@ -108,6 +120,11 @@ public class GuiPaths {
             @Override
             public List<String> getListNames() {
                 throw new IllegalAccessError();
+            }
+
+            @Override
+            public boolean isSourceable() {
+                return false;
             }
         };
 

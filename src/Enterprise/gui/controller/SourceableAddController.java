@@ -1,14 +1,19 @@
 package Enterprise.gui.controller;
 
+import Enterprise.ControlComm;
+import Enterprise.data.OpEntryCarrier;
 import Enterprise.data.impl.SourceableEntryImpl;
 import Enterprise.data.impl.SourceableImpl;
 import Enterprise.data.intface.*;
+import Enterprise.gui.controller.content.NovelController;
+import Enterprise.gui.general.BasicModes;
 import Enterprise.gui.general.GlobalItemValues;
-import Enterprise.modules.BasicModules;
 import Enterprise.modules.Module;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.stage.Stage;
+import scrape.PostManager;
 import scrape.sources.Source;
 import scrape.sources.SourceList;
 
@@ -56,6 +61,33 @@ public abstract class SourceableAddController<E extends Enum<E> & Module> extend
         }
     }
 
+    @Override
+    @FXML
+    protected void add() {
+        SourceableEntry entry = getSourceableEntry(module);
+
+        //add if this entry is not contained in the entry list of module
+        if (module.addEntry(entry)) {
+
+            //add it to the TableView of the Content Display
+            NovelController controller = (NovelController) ControlComm.getInstance().getController(module, BasicModes.CONTENT);
+            controller.addEntry(entry);
+
+            //ready for adding it to the database
+            OpEntryCarrier.getInstance().addNewEntry(entry);
+
+            //Make content available for Scraping
+            PostManager.getInstance().addSearchEntries(entry);
+        } else {
+            //show alert for trying to add an already existing entry
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Eintrag existiert schon!");
+            alert.show();
+        }
+        //close this window either way
+        Stage stage = (Stage) addBtn.getScene().getWindow();
+        stage.close();
+    }
+
     /**
      * Sets the fields providing data for the Columns.
      */
@@ -71,7 +103,7 @@ public abstract class SourceableAddController<E extends Enum<E> & Module> extend
      * @param module module of this {@code SourceableEntry}
      * @return entry - a complete SourceableEntry
      */
-    protected SourceableEntryImpl getSourceableEntry(BasicModules module) {
+    protected SourceableEntryImpl getSourceableEntry(Module module) {
         CreationEntry entry = getCreationEntry(module);
 
         Creator creator = entry.getCreator();

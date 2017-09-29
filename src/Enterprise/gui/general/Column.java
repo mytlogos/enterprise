@@ -1,5 +1,6 @@
 package Enterprise.gui.general;
 
+import Enterprise.modules.Module;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.TableColumn;
 import javafx.util.Callback;
@@ -8,11 +9,14 @@ import javafx.util.Callback;
  *
  */
 public interface Column<V> {
-    <E> Callback<TableColumn.CellDataFeatures<V, E>, ObservableValue<E>> getCallBack();
+    <T> Callback<TableColumn.CellDataFeatures<V, T>, ObservableValue<T>> getCallBack();
 
     double getPrefWidth();
 
     String getName();
 
     boolean getDefaultSelect();
+
+    void setColumnModule(Module module);
+
 }

@@ -5,7 +5,7 @@ import Enterprise.data.intface.Creation;
 import Enterprise.data.intface.CreationEntry;
 import Enterprise.data.intface.DataEntry;
 import Enterprise.data.intface.User;
-import Enterprise.modules.BasicModules;
+import Enterprise.modules.Module;
 
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -16,7 +16,7 @@ import java.util.WeakHashMap;
 abstract class AbstractCreationEntry extends EnterpriseEntry implements CreationEntry {
     User user;
     Creation creation;
-    BasicModules module;
+    Module module;
 
     private static Map<DataEntry, Integer> references = new WeakHashMap<>();
 

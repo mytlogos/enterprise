@@ -2,7 +2,7 @@ package Enterprise.data.impl;
 
 import Enterprise.data.OpEntryCarrier;
 import Enterprise.data.intface.*;
-import Enterprise.modules.BasicModules;
+import Enterprise.modules.Module;
 import scrape.PostManager;
 
 /**
@@ -22,7 +22,7 @@ public class SourceableEntryImpl extends AbstractCreationEntry implements Source
      * @param sourceable sourceable to be set to this entry
      * @param module module to be set to this entry
      */
-    public SourceableEntryImpl(User user, Creation creation, Creator creator, Sourceable sourceable, BasicModules module) {
+    public SourceableEntryImpl(User user, Creation creation, Creator creator, Sourceable sourceable, Module module) {
         this.user = user;
         this.creation = creation;
         this.module = module;
@@ -109,7 +109,7 @@ public class SourceableEntryImpl extends AbstractCreationEntry implements Source
         } else {
             compared = this.creation.compareTo(o.getCreation());
             if (compared == 0) {
-                compared = module.compareTo(o.getModule());
+                compared = module.toString().compareTo(getModule().toString());
             }
             if (compared == 0) {
                 compared = user.compareTo(o.getUser());
@@ -124,7 +124,7 @@ public class SourceableEntryImpl extends AbstractCreationEntry implements Source
     }
 
     @Override
-    public BasicModules getModule() {
+    public Module getModule() {
         return module;
     }
 

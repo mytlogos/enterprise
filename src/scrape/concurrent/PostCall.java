@@ -6,10 +6,10 @@ import scrape.PostTable;
 import scrape.sources.Source;
 
 import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -73,10 +73,47 @@ public class PostCall implements Callable<Boolean> {
                         stream().
                         filter(timeFilter().negate()).
                         collect(Collectors.toList());
+
+                oldPosts.addAll(posts);
                 return PostTable.getInstance().delete(oldPosts);
             }
-        };
 
+            Set<Post> posts = new HashSet<>();
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            boolean started = false;
+
+            public void startTimer() {
+                if (!executor.isShutdown()) {
+                    executor.submit(() -> {
+                        if (!started) {
+                            started = true;
+                            executor.shutdown();
+
+                            LocalDateTime now = LocalDateTime.now().plusSeconds(4);
+                            while (now.isAfter(LocalDateTime.now())) {
+                                try {
+                                    Thread.sleep(1000);
+                                } catch (InterruptedException ignored) {
+                                }
+                            }
+                            doAction();
+                        }
+                    });
+                }
+            }
+
+            public void queueEntry(Post post) {
+                posts.add(post);
+            }
+        },;
+
+        public void queueEntry(Post post) {
+
+        }
+
+        public void startTimer() {
+
+        }
         private static Map<Source, List<Post>> mapWithSource(List<Post> posts) {
             return posts.stream().collect(Collectors.groupingBy(Post::getSource));
         }

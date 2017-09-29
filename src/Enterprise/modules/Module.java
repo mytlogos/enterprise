@@ -12,9 +12,11 @@ public interface Module {
 
     boolean deleteEntry(CreationEntry entry);
 
-    List<CreationEntry> getEntries();
+    List<? extends CreationEntry> getEntries();
 
     boolean addEntry(CreationEntry entry);
 
     List<String> getListNames();
+
+    boolean isSourceable();
 }

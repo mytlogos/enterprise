@@ -123,7 +123,7 @@ public abstract class ShowController<E extends CreationEntry, R extends Enum<R> 
     @FXML
     protected void openEdit() {
         EntrySingleton.getInstance().setEntry(entryData);
-        ControlComm.getInstance().getController(module, mode).open();
+        ControlComm.getInstance().getController(module, BasicModes.EDIT).open();
     }
 
     /**

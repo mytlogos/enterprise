@@ -72,7 +72,7 @@ public class CreationEntryTable extends AbstractRelationTable<CreationEntry> {
     }
 
     final String getDelete() {
-        return "Delete from " + getTableName() + " where " + userIdC + " = ?";
+        return "Delete from " + getTableName() + " where " + userIdC.getName() + " = ?";
     }
 
     /**
@@ -286,6 +286,7 @@ public class CreationEntryTable extends AbstractRelationTable<CreationEntry> {
             if (entries.isEmpty()) {
                 return false;
             }
+            System.out.println("Delete Statement: " + getDelete());
             try (PreparedStatement statement = connection.prepareStatement(getDelete())) {
                 for (CreationEntry entry : entries) {
                     removeDead(entry, connection);
@@ -340,9 +341,6 @@ public class CreationEntryTable extends AbstractRelationTable<CreationEntry> {
 
         entry.getModule().addEntry(entry);
 
-        if (entry.getModule().isSourceable()) {
-
-        }
         return entry;
     }
 
@@ -495,7 +493,7 @@ public class CreationEntryTable extends AbstractRelationTable<CreationEntry> {
         int creationId = entry.getCreation().getId();
         int creatorId = entry.getCreator().getId();
         int userId = entry.getUser().getId();
-        String module = entry.getModule().name();
+        String module = entry.getModule().toString().toUpperCase();
 
         checkId(creationId);
         checkId(creatorId);

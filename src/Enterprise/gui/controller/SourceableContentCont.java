@@ -1,33 +1,35 @@
 package Enterprise.gui.controller;
 
+import Enterprise.data.impl.*;
+import Enterprise.data.intface.Creation;
+import Enterprise.data.intface.Creator;
 import Enterprise.data.intface.SourceableEntry;
-import Enterprise.gui.general.Columns;
+import Enterprise.gui.general.Column;
+import Enterprise.gui.general.SourceableColumns;
 import Enterprise.modules.Module;
-import javafx.scene.control.TableColumn;
-import javafx.util.Callback;
+
+import java.util.List;
 
 /**
  * This class represents an corresponding extension of {@code ContentController}
  * for all controller which handle {@link Enterprise.data.intface.SourceableEntry}s.
  */
 public abstract class SourceableContentCont<R extends Enum<R> & Module> extends ContentController<SourceableEntry, R> {
-    private TableColumn<SourceableEntry, String> translatorColumn;
-
-    /**
-     * Adds the translator column to the {@code entryTable TableView}
-     * after going through the {@link #stringColumnFactory(String, double, Callback)}.
-     */
-    public void showTranslatorColumn() {
-        translatorColumn = stringColumnFactory(Columns.getTranslator(module), 80,
-                data -> data.getValue().getSourceable().translatorProperty());
-        //'shows' the column in the TableView
-        entryTable.getColumns().add(translatorColumn);
+    @Override
+    protected List<Column<SourceableEntry>> getColumnList() {
+        List<Column<SourceableEntry>> list = new SourceableColumns().asList();
+        list.forEach(column -> column.setColumnModule(module));
+        return super.getColumnList();
     }
 
-    /**
-     * Removes the Translator Column from the {@code entryTable TableView}.
-     */
-    public void hideTranslatorColumn() {
-        entryTable.getColumns().remove(translatorColumn);
+    @Override
+    protected SourceableEntry getSimpleEntry() {
+        String author = creatorField.getText();
+        String title = titleField.getText();
+
+        Creator creator = new CreatorImpl.CreatorBuilder(author).build();
+        Creation creation = new CreationImpl.CreationImplBuilder(title).build();
+
+        return new SourceableEntryImpl(new SimpleUser(), creation, creator, new SourceableImpl(), module);
     }
 }

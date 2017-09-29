@@ -1,6 +1,7 @@
 package Enterprise.data.intface;
 
 import Enterprise.modules.BasicModules;
+import Enterprise.modules.Module;
 
 /**
  * Container class which represents an Entity of an Entry, with Creation, Creator and user procession of said Creation
@@ -33,7 +34,7 @@ public interface CreationEntry extends Comparable<CreationEntry>, ContainerEntry
      *
      * @return module - returns the {@link BasicModules} of this {@code CreationEntry}, is not {@code null}.
      */
-    BasicModules getModule();
+    Module getModule();
 
     /**
      * Implementation of {@link Comparable}

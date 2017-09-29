@@ -3,6 +3,8 @@ package Enterprise.modules;
 import Enterprise.data.OpEntryCarrier;
 import Enterprise.data.intface.CreationEntry;
 import Enterprise.misc.SetList;
+import com.sun.javafx.collections.ObservableListWrapper;
+import javafx.collections.ObservableList;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,11 +14,11 @@ import java.util.List;
  */
 public enum BasicModules implements Module {
     ANIME("Anime", true) {
-        List<CreationEntry> entries = new SetList<>();
+        ObservableList<CreationEntry> entries = new ObservableListWrapper<>(new SetList<>());
         List<String> distinctionList = new SetList<>();
 
         @Override
-        List<CreationEntry> getEntryList() {
+        ObservableList<CreationEntry> getEntryList() {
             return entries;
         }
 
@@ -27,12 +29,12 @@ public enum BasicModules implements Module {
 
     },
     BOOK("Bücher", false) {
-        List<CreationEntry> entries = new SetList<>();
+        ObservableList<CreationEntry> entries = new ObservableListWrapper<>(new SetList<>());
         List<String> distinctionList = new ArrayList<>();
 
 
         @Override
-        List<CreationEntry> getEntryList() {
+        ObservableList<CreationEntry> getEntryList() {
             return entries;
         }
 
@@ -42,12 +44,12 @@ public enum BasicModules implements Module {
         }
     },
     MANGA("Manga", false) {
-        List<CreationEntry> entries = new SetList<>();
+        ObservableList<CreationEntry> entries = new ObservableListWrapper<>(new SetList<>());
         List<String> distinctionList = new ArrayList<>();
 
 
         @Override
-        List<CreationEntry> getEntryList() {
+        ObservableList<CreationEntry> getEntryList() {
             return entries;
         }
 
@@ -57,12 +59,12 @@ public enum BasicModules implements Module {
         }
     },
     NOVEL("Novel", true) {
-        List<CreationEntry> entries = new SetList<>();
+        ObservableList<CreationEntry> entries = new ObservableListWrapper<>(new SetList<>());
         List<String> distinctionList = new ArrayList<>();
 
 
         @Override
-        List<CreationEntry> getEntryList() {
+        ObservableList<CreationEntry> getEntryList() {
             return entries;
         }
 
@@ -72,12 +74,12 @@ public enum BasicModules implements Module {
         }
     },
     SERIES("Serien", false) {
-        List<CreationEntry> entries = new SetList<>();
+        ObservableList<CreationEntry> entries = new ObservableListWrapper<>(new SetList<>());
         List<String> distinctionList = new ArrayList<>();
 
 
         @Override
-        List<CreationEntry> getEntryList() {
+        ObservableList<CreationEntry> getEntryList() {
             return entries;
         }
 
@@ -100,7 +102,7 @@ public enum BasicModules implements Module {
     }
 
     @Override
-    public List<CreationEntry> getEntries() {
+    public ObservableList<? extends CreationEntry> getEntries() {
         return getEntryList();
     }
 
@@ -151,7 +153,7 @@ public enum BasicModules implements Module {
      *
      * @return
      */
-    abstract List<CreationEntry> getEntryList();
+    abstract ObservableList<CreationEntry> getEntryList();
 
     /**
      * @return
