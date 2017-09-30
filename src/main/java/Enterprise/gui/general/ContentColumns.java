@@ -74,8 +74,8 @@ public class ContentColumns<E extends CreationEntry> {
         Module module;
 
         @Override
-        public Callback<TableColumn.CellDataFeatures<E, String>, ObservableValue<String>> getCallBack() {
-            return param -> param.getValue().getCreation().titleProperty();
+        public Callback<TableColumn.CellDataFeatures<E, Number>, ObservableValue<Number>> getCallBack() {
+            return param -> param.getValue().getCreation().numPortionProperty();
         }
 
         @Override

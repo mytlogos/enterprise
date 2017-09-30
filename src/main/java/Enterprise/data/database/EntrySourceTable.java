@@ -156,7 +156,7 @@ public class EntrySourceTable extends AbstractSubRelation<Sourceable> {
                     entrySet.add(entry);
                 }
             } else {
-                System.out.println("Es scheint das keine Einträge in " + getTableName() + "vorhanden sind!");
+                System.out.println("Es scheint das keine Einträge in " + getTableName() + " vorhanden sind!");
                 logger.log(Level.INFO, "no entries in " + getTableName());
             }
         }

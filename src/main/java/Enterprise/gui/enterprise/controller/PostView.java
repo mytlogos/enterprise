@@ -72,7 +72,7 @@ public class PostView implements Initializable {
      * Opens an independent window of {@code PostView}.
      */
     public void open() {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("../fxml/PostView.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("fxml/postView.fxml"));
         try {
             Parent root;
             loader.setController(this);
@@ -129,7 +129,7 @@ public class PostView implements Initializable {
      */
     Stage open(Window window) throws IOException {
         if (stage == null) {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("../fxml/PostView.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("fxml/postView.fxml"));
             loader.setController(this);
             root = loader.load();
 

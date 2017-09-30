@@ -40,12 +40,7 @@ public class EnterpriseStart extends Application {
         executor.shutdown();
 
         String string = GuiPaths.getMainPath();
-        System.out.println(this.getClass().getClassLoader().getResource(
-                string));
-        System.out.println(System.getProperty("user.dir"));
-        FXMLLoader loader = new FXMLLoader(getClass().getResource(string));
-        System.out.println(string);
-        System.out.println(loader.getLocation());
+        FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource(string));
         Parent root = loader.load();
 
         primaryStage.setTitle("Enterprise");

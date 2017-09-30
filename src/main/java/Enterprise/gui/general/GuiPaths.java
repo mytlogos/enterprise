@@ -65,7 +65,7 @@ public class GuiPaths {
     }
 
     private static String getFxmlDirectory() {
-        return "/Enterprise/target/classes/Enterprise/gui/fxml/";
+        return "fxml/";
     }
     /*public static String getPath(Module module, Mode mode) {
         String fxmlEnding = ".fxml";
@@ -87,15 +87,15 @@ public class GuiPaths {
     }*/
 
     public static String getMainPath() {
-        String fxmlEnding = ".fxml";
+        String extension = ".fxml";
         String path;
 
         Main module = Main.ENTERPRISE;
 
-        String moduleString = capFirst(module.toString());
-        path = constructFXMLPath(module)
+        String moduleString = module.toString().toLowerCase();
+        path = getFxmlDirectory()
                 .concat(moduleString)
-                .concat(fxmlEnding);
+                .concat(extension);
 
         return path;
     }

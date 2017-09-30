@@ -14,7 +14,8 @@ import java.sql.SQLException;
 public class testScraper extends Application {
 
     public static void main(String[] args) throws URISyntaxException, IOException, InterruptedException, SQLException, ClassNotFoundException {
-        System.out.println(testScraper.class.getResource("D:\\Programmieren\\Java\\Projects\\Enterprise\\src\\main\\java\\Enterprise\\gui\\fxml\\add.fxml"));
+        String s = testScraper.class.getClassLoader().getResource("fxml/add.fxml").toString();
+        System.out.println(s);
         System.out.println(DriverManager.getConnection("jdbc:sqlite:enterprise.db"));
     }
 

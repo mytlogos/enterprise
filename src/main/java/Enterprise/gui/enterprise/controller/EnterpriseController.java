@@ -35,7 +35,7 @@ import java.util.logging.Logger;
 import static Enterprise.modules.BasicModules.*;
 
 /**
- * This Class is the Controller of the Main Window of the File {@code Enterprise.fxml}.
+ * This Class is the Controller of the Main Window of the File {@code enterprise.fxml}.
  */
 public class EnterpriseController implements Initializable, Controller {
 
@@ -247,7 +247,7 @@ public class EnterpriseController implements Initializable, Controller {
      */
     private void loadContent(BasicModules module, Pane pane) throws IOException {
         String location = GuiPaths.getPath(module, BasicModes.CONTENT);
-        FXMLLoader loader = new FXMLLoader(getClass().getResource(location));
+        FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource(location));
 
         Pane contentPane;
         loader.setController(ControlComm.getInstance().getController(module, BasicModes.CONTENT));

@@ -103,7 +103,8 @@ abstract class ModifyEntry<E extends Enum<E> & Module, R extends Enum<R> & Mode>
      * {@link Mode} and {@link Module} of each Controller.
      */
     protected Stage loadStage() {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource(GuiPaths.getPath(module, mode)));
+        FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource(GuiPaths.getPath(module, mode)));
+        loader.setController(this);
         try {
             root = loader.load();
         } catch (IOException e) {

@@ -203,7 +203,7 @@ public class hallo extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        /*    FXMLLoader loader = new FXMLLoader(getClass().getResource("../gui/enterprise/fxml/PostView.fxml"));
+        /*    FXMLLoader loader = new FXMLLoader(getClass().getResource("../gui/enterprise/fxml/postView.fxml"));
         Parent root = loader.load();
 
         primaryStage.setTitle("Post");

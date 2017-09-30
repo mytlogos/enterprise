@@ -75,7 +75,8 @@ public abstract class ShowController<E extends CreationEntry, R extends Enum<R> 
      * {@link Mode} and {@link Module} of each Controller.
      */
     protected Stage loadStage() {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource(GuiPaths.getPath(module, mode)));
+        FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource(GuiPaths.getPath(module, mode)));
+        loader.setController(this);
         Parent root = null;
         try {
             root = loader.load();

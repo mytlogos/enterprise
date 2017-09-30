@@ -192,7 +192,7 @@ public abstract class AbstractDataTable<E extends DataEntry> extends AbstractTab
                         }
                     }
                 } else {
-                    System.out.println("Es scheint das keine Einträge in " + getTableName() + "vorhanden sind!");
+                    System.out.println("Es scheint das keine Einträge in " + getTableName() + " vorhanden sind!");
                     logger.log(Level.INFO, "no entries in " + getTableName());
                 }
             }
