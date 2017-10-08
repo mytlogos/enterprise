@@ -1,13 +1,13 @@
 package Enterprise.data.database;
 
 import Enterprise.data.ReflectUpdate;
-import scrape.sources.PostConfigs;
 import scrape.sources.Source;
-import scrape.sources.novels.FeedGetter;
-import scrape.sources.novels.strategies.ArchiveGetter;
-import scrape.sources.novels.strategies.PostsWrapper;
-import scrape.sources.novels.strategies.intface.Filter;
-import scrape.sources.novels.strategies.intface.impl.*;
+import scrape.sources.posts.FeedGetter;
+import scrape.sources.posts.PostConfigs;
+import scrape.sources.posts.strategies.ArchiveGetter;
+import scrape.sources.posts.strategies.ContentWrapper;
+import scrape.sources.posts.strategies.intface.Filter;
+import scrape.sources.posts.strategies.intface.impl.*;
 
 import java.net.URISyntaxException;
 import java.sql.Connection;
@@ -103,7 +103,7 @@ public class SourceTable extends AbstractDataTable<Source> {
     protected void setInsertData(Source entry, PreparedStatement stmt) throws SQLException {
         String url = entry.getUrl();
         String srceType = entry.getSourceType().name();
-        PostConfigs configs = entry.getConfigs();
+        PostConfigs configs = entry.getPostConfigs();
 
         setIntNull(stmt, getIdColumn());
         setString(stmt, sourceUrl, url);
@@ -139,7 +139,7 @@ public class SourceTable extends AbstractDataTable<Source> {
 
         try {
             entry = Source.create(id, url, sourceType);
-            setPostConfigs(rs, entry.getConfigs());
+            setPostConfigs(rs, entry.getPostConfigs());
             entry.setEntryOld();
         } catch (URISyntaxException e) {
             logger.log(Level.SEVERE, "corrupt data: URL: "
@@ -164,7 +164,7 @@ public class SourceTable extends AbstractDataTable<Source> {
 
         configs.setArchive(getMatch(ArchiveGetter.getFilter(), archiveSearcherString));
         configs.setFeed(getMatch(FeedGetter.getFilter(), feedString));
-        configs.setWrapper(getMatch(Arrays.asList(PostsWrapper.values()), postWrapperString));
+        configs.setWrapper(getMatch(Arrays.asList(ContentWrapper.values()), postWrapperString));
 
         configs.setPosts(getMatch(new PostsFilter().getFilter(), postElementString));
         configs.setTitle(getMatch(new TitlesFilter().getFilter(), titleElementString));
@@ -237,6 +237,6 @@ public class SourceTable extends AbstractDataTable<Source> {
 
     @Override
     final protected Set<String> getStatements(ReflectUpdate classSpy, Source entry) {
-        return classSpy.updateStrings(entry.getConfigs(), entry, getTableName(), getTableId());
+        return classSpy.updateStrings(entry.getPostConfigs(), entry, getTableName(), getTableId());
     }
 }

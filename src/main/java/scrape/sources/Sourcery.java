@@ -8,8 +8,8 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
-import scrape.Post;
-import scrape.sources.novels.PostScraper;
+import scrape.sources.posts.Post;
+import scrape.sources.posts.PostScraper;
 
 import java.io.IOException;
 import java.net.URISyntaxException;

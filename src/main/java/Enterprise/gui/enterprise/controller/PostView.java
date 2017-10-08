@@ -19,9 +19,9 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 import org.controlsfx.control.Notifications;
 import org.controlsfx.control.StatusBar;
-import scrape.Post;
-import scrape.PostManager;
 import scrape.concurrent.ScheduledPostScraper;
+import scrape.sources.posts.Post;
+import scrape.sources.posts.PostManager;
 
 import java.awt.*;
 import java.io.IOException;
@@ -58,11 +58,7 @@ public class PostView implements Initializable {
     private ComboBox<SortingBy> sortBy;
 
 
-    private PostView() {
-        if (INSTANCE != null) {
-            throw new IllegalStateException();
-        }
-    }
+    public SortingBy SORTED_BY;
 
     public static PostView getInstance() {
         return INSTANCE;
@@ -88,11 +84,11 @@ public class PostView implements Initializable {
         }
     }
 
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
-        setListView();
-        setStatusBar();
-        sortBy.getItems().addAll(SortingBy.values());
+    private PostView() {
+        if (INSTANCE != null) {
+            throw new IllegalStateException();
+        }
+        SORTED_BY = SortingBy.DATEDESC;
     }
 
     public void openNew() {
@@ -108,9 +104,18 @@ public class PostView implements Initializable {
         }
     }
 
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        setListView();
+        setStatusBar();
+        sortBy.getItems().addAll(SortingBy.values());
+        sortBy.getSelectionModel().select(SortingBy.DATEDESC);
+    }
+
     @FXML
     void sort() {
-        Comparator<Post> comparator = sortBy.getSelectionModel().getSelectedItem().getComparator();
+        SORTED_BY = sortBy.getSelectionModel().getSelectedItem();
+        Comparator<Post> comparator = SORTED_BY.getComparator();
         listView.getItems().sort(comparator);
     }
 
@@ -249,40 +254,40 @@ public class PostView implements Initializable {
         );
     }
 
-    private enum SortingBy {
-        TITLEAZ("Alphabetisch aufsteigend") {
+    public enum SortingBy {
+        DATEDESC("Neueste zuerst") {
             @Override
-            Comparator<Post> getComparator() {
-                return (o1, o2) -> o1.getTitle().compareToIgnoreCase(o2.getTitle());
-            }
-        },
-        TITLEZA("Alphabetisch absteigend") {
-            @Override
-            Comparator<Post> getComparator() {
-                return (o1, o2) -> o2.getTitle().compareToIgnoreCase(o1.getTitle());
+            public Comparator<Post> getComparator() {
+                return Comparator.comparing(Post::getTimeStamp).reversed();
             }
         },
         DATEASC("Älteste zuerst") {
             @Override
-            Comparator<Post> getComparator() {
+            public Comparator<Post> getComparator() {
                 return Comparator.comparing(Post::getTimeStamp);
             }
         },
-        DATEDESC("Neueste zuerst") {
+        TITLEAZ("Alphabetisch aufsteigend") {
             @Override
-            Comparator<Post> getComparator() {
-                return Comparator.comparing(Post::getTimeStamp).reversed();
+            public Comparator<Post> getComparator() {
+                return Comparator.comparing(Post::getTitle);
+            }
+        },
+        TITLEZA("Alphabetisch absteigend") {
+            @Override
+            public Comparator<Post> getComparator() {
+                return Comparator.comparing(Post::getTitle).reversed();
             }
         },
         SOURCEASC("Nach Quellen A-Z") {
             @Override
-            Comparator<Post> getComparator() {
+            public Comparator<Post> getComparator() {
                 return Comparator.comparing(Post::getSource);
             }
         },
         SOURCEDES("Nach Quellen Z-A") {
             @Override
-            Comparator<Post> getComparator() {
+            public Comparator<Post> getComparator() {
                 return Comparator.comparing(Post::getSource).reversed();
             }
         },;
@@ -293,7 +298,7 @@ public class PostView implements Initializable {
             text = s;
         }
 
-        abstract Comparator<Post> getComparator();
+        public abstract Comparator<Post> getComparator();
 
         @Override
         public String toString() {

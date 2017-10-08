@@ -5,15 +5,16 @@ import Enterprise.data.intface.CreationEntry;
 import Enterprise.data.intface.SourceableEntry;
 import Enterprise.gui.general.GuiPaths;
 import Enterprise.misc.Log;
+import Enterprise.misc.TimeMeasure;
 import Enterprise.modules.BasicModules;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import scrape.PostManager;
 import scrape.concurrent.PostCall;
 import scrape.concurrent.ScheduledPostScraper;
+import scrape.sources.posts.PostManager;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -35,9 +36,12 @@ public class EnterpriseStart extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        getEntryData();
-        getSavedPosts();
-        executor.shutdown();
+        TimeMeasure measure = TimeMeasure.start();
+        executor.submit(() -> {
+            getEntryData();
+            getSavedPosts();
+            executor.shutdown();
+        });
 
         String string = GuiPaths.getMainPath();
         FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource(string));
@@ -47,6 +51,9 @@ public class EnterpriseStart extends Application {
         primaryStage.setScene(new Scene(root));
         primaryStage.sizeToScene();
         primaryStage.show();
+
+        measure.finish();
+        System.out.println(measure.getMessage(s -> "TIME NEEDED FOR SETTING WINDOW: " + s));
     }
 
     /**
@@ -56,7 +63,6 @@ public class EnterpriseStart extends Application {
      */
     private void getEntryData() {
         Future<List<? extends CreationEntry>> future = executor.submit(new GetCall());
-
         List<? extends CreationEntry> futureEntries;
         try {
             futureEntries = future.get();

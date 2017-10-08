@@ -1,14 +1,14 @@
 package Enterprise.gui.general;
 
-import javafx.beans.value.ObservableValue;
+import Enterprise.gui.contextMenu.ContextMenuManager;
+import Enterprise.gui.general.Columns.Column;
+import javafx.collections.ListChangeListener;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.util.Callback;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Should create column with settings specified by the {@link Column}.
@@ -18,54 +18,93 @@ import java.util.Set;
  * <p>
  */
 public class ColumnManager<E> {
-    private final Map<Column<E>, TableColumn<E, ?>> columnMap = new HashMap<>();
-    private final TableView<E> tableView;
+    private final Map<Column<E, ?>, TableColumn<E, ?>> columnMap = new TreeMap<>();
+    private TableView<E> tableView;
+    private ContextMenu contextMenu = ContextMenuManager.getInstance().getTempMenu();
+    private int counter = 0;
 
-    public ColumnManager(TableView<E> tableView, List<Column<E>> columns) {
-        this.tableView = tableView;
-        columns.forEach((Column<E> column) -> columnMap.put(
-                column,
-                columnFactory(
-                        column.getName(),
-                        column.getPrefWidth(),
-                        column.getCallBack())));
+    public ColumnManager(List<Column<E, ?>> columns) {
+        columns.sort(Comparator.comparingInt(Column::getPrefIndex));
+        contextMenu.getItems().add(0, new SeparatorMenuItem());
+        columns.forEach(this::init);
     }
 
-
-    public void hideColumn(Column column) {
-        tableView.getColumns().remove(columnMap.get(column));
+    private void init(Column<E, ?> column) {
+        TableColumn<E, ?> value = column.getTableColumn();
+        columnMap.put(column, value);
+        value.setContextMenu(contextMenu);
+        contextMenu.getItems().add(counter, column.getMenuItem());
+        counter++;
     }
 
-    public void showColumn(Column column) {
-        TableColumn<E, ?> tableColumn = columnMap.get(column);
-        if (!tableView.getColumns().contains(tableColumn)) {
-            tableView.getColumns().add(tableColumn);
+    private void listen() {
+        if (tableView != null) {
+            tableView.getColumns().addListener((ListChangeListener<? super TableColumn<E, ?>>) observable -> {
+                while (observable.next()) {
+                    if (observable.wasAdded()) {
+                        System.out.println("column added ");
+                        observable.getAddedSubList().forEach(column -> System.out.println(column.getText()));
+                    }
+                    if (observable.wasRemoved()) {
+                        System.out.println("column removed");
+                        observable.getRemoved().forEach(column -> System.out.println(column.getText()));
+                    }
+                    if (observable.wasPermutated()) {
+                        System.out.println("column permutated ");
+                    }
+                    if (observable.wasReplaced()) {
+                        System.out.println("column replaced ");
+                    }
+                    if (observable.wasUpdated()) {
+                        System.out.println("column updated");
+
+                    }
+                }
+            });
         }
     }
 
-    public Set<Column<E>> getColumns() {
-        return columnMap.keySet();
+    public void setTableView(TableView<E> tableView) {
+        Objects.requireNonNull(tableView);
+        this.tableView = tableView;
+        this.columnMap.keySet().forEach(column -> {
+            if (column.getDefaultSelect()) {
+                showColumn(column);
+            }
+            column.addColumnsListener(tableView);
+        });
+        listen();
     }
 
-    /**
-     * Creates a {@link TableColumn} with {@code String} as it´s value type.
-     * Sets the data provider through the {@link Callback}, the Name of the Column
-     * and the preferred width.
-     *
-     * @param columnName name of the column
-     * @param callback   the data provider callback
-     * @param prefWidth  preferred width of the column
-     * @return column - a complete {@code TableColumn}
-     */
-    private TableColumn<E, Object> columnFactory(String columnName, double prefWidth,
-                                                 Callback<TableColumn.CellDataFeatures<E, Object>, ObservableValue<Object>> callback) {
-
-        TableColumn<E, Object> column = new TableColumn<>();
-        column.setPrefWidth(prefWidth);
-        column.setMinWidth(40);
-        column.setEditable(true);
-        column.setText(columnName);
-        column.setCellValueFactory(callback);
-        return column;
+    public void hideColumn(Column<E, ?> column) {
+        TableColumn<E, ?> tableColumn = getTableColumn(column);
+        tableView.getColumns().remove(tableColumn);
+        column.setShown(false);
     }
+
+    private TableColumn<E, ?> getTableColumn(Column<E, ?> column) {
+        return columnMap.get(column);
+    }
+
+    public void showColumn(Column<E, ?> column) {
+        TableColumn<E, ?> tableColumn = getTableColumn(column);
+
+        if (!tableView.getColumns().contains(tableColumn) && tableColumn != null) {
+            int index = column.getPrefIndex();
+            // TODO: 01.10.2017 sort the columns according to the prefIndices
+            if (tableView.getColumns().size() >= index) {
+                tableView.getColumns().add(column.getPrefIndex(), tableColumn);
+            } else {
+                tableView.getColumns().add(tableColumn);
+            }
+            column.setShown(true);
+        }
+    }
+
+    public List<Column<E, ?>> getColumns() {
+        List<Column<E, ?>> columns = new ArrayList<>(columnMap.keySet());
+        columns.sort(Comparator.comparingInt(Column::getPrefIndex));
+        return columns;
+    }
+
 }

@@ -4,8 +4,8 @@ import Enterprise.data.impl.*;
 import Enterprise.data.intface.Creation;
 import Enterprise.data.intface.Creator;
 import Enterprise.data.intface.SourceableEntry;
-import Enterprise.gui.general.Column;
-import Enterprise.gui.general.SourceableColumns;
+import Enterprise.gui.general.Columns.Column;
+import Enterprise.gui.general.Columns.TranslatorColumn;
 import Enterprise.modules.Module;
 
 import java.util.List;
@@ -16,10 +16,15 @@ import java.util.List;
  */
 public abstract class SourceableContentCont<R extends Enum<R> & Module> extends ContentController<SourceableEntry, R> {
     @Override
-    protected List<Column<SourceableEntry>> getColumnList() {
-        List<Column<SourceableEntry>> list = new SourceableColumns().asList();
-        list.forEach(column -> column.setColumnModule(module));
-        return super.getColumnList();
+    protected List<Column<SourceableEntry, ?>> getColumnList() {
+        List<Column<SourceableEntry, ?>> columns = super.getColumnList();
+
+        TranslatorColumn translatorColumn = new TranslatorColumn(module);
+        translatorColumn.setColumnModule(module);
+        translatorColumn.loadMenuItem(this);
+        columns.add(translatorColumn);
+
+        return columns;
     }
 
     @Override

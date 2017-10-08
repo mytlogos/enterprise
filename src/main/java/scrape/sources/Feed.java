@@ -1,6 +1,6 @@
 package scrape.sources;
 
-import scrape.sources.novels.strategies.intface.Filter;
+import scrape.sources.posts.strategies.intface.Filter;
 
 /**
  *

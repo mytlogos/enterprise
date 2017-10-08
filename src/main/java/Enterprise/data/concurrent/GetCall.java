@@ -2,17 +2,14 @@ package Enterprise.data.concurrent;
 
 import Enterprise.data.database.CreationEntryTable;
 import Enterprise.data.intface.CreationEntry;
-import Enterprise.misc.Log;
 
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.logging.Logger;
 
 /**
  * Service class responsible for getting data from the underlying database
  */
 public class GetCall implements Callable<List<? extends CreationEntry>> {
-    private Logger logger = Log.packageLogger(this);
 
     @Override
     public List<? extends CreationEntry> call() throws Exception {

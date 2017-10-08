@@ -5,13 +5,9 @@ import Enterprise.misc.TimeMeasure;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
 import javafx.util.Duration;
-import scrape.Post;
-import scrape.PostList;
-import scrape.PostManager;
-import scrape.SearchEntry;
 import scrape.sources.Source;
 import scrape.sources.SourceList;
-import scrape.sources.novels.PostScraper;
+import scrape.sources.posts.*;
 
 import java.io.IOException;
 import java.util.*;
@@ -39,7 +35,7 @@ public class ScheduledPostScraper extends ScheduledService<List<Post>> {
 
     private Logger logger = Log.packageLogger(this);
 
-    private Map<Source, List<SearchEntry>> searchMap = new HashMap<>();
+    private Map<Source, List<PostSearchEntry>> searchMap = new HashMap<>();
     private TimeMeasure measure;
 
     /**
@@ -62,8 +58,7 @@ public class ScheduledPostScraper extends ScheduledService<List<Post>> {
             protected List<Post> call() throws Exception {
                 Thread.currentThread().setName("ScheduledPostScraper");
 
-                measure = new TimeMeasure();
-                measure.start();
+                measure = TimeMeasure.start();
 
                 //the searchEntries supplied by the PostManager
                 getBySource(PostManager.getInstance().getSearch());
@@ -93,8 +88,8 @@ public class ScheduledPostScraper extends ScheduledService<List<Post>> {
                 return postList;
             }
 
-            private void getBySource(Set<SearchEntry> searchEntries) {
-                searchMap = searchEntries.stream().collect(Collectors.groupingBy(SearchEntry::getSource));
+            private void getBySource(Set<PostSearchEntry> searchEntries) {
+                searchMap = searchEntries.stream().collect(Collectors.groupingBy(PostSearchEntry::getSource));
                 calcMaxWork();
             }
 
@@ -113,7 +108,7 @@ public class ScheduledPostScraper extends ScheduledService<List<Post>> {
                     service.submit(() -> {
                         try {
                             PostScraper scraper = PostScraper.scraper(source);
-                            for (SearchEntry searchEntry : searchMap.get(source)) {
+                            for (PostSearchEntry searchEntry : searchMap.get(source)) {
                                 postList.addAll(scraper.getPosts(searchEntry));
                             }
                         } catch (IOException e) {

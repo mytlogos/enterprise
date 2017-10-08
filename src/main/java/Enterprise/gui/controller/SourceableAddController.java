@@ -13,9 +13,9 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
-import scrape.PostManager;
 import scrape.sources.Source;
 import scrape.sources.SourceList;
+import scrape.sources.posts.PostManager;
 
 import java.net.URISyntaxException;
 

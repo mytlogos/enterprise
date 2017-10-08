@@ -1,7 +1,5 @@
 package Enterprise.test;
 
-import Enterprise.data.intface.ConHandler;
-import Enterprise.data.intface.User;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.safety.Cleaner;
@@ -11,7 +9,7 @@ import org.jsoup.select.Elements;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.sql.*;
+import java.net.URI;
 
 /**
  * Created by Dominik on 29.06.2017.
@@ -60,45 +58,13 @@ public class data {
     }
 
     public static void main(String[] args) throws IOException {
-        downloadXml();
-    }
-
-    private static <E> E getConnection(ConHandler<Connection, E> connectionRFunction) {
-        E result = null;
-        try (Connection connection = connection()) {
-            try {
-                connection.setAutoCommit(false);
-                result = connectionRFunction.handle(connection);
-                connection.commit();
-            } catch (SQLException e) {
-                connection.rollback();
-                e.printStackTrace();
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return result;
-    }
-
-    private static Boolean getaBoolean(String select, User user, Connection connection) throws SQLException {
-        try (PreparedStatement statement = connection.prepareStatement(select)) {
-            statement.setString(1, user.getOwnStatus());
-            statement.setString(2, user.getComment());
-            statement.setString(3, user.getListName());
-            statement.setInt(4, user.getProcessedPortion());
-            statement.setInt(5, user.getRating());
-            statement.setString(6, user.getKeyWords());
-
-            ResultSet set = statement.executeQuery();
-            System.out.println("Closed: " + statement.isClosed());
-            while (set.next()) {
-                System.out.println(set.getInt(1));
-            }
-        }
-        return false;
-    }
-
-    private static Connection connection() throws SQLException {
-        return DriverManager.getConnection("jdbc:sqlite:enterprise.db");
+        String string = "binhjamin.wordpress.com//sayonara-ryuusei-konnichiwa-jinsei/volume-2/chapter-15";
+        URI uri = URI.create("https://binhjamin.wordpress.com/sayonara-ryuusei-konnichiwa-jinsei/volume-2/chapter-16/");
+        System.out.println(uri.getUserInfo());
+        System.out.println(uri.getAuthority());
+        System.out.println(uri.getFragment());
+        System.out.println(uri.getSchemeSpecificPart());
+        System.out.println(uri.getScheme());
+//        downloadXml();
     }
 }

@@ -1,5 +1,6 @@
 package Enterprise.data.concurrent;
 
+import Configs.SettingsRun;
 import Enterprise.misc.Log;
 import scrape.concurrent.PostCall;
 
@@ -40,6 +41,7 @@ public class OnCloseRun implements Runnable {
         DeleteCall delete = new DeleteCall();
         PostCall addPosts = new PostCall(ADD_ENTRIES);
         PostCall deletePosts = new PostCall(DELETE_ENTRIES);
+        SettingsRun saveSettings = new SettingsRun(SettingsRun.Action.SAVE);
 
 
         //starts the On-Close Operations
@@ -48,6 +50,7 @@ public class OnCloseRun implements Runnable {
         Future<Boolean> deleteFuture = pool.submit(delete);
         Future<Boolean> deletePostsFuture = pool.submit(addPosts);
         Future<Boolean> addPostsFuture = pool.submit(deletePosts);
+        pool.submit(saveSettings);
 
         //executioner should not accept any new tasks anymore
         pool.shutdown();

@@ -7,7 +7,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.TextArea;
 import javafx.stage.Stage;
-import scrape.Post;
+import scrape.sources.posts.Post;
 
 import java.io.IOException;
 import java.net.URL;

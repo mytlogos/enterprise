@@ -13,7 +13,9 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
 import javafx.collections.SetChangeListener;
-import scrape.Post;
+import scrape.sources.chapter.ChapterConfigs;
+import scrape.sources.posts.Post;
+import scrape.sources.posts.PostConfigs;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -46,9 +48,11 @@ public class Source extends AbstractDataEntry implements DataEntry, Comparable<S
     private StringProperty sourceName = new SimpleStringProperty();
     private StringProperty url = new SimpleStringProperty();
     private SourceType sourceType;
-    private PostConfigs configs = new PostConfigs();
-    private Map<Creation, Post> newestPosts = new HashMap<>();
+    private PostConfigs postConfigs = new PostConfigs();
 
+    private ChapterConfigs chapterConfigs = new ChapterConfigs();
+
+    private Map<Creation, Post> newestPosts = new HashMap<>();
     /**
      * The constructor of {@code Source}.
      *
@@ -116,7 +120,7 @@ public class Source extends AbstractDataEntry implements DataEntry, Comparable<S
 
     @Override
     protected void bindUpdated() {
-        updated.bind(configs.updatedProperty());
+        updated.bind(postConfigs.updatedProperty());
         updated.addListener((observable, oldValue, newValue) -> {
             if (newValue && !newEntry) {
                 System.out.println("ready to update");
@@ -198,7 +202,7 @@ public class Source extends AbstractDataEntry implements DataEntry, Comparable<S
 
     @Override
     public void setUpdated() {
-        configs.setUpdated();
+        postConfigs.setUpdated();
     }
 
     @Override
@@ -258,10 +262,14 @@ public class Source extends AbstractDataEntry implements DataEntry, Comparable<S
     /**
      * Returns the {@code PostConfigs} of this Source.
      *
-     * @return the configs of this source
+     * @return the postConfigs of this source
      */
-    public PostConfigs getConfigs() {
-        return configs;
+    public PostConfigs getPostConfigs() {
+        return postConfigs;
+    }
+
+    public ChapterConfigs getChapterConfigs() {
+        return chapterConfigs;
     }
 
     /**
@@ -298,6 +306,6 @@ public class Source extends AbstractDataEntry implements DataEntry, Comparable<S
             return type;
         }
 
-    }
 
+    }
 }

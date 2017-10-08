@@ -49,7 +49,7 @@ public class UpdateService extends ScheduledService<Boolean> {
                     ((SourceableEntry) entry).getSourceable().getSourceList().forEach(source -> {
                         System.out.println("Source: " + source + " is " + source.isUpdated());
                         System.out.println("Source: " + source + " is  new?: " + source.isNewEntry());
-                        System.out.println("Configs is: " + source.getConfigs().isUpdated());
+                        System.out.println("Configs is: " + source.getPostConfigs().isUpdated());
                     });
                     System.out.println();
                 });

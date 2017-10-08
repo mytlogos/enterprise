@@ -3,13 +3,13 @@ package Enterprise.gui.general;
 import Enterprise.ControlComm;
 import Enterprise.data.intface.CreationEntry;
 import Enterprise.gui.controller.ContentController;
+import Enterprise.gui.general.Columns.Column;
 import Enterprise.modules.Module;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.control.CheckMenuItem;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * This class generates {@link CheckMenuItem}s with several default values.
@@ -29,13 +29,13 @@ public class ItemFactory {
     public List<CheckMenuItem> getCheckMenuItems(Module module) {
         ContentController controller = (ContentController) ControlComm.getInstance().getController(module, BasicModes.CONTENT);
 
-        Set<Column<? extends CreationEntry>> columns = controller.getColumnManager().getColumns();
+        List<Column<? extends CreationEntry, ?>> columns = controller.getColumnManager().getColumns();
         List<CheckMenuItem> items = new ArrayList<>();
-        columns.forEach(column -> items.add(getItem(controller, column)));
+        columns.forEach(column -> items.add(getCheckMenuItem(controller, column)));
         return items;
     }
 
-    private CheckMenuItem getItem(ContentController controller, Column column) {
+    public CheckMenuItem getCheckMenuItem(ContentController controller, Column column) {
         return checkMenuItemFactory(column.getName(), column.getDefaultSelect(),
                 (observable, oldValue, newValue) -> {
                     if (newValue) {
@@ -58,8 +58,9 @@ public class ItemFactory {
     private CheckMenuItem checkMenuItemFactory(String text, boolean defaultSel, ChangeListener<Boolean> changeListener) {
         CheckMenuItem item = new CheckMenuItem();
         item.setText(text);
-        item.selectedProperty().addListener(changeListener);
         item.setSelected(defaultSel);
+
+        item.selectedProperty().addListener(changeListener);
         return item;
     }
 }

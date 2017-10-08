@@ -1,9 +1,9 @@
 package scrape.concurrent;
 
-import scrape.Post;
-import scrape.PostManager;
-import scrape.PostTable;
 import scrape.sources.Source;
+import scrape.sources.posts.Post;
+import scrape.sources.posts.PostManager;
+import scrape.sources.posts.PostTable;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -34,9 +34,8 @@ public class PostCall implements Callable<Boolean> {
             @Override
             boolean doAction() {
                 List<Post> posts = PostTable.getInstance().getEntries();
-
                 if (!posts.isEmpty()) {
-                    PostManager.getInstance().getPosts().addAll(posts);
+                    PostManager.getInstance().addPosts(posts);
                     Map<Source, List<Post>> postMap = mapWithSource(posts);
 
                     for (Source source : postMap.keySet()) {

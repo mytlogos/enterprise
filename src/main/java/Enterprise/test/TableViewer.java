@@ -54,7 +54,6 @@ public class TableViewer extends Application implements Initializable {
             URI uri = new URI(name.getText());
             WebEngine engine = browser.getEngine();
             engine.load(uri.toString());
-
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
@@ -80,7 +79,7 @@ public class TableViewer extends Application implements Initializable {
 
     @Override
     public void start(Stage primaryStage) throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("TableView.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("TableView.fxml"));
         Parent root = loader.load();
 
         Stage stage = new Stage();

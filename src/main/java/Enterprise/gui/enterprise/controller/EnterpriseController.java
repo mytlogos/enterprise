@@ -3,11 +3,12 @@ package Enterprise.gui.enterprise.controller;
 import Enterprise.ControlComm;
 import Enterprise.data.concurrent.OnCloseRun;
 import Enterprise.data.concurrent.UpdateService;
+import Enterprise.data.intface.CreationEntry;
 import Enterprise.gui.controller.ContentController;
 import Enterprise.gui.controller.Controller;
 import Enterprise.gui.general.BasicModes;
+import Enterprise.gui.general.Columns.Column;
 import Enterprise.gui.general.GuiPaths;
-import Enterprise.gui.general.ItemFactory;
 import Enterprise.misc.Log;
 import Enterprise.modules.BasicModules;
 import javafx.application.Platform;
@@ -23,11 +24,13 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.stage.WindowEvent;
-import scrape.PostManager;
 import scrape.concurrent.ScheduledPostScraper;
+import scrape.sources.posts.PostManager;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -294,80 +297,48 @@ public class EnterpriseController implements Initializable, Controller {
      * Adds listener to dynamically change these items, depending of the opened tab.
      */
     private void setViewMenu() {
-        ItemFactory factory = new ItemFactory();
-
         tabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             String selectedTab = newValue.getText();
-            String oldTab = oldValue.getText();
-
-            onNewTab(factory, selectedTab);
-            onOldTab(oldTab);
-
+            onNewTab(selectedTab);
         });
         tabPane.getSelectionModel().select(animeTab);
-        viewMenu.getItems().addAll(indexFirstSep + 1, factory.getCheckMenuItems(BasicModules.ANIME));
-    }
-
-    /**
-     * Clears all columns except the {@code indexColumn} of the {@code entryTable}
-     * of the specified String.
-     *
-     * @param oldTab string representing a tabName of {@link BasicModules}.
-     * @see BasicModules#tabName()
-     */
-    private void onOldTab(String oldTab) {
-        for (BasicModules basicModule : BasicModules.values()) {
-            if (basicModule.tabName().equalsIgnoreCase(oldTab)) {
-                ContentController controller = (ContentController) ControlComm.getInstance().getController(basicModule, BasicModes.CONTENT);
-                controller.clearColumns();
-            }
-        }/*
-        if (BOOK.tabName().equalsIgnoreCase(oldTab)) {
-            BookController controller = (BookController) ControlComm.getInstance().getController(BOOK, BasicModes.CONTENT);
-            //controller.clearColumns();
-            // TODO: 30.07.2017 implement BOOK, MANGA and SERIES first
-        }
-        if (MANGA.tabName().equalsIgnoreCase(oldTab)) {
-            MangaController controller = (MangaController) ControlComm.getInstance().getController(MANGA, BasicModes.CONTENT);
-            //controller.clearColumns();
-        }
-        if (NOVEL.tabName().equalsIgnoreCase(oldTab)) {
-            NovelController controller = (NovelController) ControlComm.getInstance().getController(NOVEL, BasicModes.CONTENT);
-            controller.clearColumns();
-        }
-        if (SERIES.tabName().equalsIgnoreCase(oldTab)) {
-            SeriesController controller = (SeriesController) ControlComm.getInstance().getController(SERIES, BasicModes.CONTENT);
-            //controller.clearColumns();
-        }*/
+        List<CheckMenuItem> menuItems = getCheckMenuItems(BasicModules.ANIME);
+        viewMenu.getItems().addAll(indexFirstSep + 1, menuItems);
     }
 
     /**
      * Sets the 'hide/show XYColumns' menuItems to the {@code viewMenu}
      * and removes the old ones from the {@code viewMenu}.
      *
-     * @param factory     menuItemFactory for the 'hide/show XYColumns'
      * @param selectedTab name of the selected Tab
      */
-    private void onNewTab(ItemFactory factory, String selectedTab) {
+    private void onNewTab(String selectedTab) {
         for (BasicModules basicModule : BasicModules.values()) {
             if (selectedTab.equalsIgnoreCase(basicModule.tabName())) {
                 clearViewMenu();
-                viewMenu.getItems().addAll(indexFirstSep + 1, factory.getCheckMenuItems(basicModule));
+                List<CheckMenuItem> items = getCheckMenuItems(basicModule);
+
+                viewMenu.getItems().addAll(indexFirstSep + 1, items);
             }
         }
-        /*if (selectedTab.equalsIgnoreCase(BOOK.tabName())) {
-            clearViewMenu();
+    }
+
+    private List<CheckMenuItem> getCheckMenuItems(BasicModules basicModule) {
+        ContentController controller = (ContentController) ControlComm.getInstance().getController(basicModule, BasicModes.CONTENT);
+
+        List<Column<? extends CreationEntry, ?>> set = controller.getColumnManager().getColumns();
+        List<CheckMenuItem> items = new ArrayList<>();
+
+        for (Column<? extends CreationEntry, ?> column : set) {
+            CheckMenuItem item = column.getMenuItem();
+            if (item == null) {
+                System.out.println("NULL FOR");
+                System.out.println(column.getName());
+                System.out.println(column.getNodeName());
+            }
+            items.add(item);
         }
-        if (selectedTab.equalsIgnoreCase(MANGA.tabName())) {
-            clearViewMenu();
-        }
-        if (selectedTab.equalsIgnoreCase(NOVEL.tabName())) {
-            clearViewMenu();
-            viewMenu.getItems().addAll(indexFirstSep + 1, factory.getCheckMenuItems(BasicModules.NOVEL));
-        }
-        if (selectedTab.equalsIgnoreCase(SERIES.tabName())) {
-            clearViewMenu();
-        }*/
+        return items;
     }
 
     /**

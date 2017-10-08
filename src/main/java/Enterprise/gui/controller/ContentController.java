@@ -6,9 +6,8 @@ import Enterprise.data.OpEntryCarrier;
 import Enterprise.data.intface.CreationEntry;
 import Enterprise.data.intface.SourceableEntry;
 import Enterprise.gui.general.BasicModes;
-import Enterprise.gui.general.Column;
 import Enterprise.gui.general.ColumnManager;
-import Enterprise.gui.general.ContentColumns;
+import Enterprise.gui.general.Columns.*;
 import Enterprise.misc.EntrySingleton;
 import Enterprise.misc.Log;
 import Enterprise.modules.BasicModules;
@@ -28,8 +27,9 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import org.controlsfx.control.SegmentedButton;
-import scrape.PostManager;
+import scrape.sources.posts.PostManager;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.logging.Level;
@@ -68,7 +68,7 @@ public abstract class ContentController<E extends CreationEntry, R extends Enum<
     protected Button editBtn;
     @FXML
     private Menu moveToMenu;
-    private ColumnManager<E> columnManager;
+    private ColumnManager<E> columnManager = new ColumnManager<>(getColumnList());
 
     @Override
     final protected void setMode() {
@@ -76,7 +76,7 @@ public abstract class ContentController<E extends CreationEntry, R extends Enum<
     }
 
     private void initColumnManager() {
-        columnManager = new ColumnManager<>(entryTable, getColumnList());
+        columnManager.setTableView(entryTable);
     }
 
     private void initSegmentButtons() {
@@ -311,13 +311,6 @@ public abstract class ContentController<E extends CreationEntry, R extends Enum<
     }
 
     /**
-     * Clears all columns except the {@code indexColumn} in the {@code entryTable}.
-     */
-    public void clearColumns() {
-        entryTable.getColumns().remove(1, entryTable.getColumns().size());
-    }
-
-    /**
      * Sets the value of textProperty of several {@link javafx.scene.text.Text}
      * and {@link javafx.scene.control.Label}.
      */
@@ -366,13 +359,38 @@ public abstract class ContentController<E extends CreationEntry, R extends Enum<
     }
 
     public ColumnManager<E> getColumnManager() {
+        if (columnManager == null) {
+            columnManager = new ColumnManager<>(getColumnList());
+        }
         return columnManager;
     }
 
-    protected List<Column<E>> getColumnList() {
-        List<Column<E>> list = new ContentColumns<E>().asList();
-        list.forEach(column -> column.setColumnModule(module));
+    public Module getModule() {
+        return module;
+    }
+
+    protected List<Column<E, ?>> getColumnList() {
+        List<Column<E, ?>> list = new ArrayList<>();
+
+        list.add(new CommentColumn<>(module));
+        list.add(new CreatorNameColumn<>(module));
+        list.add(new CreatorSortColumn<>(module));
+        list.add(new KeyWordsColumn<>(module));
+        list.add(new LastPortionColumn<>(module));
+        list.add(new OwnStatusColumn<>(module));
+        list.add(new PresentPortionsColumn<>(module));
+        list.add(new ProcessedPortionsColumn<>(module));
+        list.add(new RatingColumn<>(module));
+        list.add(new SeriesColumn<>(module));
+        list.add(new TitleColumn<>(module));
+        list.add(new WorkStatusColumn<>(module));
+
+        list.forEach(this::setColumn);
         return list;
     }
 
+    protected void setColumn(Column<E, ?> column) {
+        column.setColumnModule(module);
+        column.loadMenuItem(this);
+    }
 }

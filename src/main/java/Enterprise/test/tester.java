@@ -3,9 +3,9 @@ package Enterprise.test;
 import Enterprise.data.Default;
 import Enterprise.misc.Log;
 import Enterprise.misc.TimeMeasure;
-import scrape.Post;
-import scrape.PostTable;
 import scrape.sources.Source;
+import scrape.sources.posts.Post;
+import scrape.sources.posts.PostTable;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -165,8 +165,7 @@ public class tester {
     }
 
     private static void repeatingSources(final int repetitions) throws URISyntaxException {
-        TimeMeasure measure = new TimeMeasure();
-        measure.start();
+        TimeMeasure measure = TimeMeasure.start();
         for (int i = 0; i < repetitions; i++) {
             for (String s : mapclass.allLinks()) {
                 source = Source.create(s, START);
@@ -177,8 +176,7 @@ public class tester {
     }
 
     private static void repeatingOneSource(final int repetitions) throws URISyntaxException {
-        TimeMeasure measure = new TimeMeasure();
-        measure.start();
+        TimeMeasure measure = TimeMeasure.start();
         for (int i = 0; i < repetitions * 70; i++) {
             source = Source.create(mapclass.allLinks().get(1), START);
         }

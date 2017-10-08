@@ -12,8 +12,10 @@ public class TimeMeasure {
     private long finish = 0;
     private long elapsed;
 
-    public void start() {
-        start = System.nanoTime();
+    public static TimeMeasure start() {
+        TimeMeasure measure = new TimeMeasure();
+        measure.start = System.nanoTime();
+        return measure;
     }
 
     public void finish() {

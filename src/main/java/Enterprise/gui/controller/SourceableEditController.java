@@ -9,9 +9,9 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.text.Text;
-import scrape.PostManager;
 import scrape.concurrent.ScheduledPostScraper;
 import scrape.sources.Source;
+import scrape.sources.posts.PostManager;
 
 import java.net.URISyntaxException;
 

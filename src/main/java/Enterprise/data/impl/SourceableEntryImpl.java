@@ -3,7 +3,7 @@ package Enterprise.data.impl;
 import Enterprise.data.OpEntryCarrier;
 import Enterprise.data.intface.*;
 import Enterprise.modules.Module;
-import scrape.PostManager;
+import scrape.sources.posts.PostManager;
 
 /**
  * Simple Implementation of {@code SourceableEntry}.

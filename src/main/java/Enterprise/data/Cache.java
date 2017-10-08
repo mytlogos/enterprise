@@ -16,7 +16,7 @@ public class Cache<K, V> {
     private Map<K, WeakReference<V>> cacheMap = new HashMap<>();
 
     /**
-     * Checks if the key from {@code getKey} function is available.
+     * Checks if the key from {@code getSettings} function is available.
      * Puts the value parameter in the map with the key if no mapping
      * is available or it is mapped to null.
      * Returns the value parameter if the key value equals
@@ -31,7 +31,7 @@ public class Cache<K, V> {
     }
 
     /**
-     * Checks if the key from {@code getKey} function is available.
+     * Checks if the key from {@code getSettings} function is available.
      * Puts the value parameter in the map with the key if no mapping
      * is available or it is mapped to null.
      * The first parameter of biFunction is the cache value,
