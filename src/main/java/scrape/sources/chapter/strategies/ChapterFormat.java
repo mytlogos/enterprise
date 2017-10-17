@@ -29,13 +29,18 @@ public class ChapterFormat extends Formatter {
 
     public Element getTitleElement(String title) {
         Element element = new Element(TITLE_TAG);
-        element.text(title);
+        if (!title.isEmpty()) {
+            element.text(title);
+        } else {
+            element.text("STUB-TITLE");
+        }
+        setId(element, TITLE_ID);
         return element;
     }
 
     public Element getPaginationElement(Element prev, Element next) {
         Element element = new Element("div");
-        element.attr("id", PAGINATION_ID);
+        setId(element, PAGINATION_ID);
 
         appendLinkElement(element, prev, PAGINATION_PREV_ID);
         appendLinkElement(element, next, PAGINATION_NEXT_ID);
@@ -51,22 +56,15 @@ public class ChapterFormat extends Formatter {
     }
 
     public Element getContentElement(Element element) {
+        Element content = new Element(CONTENT_TAG);
+        setId(content, CONTENT_ID);
         // TODO: 06.10.2017 remove all unnecessary elements like pagination
         System.out.println(element);
         return element;
     }
 
-    private void appendLinkElement(Element container, Element infoHolder, String id) {
-        Element linkContainer = new Element(PAGINATION_CONTAINER);
-        linkContainer.attr("id", id);
-
-        if (infoHolder != null) {
-            String link = infoHolder.absUrl("href");
-            linkContainer.attr(PAGINATION_LINK_ATTRIBUTE, link);
-
-        }
-
-        container.appendChild(linkContainer);
+    public Element getContent(Element element) {
+        return element.getElementById(CONTENT_ID);
     }
 
     public Element format(Document document, ChapterConfigs configs) {
@@ -88,4 +86,16 @@ public class ChapterFormat extends Formatter {
         return post;
     }
 
+
+    private void appendLinkElement(Element container, Element infoHolder, String id) {
+        Element linkContainer = new Element(PAGINATION_CONTAINER);
+        setId(linkContainer, id);
+
+        if (infoHolder != null) {
+            String link = getUrl(infoHolder);
+            linkContainer.attr(PAGINATION_LINK_ATTRIBUTE, link);
+        }
+
+        container.appendChild(linkContainer);
+    }
 }

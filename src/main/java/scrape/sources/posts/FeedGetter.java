@@ -3,8 +3,8 @@ package scrape.sources.posts;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import scrape.sources.Feed;
 import scrape.sources.Source;
+import scrape.sources.feed.Feed;
 
 import java.io.IOException;
 import java.util.ArrayList;

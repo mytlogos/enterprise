@@ -4,14 +4,13 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import scrape.sources.posts.strategies.intface.Filter;
-
-import java.util.function.Function;
+import scrape.sources.toc.strategies.intface.DocumentElement;
 
 /**
  *
  */
-public enum ContentWrapper implements Function<Document, Element>, Filter {
-    CONTENT("div#content, div.content") {
+public enum ContentWrapper implements DocumentElement, Filter {
+    CONTENT("#content, div.content") {
     },
     MAIN(".main, #main") {
     },
@@ -20,9 +19,10 @@ public enum ContentWrapper implements Function<Document, Element>, Filter {
     TABLE("table[class*=update], table[id*=update]"),
     RELEASES(".releases, #releases"),
     COLUMN_GRID(".column.grid_7"),
-    CONTENT_WRAP("#content-wrap, .content-wrap"),
+    CONTENT_WRAP_ID("#content-wrap"),
+    CONTENT_WRAP_CLASS(".content-wrap"),
     X_CONTAINER(".site > .x-container.max.width.offset"),
-    CONTAINER_FLUID("h2:contains(release) + .container-fluid");
+    CONTAINER_FLUID("h2:contains(release) + .container-fluid"),;
 
     private final String selector;
 

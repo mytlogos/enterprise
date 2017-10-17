@@ -1,8 +1,5 @@
 package Enterprise.test;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.safety.Whitelist;
 import org.jsoup.select.Elements;
 
 import java.io.BufferedWriter;
@@ -25,29 +22,6 @@ public class mapclass {
 
     }
 
-    private static Document cleanDoc(Document document) {
-        Whitelist whitelist = Whitelist.relaxed();
-        whitelist.addAttributes(":all", "id", "class", "style");
-        whitelist.addAttributes("div", "class", "id");
-        whitelist.addAttributes("a", "id", "datetime");
-        whitelist.addAttributes("p", "data-timestamp");
-        whitelist.addAttributes("time", "datetime");
-        whitelist.addAttributes("abbr", "title");
-        whitelist.addAttributes("span", "title");
-        whitelist.addAttributes("em", "data-timestamp");
-        whitelist.addTags("time");
-        whitelist.addTags("style");
-        whitelist.addTags("main");
-        whitelist.addTags("article");
-        document.getElementsByAttributeValueContaining("class", "comment").remove();
-        document.getElementsByAttributeValueContaining("class", "share").remove();
-        document.getElementsByAttributeValueContaining("id", "comment").remove();
-        document.getElementsByAttributeValueContaining("id", "share").remove();
-
-        String cleaned = Jsoup.clean(document.outerHtml(), document.baseUri(), whitelist);
-
-        return Jsoup.parse(cleaned, document.baseUri());
-    }
 
     private static void write(String location, Elements elements) {
 

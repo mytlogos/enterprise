@@ -58,4 +58,9 @@ public class ChapterConfigs implements ScrapeConfigs {
     public void setInit() {
         init = true;
     }
+
+    @Override
+    public String toString() {
+        return "ChapterConfigs:\nWrapper: " + wrapper.get() + "\nContent: " + content.get() + "\nTitle: " + title.get() + "\nPagination: " + pagination.get();
+    }
 }

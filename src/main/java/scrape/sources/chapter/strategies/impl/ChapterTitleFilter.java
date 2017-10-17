@@ -20,11 +20,11 @@ public class ChapterTitleFilter implements ElementFilter<TitleElement> {
     }
 
     public enum Titles implements TitleElement {
-        CAT_LINK(".cat-links", ".entry-title", Type.DOUBLE),
         BREADCRUMPS(".breadcrumps-ancestor", ".breadcrumps-current", Type.DOUBLE),
         CHAPTER_TITLE(".chapter-title", ".entry-title", Type.DOUBLE),
         CHA_TIT(".cha-tit", Type.SINGLE),
         ENTRY_TITLE(".entry-title", Type.SINGLE),
+        CAT_LINK(".cat-links", ".entry-title", Type.DOUBLE),
         PAGE_TITLE(".page-title", Type.SINGLE),
         POST_TITLE(".post-title", Type.SINGLE),
         TITLE("h2.title", Type.SINGLE),
@@ -61,6 +61,7 @@ public class ChapterTitleFilter implements ElementFilter<TitleElement> {
         DOUBLE {
             @Override
             Element get(Titles titles, Element element) {
+
                 Elements novelSelected = element.select(titles.novel);
                 Elements chapterSelected = element.select(titles.chapter);
 
@@ -76,17 +77,30 @@ public class ChapterTitleFilter implements ElementFilter<TitleElement> {
         SINGLE {
             @Override
             Element get(Titles titles, Element element) {
+                String title = "";
                 Elements elements = element.select(titles.title);
                 if (elements.size() == 1) {
-                    return new ChapterFormat().getTitleElement(elements.get(0).text());
+                    title = elements.get(0).text();
                 } else {
+                    // TODO: 10.10.2017 possible bug
+                    if (elements.size() == 2) {
+                        for (Element element1 : elements) {
+                            if (element1.tagName().contains("h")) {
+                                title = element1.text();
+                            }
+                        }
+                    }
                     Element sibling = element.previousElementSibling();
+
                     if (sibling != null) {
                         Elements siblingElements = sibling.select(titles.title);
                         if (siblingElements.size() == 1) {
-                            return new ChapterFormat().getTitleElement(siblingElements.get(0).text());
+                            title = siblingElements.get(0).text();
                         }
                     }
+                }
+                if (!title.isEmpty()) {
+                    return new ChapterFormat().getTitleElement(title);
                 }
                 return null;
             }

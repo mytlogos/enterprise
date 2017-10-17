@@ -8,10 +8,7 @@ import org.jsoup.nodes.Document;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLConnection;
+import java.net.*;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.time.LocalDateTime;
@@ -30,23 +27,9 @@ public class hallo extends Application {
     }
 
     public static void main(String[] args) throws IOException, URISyntaxException, ParseException, SQLException {
-        launch();
-        /*
-        String string = "No Fatigue";
-        Matcher matcher = novelHost.getMatcher("After Transformation, Mine and Her Wild Fantasy",string);
-
-        boolean found = matcher.find();
-        System.out.println(found);
-        if (found) {
-            System.out.println(matcher.start());
-            System.out.println(matcher.end());
-            System.out.println(string.substring(matcher.start(), matcher.end()));
-        }
-        */
-        /*
-        addUris();
-        printTime(uris.get(1),"RMJI");
-        */
+        String decoded = "http://www.amazon.co.jp/%E7%81%B0%E3%81%A8%E7%8E%8B%E5%9B%BD1-%E5%8C%97%E8%BE%BA%E3%81%AE%E9%97%87-%E9%A2%A8%E7%BE%BD%E6%B4%B8%E6%B5%B7/dp/4047296155";
+        System.out.println(decoded);
+        System.out.println(URLDecoder.decode(decoded, "UTF-8"));
     }
 
     private static void getTime(String date) {

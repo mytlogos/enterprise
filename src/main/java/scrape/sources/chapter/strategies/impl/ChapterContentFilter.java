@@ -40,7 +40,21 @@ public class ChapterContentFilter implements ElementFilter<ChapterElement> {
             Elements selected = element.select(selector);
             if (selected.size() != 1) {
                 if (selected.size() == 2) {
-                    return selected.get(1).text().isEmpty() ? selected.get(0) : apply(selected.get(0));
+                    // FIXME: 10.10.2017 a possible bug could be hiding here
+                    Element first = selected.get(0);
+                    Element second = selected.get(1);
+
+                    if (second.text().isEmpty()) {
+                        return first.text().isEmpty() ? null : first;
+                    } else {
+                        if (first.children().contains(second)) {
+                            return first;
+                        } else if (first.text().length() > second.text().length()) {
+                            return first;
+                        } else {
+                            return second;
+                        }
+                    }
                 } else {
                     return null;
                 }

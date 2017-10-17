@@ -21,12 +21,13 @@ public abstract class Scraper<E extends ScrapeConfigs, R extends SearchEntry> {
         Whitelist whitelist = Whitelist.relaxed();
         whitelist.addAttributes(":all", "id", "class", "style");
         whitelist.addAttributes("div", "class", "id");
-        whitelist.addAttributes("a", "id", "datetime", "rel");
+        whitelist.addAttributes("a", "id", "datetime", "rel", "data-toggle");
         whitelist.addAttributes("p", "data-timestamp");
         whitelist.addAttributes("time", "datetime");
         whitelist.addAttributes("abbr", "title");
         whitelist.addAttributes("span", "title");
         whitelist.addAttributes("em", "data-timestamp");
+        whitelist.addAttributes("nav", "role");
         whitelist.addTags("time");
         whitelist.addTags("style");
         whitelist.addTags("main");
@@ -47,6 +48,6 @@ public abstract class Scraper<E extends ScrapeConfigs, R extends SearchEntry> {
     }
 
     public static Document getCleanDocument(String uri) throws IOException {
-        return cleanDoc(Jsoup.connect(uri).get());
+        return cleanDoc(Jsoup.connect(uri).maxBodySize(0).get());
     }
 }

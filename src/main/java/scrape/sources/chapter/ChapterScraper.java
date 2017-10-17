@@ -17,7 +17,7 @@ import java.util.concurrent.Executors;
  * // FIXME: 08.10.2017 breaks of prematurely, some site are not wholly scraped
  */
 public class ChapterScraper extends Scraper<ChapterConfigs, ChapterSearchEntry> {
-    Set<String> visited = new HashSet<>();
+    private Set<String> visited = new HashSet<>();
     private ChapterFormat format = new ChapterFormat();
     private int counter = 0;
 
@@ -30,6 +30,39 @@ public class ChapterScraper extends Scraper<ChapterConfigs, ChapterSearchEntry> 
 
     public Element getChapter() {
         return format.format(document, configs);
+    }
+
+    public Element getChapter(String s) {
+        try {
+            document = getCleanDocument(s);
+            System.out.println("i am doing sth");
+            System.out.println(++counter);
+            return new ChapterFormat().format(document, configs);
+        } catch (IOException e) {
+            System.out.println("could not get chapter for " + s);
+            return null;
+        }
+    }
+
+    public List<Element> getChapters(List<String> strings) {
+        try {
+            document = getCleanDocument(strings.get(0));
+            this.configs = new ChapterConfigs();
+            if (!configs.isInit()) {
+                initConfigs(document);
+            }
+        } catch (IOException e) {
+            System.out.println("could not get chapter for " + strings.get(0));
+            return new ArrayList<>();
+        }
+        List<Element> elements = new ArrayList<>();
+        strings.forEach(s -> {
+            Element element = getChapter(s);
+            if (element != null) {
+                elements.add(element);
+            }
+        });
+        return elements;
     }
 
     public Deque<Element> getAllChapters() {

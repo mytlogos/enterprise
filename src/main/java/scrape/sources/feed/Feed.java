@@ -1,4 +1,4 @@
-package scrape.sources;
+package scrape.sources.feed;
 
 import scrape.sources.posts.strategies.intface.Filter;
 

@@ -160,7 +160,10 @@ public class ChapterPagination implements PaginationFilter {
 
 
                 String mainHost = getDomain(mainUri.getHost());
-                String linkHost = getDomain(linkUri.getHost());
+                String linkHost = "";
+                if (!link.isEmpty()) {
+                    linkHost = getDomain(linkUri.getHost());
+                }
 
                 if (!mainHost.equals(linkHost)) {
                     link = null;

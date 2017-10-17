@@ -7,7 +7,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import scrape.ScrapeConfigs;
-import scrape.sources.Feed;
+import scrape.sources.feed.Feed;
 import scrape.sources.posts.strategies.ContentWrapper;
 import scrape.sources.posts.strategies.intface.*;
 

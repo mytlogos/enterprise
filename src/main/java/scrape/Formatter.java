@@ -42,4 +42,12 @@ public abstract class Formatter {
             return selected;
         }
     }
+
+    protected void setId(Element element, String id) {
+        element.attr("id", id);
+    }
+
+    protected String getUrl(Element element) {
+        return element.absUrl("href");
+    }
 }
