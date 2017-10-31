@@ -11,7 +11,6 @@ import Enterprise.data.intface.Creation;
 import Enterprise.data.intface.CreationEntry;
 import Enterprise.data.intface.Creator;
 import Enterprise.data.intface.User;
-import Enterprise.gui.controller.content.SeriesController;
 import Enterprise.gui.general.BasicModes;
 import Enterprise.modules.Module;
 import javafx.fxml.FXML;
@@ -61,7 +60,7 @@ public abstract class AddController<E extends Enum<E> & Module> extends ModifyEn
         if (module.addEntry(entry)) {
 
             //add it to the TableView of the Content Display
-            SeriesController controller = (SeriesController) ControlComm.getInstance().getController(module, BasicModes.CONTENT);
+            ContentController controller = (ContentController) ControlComm.getInstance().getController(module, BasicModes.CONTENT);
             controller.addEntry(entry);
 
             //ready for adding it to the database

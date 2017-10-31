@@ -2,7 +2,7 @@ package scrape.sources.chapter.strategies.impl;
 
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import scrape.sources.chapter.strategies.intface.ChapterElement;
+import scrape.sources.chapter.strategies.intface.PageContentElement;
 import scrape.sources.posts.strategies.intface.ElementFilter;
 
 import java.util.ArrayList;
@@ -12,13 +12,13 @@ import java.util.Collection;
 /**
  *
  */
-public class ChapterContentFilter implements ElementFilter<ChapterElement> {
+public class PageContentFilter implements ElementFilter<PageContentElement> {
     @Override
-    public Collection<ChapterElement> getFilter() {
+    public Collection<PageContentElement> getFilter() {
         return new ArrayList<>(Arrays.asList(ChapterContents.values()));
     }
 
-    private enum ChapterContents implements ChapterElement {
+    private enum ChapterContents implements PageContentElement {
         CHAPTER_CONTENT("#chapterContent"),
         ARTICLE_BODY(".article-body"),
         BOX(".box"),

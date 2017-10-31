@@ -5,6 +5,7 @@ import Enterprise.data.database.CreationTable;
 import Enterprise.data.database.DataColumn;
 import Enterprise.data.database.SourceTable;
 import Enterprise.data.intface.Creation;
+import Enterprise.data.update.EntryWrapper;
 import scrape.concurrent.PostCall;
 import scrape.sources.Source;
 
@@ -103,7 +104,7 @@ public class PostTable extends AbstractDataTable<Post> {
         Post post = new Post(source, title, dateTime, postLink, creation, sticky);
         post.setId(postId, this);
         post.setEntryOld();
-        post.setUpdated();
+        EntryWrapper.getWrapper(post).isUpdated();
 
         if (creation == null) {
             PostCall.Action.DELETE_ENTRIES.queueEntry(post);

@@ -13,19 +13,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface SQLUpdate {
-    /**
-     * The name of the stateChanged-Getter of the annotated field.
-     *
-     * @return {@code String} name of the method.
-     */
-    String stateGet();
-
-    /**
-     * The name of the value-Getter of the annotated Field.
-     *
-     * @return {@code String} name of the method.
-     */
-    String valueGet();
 
     /**
      * The name of the Field, which has the name of the database column as it´s value.

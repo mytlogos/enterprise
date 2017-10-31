@@ -1,8 +1,11 @@
 package Enterprise.data.database;
 
-import Enterprise.data.ReflectUpdate;
 import Enterprise.data.intface.DataEntry;
 import Enterprise.data.intface.DataTable;
+import Enterprise.data.update.EntryUpdater;
+import Enterprise.data.update.EntryWrapper;
+import Enterprise.data.update.ReflectUpdate;
+import Enterprise.data.update.UpdateReflector;
 import Enterprise.misc.SetList;
 
 import java.sql.*;
@@ -49,7 +52,8 @@ public abstract class AbstractDataTable<E extends DataEntry> extends AbstractTab
     public boolean updateEntry(E entry, Connection connection) throws SQLException {
         validate(entry, connection);
         boolean updated = false;
-        ReflectUpdate classSpy = new ReflectUpdate();
+        UpdateReflector classSpy = new EntryUpdater();
+
         Set<String> statements = getStatements(classSpy, entry);
 
         int[] affected;
@@ -59,7 +63,7 @@ public abstract class AbstractDataTable<E extends DataEntry> extends AbstractTab
             }
             affected = stmt.executeBatch();
             if (affected.length == statements.size()) {
-                entry.setUpdated();
+                EntryWrapper.getWrapper(entry).setUpdated();
                 updated = true;
             } else {
                 logger.log(Level.SEVERE, "a problem while updating occurred: " +
@@ -93,7 +97,7 @@ public abstract class AbstractDataTable<E extends DataEntry> extends AbstractTab
                 affected = stmt.executeBatch();
 
                 if (affected.length == statements.size()) {
-                    entries.forEach(E::setUpdated);
+                    entries.forEach(entry -> EntryWrapper.getWrapper(entry).setUpdated());
                     updated = true;
                 } else {
                     throw new IllegalStateException("Beinflusste Spalten beim " + getTableName() + " stimmen nicht überein!");
@@ -140,7 +144,6 @@ public abstract class AbstractDataTable<E extends DataEntry> extends AbstractTab
             }
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "error occurred while inserting", e);
-            e.printStackTrace();
         }
         return inserted;
     }
@@ -286,7 +289,7 @@ public abstract class AbstractDataTable<E extends DataEntry> extends AbstractTab
      */
     Set<String> updateStrings(Collection<? extends E> entries) {
         Set<String> statements = new HashSet<>();
-        ReflectUpdate classSpy = new ReflectUpdate();
+        UpdateReflector classSpy = new EntryUpdater();
 
         for (E entry : entries) {
             statements.addAll(getStatements(classSpy, entry));
@@ -295,8 +298,8 @@ public abstract class AbstractDataTable<E extends DataEntry> extends AbstractTab
         return statements;
     }
 
-    protected Set<String> getStatements(ReflectUpdate classSpy, E entry) {
-        return classSpy.updateStrings(entry, entry, getTableName(), getTableId());
+    protected Set<String> getStatements(UpdateReflector classSpy, E entry) {
+        return classSpy.getUpdateStrings(entry, entry, getTableId(), getTableName());
     }
 
     /**

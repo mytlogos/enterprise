@@ -1,6 +1,5 @@
 package Enterprise.data.impl;
 
-import Enterprise.data.OpEntryCarrier;
 import Enterprise.data.intface.*;
 import Enterprise.modules.Module;
 import scrape.sources.posts.PostManager;
@@ -35,7 +34,6 @@ public class SourceableEntryImpl extends AbstractCreationEntry implements Source
 
         this.creation.setCreator(creator);
         this.sourceable.setUser(user);
-        bindUpdated();
     }
 
     @Override
@@ -68,11 +66,6 @@ public class SourceableEntryImpl extends AbstractCreationEntry implements Source
     @Override
     public Creator getCreator() {
         return creation.getCreator();
-    }
-
-    @Override
-    public boolean isUpdated() {
-        return updated.get();
     }
 
     @Override
@@ -129,25 +122,8 @@ public class SourceableEntryImpl extends AbstractCreationEntry implements Source
     }
 
     @Override
-    public void setUpdated() {
-        super.setUpdated();
-        sourceable.setUpdated();
-    }
-
-    @Override
     public Sourceable getSourceable() {
         return sourceable;
-    }
-
-    @Override
-    protected void bindUpdated() {
-        updated.bind(user.updatedProperty().or(creation.updatedProperty()).or(getCreator().updatedProperty()).or(sourceable.updatedProperty()));
-        updated.addListener((observable, oldValue, newValue) -> {
-            if (newValue && !newEntry) {
-                OpEntryCarrier.getInstance().addUpdateEntry(this);
-            }
-
-        });
     }
 
     /**

@@ -22,6 +22,7 @@ public class CreationTable extends AbstractDataTable<Creation> implements DataTa
     private static final DataColumn numPortionC = new DataColumn("NUMPORTION", INTEGER, NOT_NULL);
     private static final DataColumn coverPathC = new DataColumn("COVERPATH", TEXT, NOT_NULL);
     private static final DataColumn workStatusC = new DataColumn("WORKSTATUS", TEXT, NOT_NULL);
+    private static final DataColumn tocLocation = new DataColumn("TOCLOCATION", TEXT);
 
     private static CreationTable INSTANCE;
 
@@ -55,7 +56,7 @@ public class CreationTable extends AbstractDataTable<Creation> implements DataTa
 
     @Override
     protected String createString() {
-        return createDataTableHelper(getIdColumn(), titleC, seriesC, dateLastPortionC, numPortionC, coverPathC, workStatusC);
+        return createDataTableHelper(getIdColumn(), titleC, seriesC, dateLastPortionC, numPortionC, coverPathC, workStatusC, tocLocation);
         /*return "CREATE TABLE IF NOT EXISTS " +
                 getTableName() +
                 "(" + getTableId() + " " + INTEGER + " PRIMARY KEY NOT NULL UNIQUE" +
@@ -79,6 +80,7 @@ public class CreationTable extends AbstractDataTable<Creation> implements DataTa
         setString(stmt, coverPathC, entry.getCoverPath());
         setString(stmt, workStatusC, entry.getWorkStatus());
         setInt(stmt, numPortionC, entry.getNumPortion());
+        setString(stmt, tocLocation, entry.getTocLocation());
 
         /*stmt.setNull(1,Types.INTEGER);
         stmt.setString(2,entry.getTitle());

@@ -1,5 +1,6 @@
 package scrape.sources.posts;
 
+import Enterprise.data.impl.AbstractDataEntry;
 import Enterprise.misc.DataAccess;
 import Enterprise.misc.SQLUpdate;
 import javafx.beans.property.BooleanProperty;
@@ -15,48 +16,35 @@ import scrape.sources.posts.strategies.intface.*;
  *
  */
 @DataAccess(daoClass = "SourceTable")
-public class PostConfigs implements ScrapeConfigs {
+public class PostConfigs extends AbstractDataEntry implements ScrapeConfigs {
     private boolean init = false;
     private boolean isArchive = false;
 
-    @SQLUpdate(stateGet = "isArchiveUpdated", valueGet = "getArchive", columnField = "archiveSearcher")
+    @SQLUpdate(columnField = "archiveSearcher")
     private ObjectProperty<ArchiveSearcher> archive = new SimpleObjectProperty<>();
 
-    @SQLUpdate(stateGet = "isBodyUpdated", valueGet = "getWrapper", columnField = "postWrapper")
+    @SQLUpdate(columnField = "postWrapper")
     private ObjectProperty<ContentWrapper> wrapper = new SimpleObjectProperty<>();
 
-    @SQLUpdate(stateGet = "isFeedUpdated", valueGet = "getFeed", columnField = "feed")
+    @SQLUpdate(columnField = "feed")
     private ObjectProperty<Feed> feed = new SimpleObjectProperty<>();
 
-    @SQLUpdate(stateGet = "isPostsUpdated", valueGet = "getPosts", columnField = "postElement")
+    @SQLUpdate(columnField = "postElement")
     private ObjectProperty<PostElement> posts = new SimpleObjectProperty<>();
 
-    @SQLUpdate(stateGet = "isTimeUpdated", valueGet = "getTime", columnField = "timeElement")
+    @SQLUpdate(columnField = "timeElement")
     private ObjectProperty<TimeElement> time = new SimpleObjectProperty<>();
 
-    @SQLUpdate(stateGet = "isTitleUpdated", valueGet = "getTitle", columnField = "titleElement")
+    @SQLUpdate(columnField = "titleElement")
     private ObjectProperty<TitleElement> title = new SimpleObjectProperty<>();
 
-    @SQLUpdate(stateGet = "isPostBodyUpdated", valueGet = "getPostContent", columnField = "contentElement")
+    @SQLUpdate(columnField = "contentElement")
     private ObjectProperty<ContentElement> postBody = new SimpleObjectProperty<>();
 
-    @SQLUpdate(stateGet = "isFooterUpdated", valueGet = "getFooter", columnField = "footerElement")
+    @SQLUpdate(columnField = "footerElement")
     private ObjectProperty<FooterElement> footer = new SimpleObjectProperty<>();
 
-    private BooleanProperty archiveUpdated = new SimpleBooleanProperty();
-    private BooleanProperty bodyUpdated = new SimpleBooleanProperty();
-    private BooleanProperty feedUpdated = new SimpleBooleanProperty();
-    private BooleanProperty postsUpdated = new SimpleBooleanProperty();
-    private BooleanProperty timeUpdated = new SimpleBooleanProperty();
-    private BooleanProperty titleUpdated = new SimpleBooleanProperty();
-    private BooleanProperty postBodyUpdated = new SimpleBooleanProperty();
-    private BooleanProperty footerUpdated = new SimpleBooleanProperty();
-
     private BooleanProperty updated = new SimpleBooleanProperty();
-
-    public PostConfigs() {
-        bindUpdated();
-    }
 
     public boolean isInit() {
         return init;
@@ -136,44 +124,8 @@ public class PostConfigs implements ScrapeConfigs {
         this.footer.set(footer);
     }
 
-    public boolean isArchiveUpdated() {
-        return archiveUpdated.get();
-    }
-
-    public boolean isBodyUpdated() {
-        return bodyUpdated.get();
-    }
-
-    public boolean isFeedUpdated() {
-        return feedUpdated.get();
-    }
-
-    public boolean isPostsUpdated() {
-        return postsUpdated.get();
-    }
-
-    public boolean isTimeUpdated() {
-        return timeUpdated.get();
-    }
-
-    public boolean isTitleUpdated() {
-        return titleUpdated.get();
-    }
-
-    public boolean isPostBodyUpdated() {
-        return postBodyUpdated.get();
-    }
-
-    public boolean isFooterUpdated() {
-        return footerUpdated.get();
-    }
-
     public boolean isUpdated() {
         return updated.get();
-    }
-
-    public BooleanProperty updatedProperty() {
-        return updated;
     }
 
     @Override
@@ -187,34 +139,4 @@ public class PostConfigs implements ScrapeConfigs {
                 "Footer: " + footer.get();
     }
 
-    private void bindUpdated() {
-        feed.addListener(observable -> feedUpdated.set(true));
-        archive.addListener(observable -> archiveUpdated.set(true));
-        wrapper.addListener(observable -> bodyUpdated.set(true));
-        posts.addListener(observable -> postsUpdated.set(true));
-        time.addListener(observable -> timeUpdated.set(true));
-        title.addListener(observable -> titleUpdated.set(true));
-        postBody.addListener(observable -> postBodyUpdated.set(true));
-        footer.addListener(observable -> footerUpdated.set(true));
-
-        updated.bind(feedUpdated
-                .or(archiveUpdated)
-                .or(bodyUpdated)
-                .or(postsUpdated)
-                .or(timeUpdated)
-                .or(titleUpdated)
-                .or(postBodyUpdated)
-                .or(footerUpdated));
-    }
-
-    public void setUpdated() {
-        feedUpdated.set(false);
-        archiveUpdated.set(false);
-        bodyUpdated.set(false);
-        postsUpdated.set(false);
-        timeUpdated.set(false);
-        titleUpdated.set(false);
-        postBodyUpdated.set(false);
-        footerUpdated.set(false);
-    }
 }

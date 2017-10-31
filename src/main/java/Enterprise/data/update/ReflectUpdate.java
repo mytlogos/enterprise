@@ -1,7 +1,8 @@
-package Enterprise.data;
+package Enterprise.data.update;
 
 import Enterprise.data.database.DataColumn;
 import Enterprise.data.intface.DataEntry;
+import Enterprise.data.intface.Entry;
 import Enterprise.misc.DataAccess;
 import Enterprise.misc.Log;
 import Enterprise.misc.SQLUpdate;
@@ -14,82 +15,17 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 /**
- * Reflection class.
- * At the moment it is more of an Utility Class and has no real theme.
- * It is very probable that this class will change much in the future,
- * it will be expanded, divided or something else.
- * <p>
- * The main theme is the reflection of several Classes related to the Data Model Classes.
- * The class {@link Enterprise.data.database.AbstractDataTable} requires dynamic update
- * statements.
- * These are provided through this class {@link #updateStrings(Object, Object, String, String)}.
- * </p>
- * <p>
- * The {@code ReflectUpdate} searches in an object derived from {@link DataEntry}
- * for fields annotated with the {@link SQLUpdate}.
- * The class of the field to update needs to be annotated with {@link DataAccess} specifying
- * the corresponding DAO class.
- * </p>
- * <p>
- * It searches for the methods specified in {@code stateGet, valueGet} and the default
- * {@code getId} method in the class of the field.
- * Afterwards it searches for the field specified by {@code columnField} of the {@code SQLUpdate}
- * annotation in the class specified in {@code daoClass} of the {@code DataAccess} annotation,
- * which needs to be located in the {@code Enterprise.data.database} package.
- * It will consequently invoke the methods and depending von the value returned by the
- * "stateGet" method, construct the SQL statements with the values of the other methods and the
- * {@code columnField} or else it will skip this field.
- * </p>
- * Example:
- * <pre>
- * {@code
- * //value class
- *    {@literal @}DataAccess("DMOTable")
- *    class DMOImplementation {
- *         //field which will be saved into database
- *        {@literal @}SQLUpdate(stateGet = "isNameChanged", valueGet = "getName", columnField = "nameC")
- *        String name;
- *
- *         //stateChanged flag
- *        BooleanProperty nameChanged = new SimpleBooleanProperty();
- *
- *         //field value getter
- *        String getName(){
- *            return name;
- *        }
- *
- *         //stateChanged getter
- *        boolean isNameChanged(){
- *            return nameChanged.get;
- *        }
- *    }
- *    //DAO class of the value class
- *    class DMOTable{
- *          //name of the Column in the database
- *          String nameC = "NAME";
- *    }
- * }
- * </pre>
+ * A Standard Implementation of UpdateReflector.
  */
-public class ReflectUpdate {
+public class ReflectUpdate implements UpdateReflector {
     private String tableName;
     private String idColumn;
 
-    /**
-     * Gets the Update SQL Statements by reflecting several classes.
-     * The {@link DataEntry} object is required to have fields annotated with
-     * {@link SQLUpdate}.
-     *
-     * @param dataProvider an implementation of the {@code DataEntry} interface
-     * @param tableName    name of the table which will be updated
-     * @param idColumn     name of the Column with the primary key
-     * @return updateString - {@code Set} of Strings of complete SQL statements
-     * @throws IllegalArgumentException if no fields annotated with {@code SQLUpdate} were found in
-     *                                  the parameter o
-     */
-    public Set<String> updateStrings(@NotNull Object dataProvider, @NotNull Object idProvider, @NotNull String tableName, @NotNull String idColumn) {
+    @Override
+    public Set<String> getUpdateStrings(Entry dataProvider, Object idProvider, String idColumn, String tableName) {
         validate(dataProvider, idProvider, tableName, idColumn);
 
         List<Field> fieldList = getFieldsByAnnotation(dataProvider, SQLUpdate.class);
@@ -120,6 +56,48 @@ public class ReflectUpdate {
         return statements;
     }
 
+    /**
+     * Gets the Update SQL Statements by reflecting several classes.
+     * The {@link DataEntry} object is required to have fields annotated with
+     * {@link SQLUpdate}.
+     *
+     * @param dataProvider an implementation of the {@code DataEntry} interface
+     * @param idColumn name of the Column with the primary key
+     * @param tableName name of the Table
+     * @return updateString - {@code Set} of Strings of complete SQL statements
+     * @throws IllegalArgumentException if no fields annotated with {@code SQLUpdate} were found in
+     *                                  the parameter o
+     */
+    public Set<String> updateStrings(@NotNull Object dataProvider, @NotNull Object idProvider, @NotNull String idColumn, @NotNull String tableName) {
+        validate(dataProvider, idProvider, tableName, idColumn);
+
+        List<Field> fieldList = getFieldsByAnnotation(dataProvider, SQLUpdate.class);
+        Set<String> statements = new HashSet<>();
+
+        if (fieldList.isEmpty()) {
+            throw new IllegalArgumentException(dataProvider + " does not seem to have the required SQLUpdate annotation");
+        }
+
+        try {
+            List<DataObjectMethods> methodsList = getDataObjectMethods(dataProvider, idProvider, fieldList);
+
+            methodsList.forEach(methods -> {
+                String updateString;
+                try {
+                    updateString = setString(methods);
+                    if (!updateString.isEmpty()) {
+                        statements.add(updateString);
+                    }
+                } catch (ReflectiveOperationException e) {
+                    e.printStackTrace();
+                }
+            });
+        } catch (ReflectiveOperationException e) {
+            Log.classLogger(this).log(Level.SEVERE, "could not create updateStatements", e);
+        }
+
+        return statements;
+    }
 
     private void validate(@NotNull Object o, Object idProvider, @NotNull String tableName, @NotNull String idColumn) {
         if (tableName != null && !tableName.isEmpty()) {
@@ -140,13 +118,13 @@ public class ReflectUpdate {
         List<DataObjectMethods> methodsList = new ArrayList<>();
         for (Field field : fieldList) {
             SQLUpdate sql = field.getAnnotation(SQLUpdate.class);
-
-            Method booleanMethod = getMethod(o, sql.stateGet());
-            Method contentGetter = getMethod(o, sql.valueGet());
-            Method idGetter = getMethod(idProvider, "getId");
-            String columnName = getColumnName(o, sql);
-
-            methodsList.add(new DataObjectMethods(booleanMethod, contentGetter, idGetter, idProvider, o, columnName));
+// TODO: 22.10.2017 invalid
+//            Method booleanMethod = getMethod(o, sql.stateGet());
+//            Method contentGetter = getMethod(o, sql.valueGet());
+//            Method idGetter = getMethod(idProvider, "getId");
+//            String columnName = getColumnName(o, sql);
+//
+//            methodsList.add(new DataObjectMethods(booleanMethod, contentGetter, idGetter, idProvider, o, columnName));
         }
         return methodsList;
     }
@@ -262,13 +240,17 @@ public class ReflectUpdate {
         if (changed) {
             String value = getStringFromMethod(methods.getContentGetter(), methods.getObject());
 
-            String idString = getStringFromMethod(methods.getIdGetter(), methods.getIdProvider());
-            int id = Integer.parseInt(idString);
+            int id = getId(methods.getIdGetter(), methods.getIdProvider());
             setString = setString(columnName, value, id);
         } else {
             setString = "";
         }
         return setString;
+    }
+
+    private int getId(Method idGetter, Object idProvider) throws ReflectiveOperationException {
+        String idString = getStringFromMethod(idGetter, idProvider);
+        return Integer.parseInt(idString);
     }
 
     /**
@@ -381,8 +363,8 @@ public class ReflectUpdate {
      * @param annotateClass {@code Annotation} to look for
      * @return fields - {@code List} of {@code Field}s annotated with the specified {@code Annotation}
      */
-    private List<Field> getFieldsByAnnotation(Object o, Class<? extends Annotation> annotateClass) {
-        Field[] fields = o.getClass().getDeclaredFields();
+    public List<Field> getFieldsByAnnotation(Object o, Class<? extends Annotation> annotateClass) {
+        List<Field> fields = getFields(o);
         List<Field> annotateFields = new ArrayList<>();
 
         for (Field field : fields) {
@@ -396,6 +378,22 @@ public class ReflectUpdate {
             }
         }
         return annotateFields;
+    }
+
+    public List<Field> getFieldsByType(Object o, Class<?> clazz) {
+        List<Field> fields = getFields(o);
+        return fields.stream().filter(field -> clazz.isAssignableFrom(field.getType())).collect(Collectors.toList());
+    }
+
+    private List<Field> getFields(Object o) {
+        List<Field> fields = new ArrayList<>();
+        Class<?> clazz = o.getClass();
+
+        while (clazz != null && clazz != Object.class) {
+            fields.addAll(new ArrayList<>(Arrays.asList(clazz.getDeclaredFields())));
+            clazz = clazz.getSuperclass();
+        }
+        return fields;
     }
 
     /**

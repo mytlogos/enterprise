@@ -2,13 +2,14 @@ package Enterprise.data.impl;
 
 import Enterprise.data.CreationRelation;
 import Enterprise.data.Default;
-import Enterprise.data.OpEntryCarrier;
 import Enterprise.data.intface.Creation;
 import Enterprise.data.intface.Creator;
-import Enterprise.data.intface.DataEntry;
 import Enterprise.misc.DataAccess;
 import Enterprise.misc.SQLUpdate;
-import javafx.beans.property.*;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -19,37 +20,31 @@ import java.net.URISyntaxException;
  * @see Creation
  */
 @DataAccess(daoClass = "CreationTable")
-public class CreationImpl extends AbstractDataEntry implements DataEntry, Creation {
+public class CreationImpl extends AbstractDataEntry implements Creation {
 
-    @SQLUpdate(stateGet = "isTitleChanged", valueGet = "getTitle", columnField = "titleC")
+    @SQLUpdate(columnField = "titleC")
     private StringProperty title = new SimpleStringProperty();
 
-    @SQLUpdate(stateGet = "isSeriesChanged", valueGet = "getSeries", columnField = "seriesC")
+    @SQLUpdate(columnField = "seriesC")
     private StringProperty series = new SimpleStringProperty();
 
-    @SQLUpdate(stateGet = "isDateLastPortionChanged", valueGet = "getDateLastPortion", columnField = "dateLastPortionC")
+    @SQLUpdate(columnField = "dateLastPortionC")
     private StringProperty dateLastPortion = new SimpleStringProperty();
 
-    @SQLUpdate(stateGet = "isNumPortionChanged", valueGet = "getNumPortion", columnField = "numPortionC")
+    @SQLUpdate(columnField = "numPortionC")
     private IntegerProperty numPortion = new SimpleIntegerProperty();
 
-    @SQLUpdate(stateGet = "isCoverPathChanged", valueGet = "getCoverPath", columnField = "coverPathC")
+    @SQLUpdate(columnField = "coverPathC")
     private StringProperty coverPath = new SimpleStringProperty();
 
-    @SQLUpdate(stateGet = "isWorkStatusChanged", valueGet = "getWorkStatus", columnField = "workStatusC")
+    @SQLUpdate(columnField = "workStatusC")
     private StringProperty workStatus = new SimpleStringProperty();
+
+    @SQLUpdate(columnField = "tocLocation")
+    private StringProperty tocLocation = new SimpleStringProperty();
 
     private CreationRelation relation;
     private Creator creator;
-
-    private BooleanProperty titleChanged = new SimpleBooleanProperty(false);
-    private BooleanProperty seriesChanged = new SimpleBooleanProperty(false);
-
-    private BooleanProperty dateLastPortionChanged = new SimpleBooleanProperty(false);
-    private BooleanProperty numPortionsChanged = new SimpleBooleanProperty(false);
-
-    private BooleanProperty coverPathChanged = new SimpleBooleanProperty(false);
-    private BooleanProperty workStatusChanged = new SimpleBooleanProperty(false);
 
     /**
      * The private constructor of {@code CreationImpl}.
@@ -62,31 +57,7 @@ public class CreationImpl extends AbstractDataEntry implements DataEntry, Creati
         this.numPortion.set(builder.buildNumPortion);
         this.workStatus.set(builder.buildWorkStatus);
         this.coverPath.set(builder.buildCoverPath);
-
-        invalidListener();
-        bindUpdated();
-    }
-
-    /**
-     * adds InvalidListeners to the data-Properties, which set the corresponding flags to true, if a change happened
-     */
-    private void invalidListener() {
-        title.addListener(observable -> titleChanged.set(true));
-        series.addListener(observable -> seriesChanged.set(true));
-        dateLastPortion.addListener(observable -> dateLastPortionChanged.set(true));
-        numPortion.addListener(observable -> numPortionsChanged.set(true));
-        coverPath.addListener(observable -> coverPathChanged.set(true));
-        workStatus.addListener(observable -> workStatusChanged.set(true));
-    }
-
-    @Override
-    final protected void bindUpdated() {
-        updated.bind(titleChanged.or(seriesChanged).or(dateLastPortionChanged).or(numPortionsChanged).or(coverPathChanged).or(workStatusChanged));
-        updated.addListener((observable, oldValue, newValue) -> {
-            if (newValue && !newEntry) {
-                OpEntryCarrier.getInstance().addUpdate(this);
-            }
-        });
+        this.tocLocation.set(builder.tocLocation);
     }
 
     @Override
@@ -112,56 +83,6 @@ public class CreationImpl extends AbstractDataEntry implements DataEntry, Creati
         CreationImpl that = (CreationImpl) o;
 
         return getTitle().equals(that.getTitle()) && getSeries().equals(that.getSeries());
-    }
-
-    @Override
-    public void setUpdated() {
-        titleChanged.set(false);
-        seriesChanged.set(false);
-        numPortionsChanged.set(false);
-        dateLastPortionChanged.set(false);
-        coverPathChanged.set(false);
-        workStatusChanged.set(false);
-    }
-
-    @Override
-    public boolean isUpdated() {
-        return updated.get();
-    }
-
-    @Override
-    public BooleanProperty updatedProperty() {
-        return updated;
-    }
-
-    @Override
-    public boolean isWorkStatusChanged() {
-        return workStatusChanged.get();
-    }
-
-    @Override
-    public boolean isTitleChanged() {
-        return titleChanged.get();
-    }
-
-    @Override
-    public boolean isSeriesChanged() {
-        return seriesChanged.get();
-    }
-
-    @Override
-    public boolean isDateLastPortionChanged() {
-        return dateLastPortionChanged.get();
-    }
-
-    @Override
-    public boolean isNumPortionChanged() {
-        return numPortionsChanged.get();
-    }
-
-    @Override
-    public boolean isCoverPathChanged() {
-        return coverPathChanged.get();
     }
 
     @Override
@@ -232,6 +153,11 @@ public class CreationImpl extends AbstractDataEntry implements DataEntry, Creati
     }
 
     @Override
+    public String getTocLocation() {
+        return tocLocation.get();
+    }
+
+    @Override
     public StringProperty coverPathProperty() {
         return coverPath;
     }
@@ -268,6 +194,7 @@ public class CreationImpl extends AbstractDataEntry implements DataEntry, Creati
         private int buildNumPortion = Default.VALUE;
         private String buildCoverPath = Default.IMAGE;
         private String buildWorkStatus = Default.STRING;
+        private String tocLocation = null;
         private int id = Default.VALUE;
 
         public CreationImplBuilder(String title) {
@@ -277,6 +204,10 @@ public class CreationImpl extends AbstractDataEntry implements DataEntry, Creati
         public CreationImplBuilder setId(int id) {
             this.id = id;
             return this;
+        }
+
+        public void setTocLocation(String tocLocation) {
+            this.tocLocation = tocLocation;
         }
 
         public CreationImplBuilder setSeries(String series) {

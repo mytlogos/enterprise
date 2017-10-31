@@ -2,6 +2,7 @@ package Enterprise.modules;
 
 import Enterprise.data.OpEntryCarrier;
 import Enterprise.data.intface.CreationEntry;
+import Enterprise.data.update.EntryWrapper;
 import Enterprise.misc.SetList;
 import com.sun.javafx.collections.ObservableListWrapper;
 import javafx.collections.ObservableList;
@@ -110,7 +111,13 @@ public enum BasicModules implements Module {
     public boolean addEntry(CreationEntry entry) {
         if (entry != null) {
             getDistinctionList().add(entry.getUser().getListName());
-            return getEntryList().add(entry);
+
+            if (getEntryList().add(entry)) {
+                EntryWrapper.wrap(entry);
+                return true;
+            } else {
+                return false;
+            }
         } else {
             throw new NullPointerException();
         }

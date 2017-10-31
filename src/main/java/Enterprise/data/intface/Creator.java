@@ -35,27 +35,6 @@ public interface Creator extends DataEntry, Comparable<Creator> {
     List<Creation> getCreatorWorks();
 
     /**
-     * Gets the value of the internal {@code nameChanged}-Flag.
-     *
-     * @return nameChanged
-     */
-    boolean isNameChanged();
-
-    /**
-     * Gets the value of the internal {@code statusChanged}-Flag.
-     *
-     * @return statusChanged
-     */
-    boolean isStatusChanged();
-
-    /**
-     * Gets the value of the internal {@code sortNameChanged}-Flag.
-     *
-     * @return sortNameChanged
-     */
-    boolean isSortNameChanged();
-
-    /**
      * Gets the {@code name} of this {@code Creator}.
      *
      * @return name - String of the Property

@@ -2,6 +2,7 @@ package Enterprise.data.database;
 
 import Enterprise.data.intface.Entry;
 import Enterprise.data.intface.Sourceable;
+import Enterprise.data.update.EntryWrapper;
 import Enterprise.misc.SetList;
 import scrape.sources.Source;
 import scrape.sources.SourceList;
@@ -326,11 +327,11 @@ public class EntrySourceTable extends AbstractSubRelation<Sourceable> {
         int srceId = rs.getInt(sourceId.getName());
         Source source = SourceTable.getInstance().getEntry(srceId, connection);
 
-        source.setUpdated();
+        EntryWrapper.getWrapper(source).setUpdated();
         return source;
     }
 
-    boolean removeDead(Sourceable entry, Connection connection) throws SQLException {
+    private boolean removeDead(Sourceable entry, Connection connection) throws SQLException {
         boolean sourceableDelete = false;
         boolean sourceDelete;
 

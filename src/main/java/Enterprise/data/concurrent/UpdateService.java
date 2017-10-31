@@ -4,6 +4,7 @@ import Enterprise.data.OpEntryCarrier;
 import Enterprise.data.database.CreationEntryTable;
 import Enterprise.data.intface.CreationEntry;
 import Enterprise.data.intface.SourceableEntry;
+import Enterprise.data.update.EntryWrapper;
 import Enterprise.modules.BasicModules;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
@@ -43,11 +44,11 @@ public class UpdateService extends ScheduledService<Boolean> {
                 updateEntries = OpEntryCarrier.getInstance().getUpdateEntries();
                 newEntries = OpEntryCarrier.getInstance().getNewEntries();
                 BasicModules.ANIME.getEntries().forEach(entry -> {
-                    System.out.println("Entry: " + entry.isUpdated());
-                    System.out.println("Sourceable: " + ((SourceableEntry) entry).getSourceable().isUpdated());
+                    System.out.println("Entry: " + EntryWrapper.getWrapper(entry).isUpdated());
+                    System.out.println("Sourceable: " + EntryWrapper.getWrapper(((SourceableEntry) entry).getSourceable()).isUpdated());
                     System.out.println("SourceList: " + ((SourceableEntry) entry).getSourceable().getSourceList().listChangedProperty().get());
                     ((SourceableEntry) entry).getSourceable().getSourceList().forEach(source -> {
-                        System.out.println("Source: " + source + " is " + source.isUpdated());
+                        System.out.println("Source: " + source + " is " + EntryWrapper.getWrapper(source).isUpdated());
                         System.out.println("Source: " + source + " is  new?: " + source.isNewEntry());
                         System.out.println("Configs is: " + source.getPostConfigs().isUpdated());
                     });

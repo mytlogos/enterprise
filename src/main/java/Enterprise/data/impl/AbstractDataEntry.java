@@ -15,6 +15,10 @@ public abstract class AbstractDataEntry extends EnterpriseEntry implements DataE
         dataId = id;
     }
 
+    protected AbstractDataEntry() {
+
+    }
+
     @Override
     public int getId() {
         return dataId;

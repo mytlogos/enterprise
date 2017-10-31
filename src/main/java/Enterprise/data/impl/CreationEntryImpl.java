@@ -1,6 +1,5 @@
 package Enterprise.data.impl;
 
-import Enterprise.data.OpEntryCarrier;
 import Enterprise.data.intface.Creation;
 import Enterprise.data.intface.CreationEntry;
 import Enterprise.data.intface.Creator;
@@ -32,7 +31,6 @@ public class CreationEntryImpl extends AbstractCreationEntry implements Creation
 
         validateState();
         incrementReferences(user, creation, creator);
-        bindUpdated();
     }
 
     /**
@@ -54,16 +52,6 @@ public class CreationEntryImpl extends AbstractCreationEntry implements Creation
     }
 
     @Override
-    protected void bindUpdated() {
-        updated.bind(user.updatedProperty().or(creation.updatedProperty()).or(creation.getCreator().updatedProperty()));
-        updated.addListener((observable, oldValue, newValue) -> {
-            if (newValue && !newEntry) {
-                OpEntryCarrier.getInstance().addUpdateEntry(this);
-            }
-        });
-    }
-
-    @Override
     public User getUser() {
         return user;
     }
@@ -76,11 +64,6 @@ public class CreationEntryImpl extends AbstractCreationEntry implements Creation
     @Override
     public Creator getCreator() {
         return creation.getCreator();
-    }
-
-    @Override
-    public boolean isUpdated() {
-        return updated.get();
     }
 
     @Override

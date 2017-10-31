@@ -100,71 +100,11 @@ public interface User extends DataEntry, Comparable<User> {
     StringProperty keyWordsProperty();
 
     /**
-     * The corresponding stateChanged-Getter
-     * <p>
-     * Queries if the State of the Field {@code ownStatus} has changed
-     * </p>
-     *
-     * @return ownStatusChanged returns true if the state of the field {@code ownStatus} has been changed
-     */
-    boolean isOwnStatusChanged();
-
-    /**
-     * The corresponding stateChanged-Getter
-     * <p>
-     * Queries if the State of the Field {@code comment} has changed
-     * </p>
-     *
-     * @return commentChanged returns true if the state of the field {@code comment} has been changed
-     */
-    boolean isCommentChanged();
-
-    /**
-     * The corresponding stateChanged-Getter
-     * <p>
-     * Queries if the State of the Field {@code rating} has changed
-     * </p>
-     *
-     * @return ratingChanged returns true if the state of the field {@code rating} has been changed
-     */
-    boolean isRatingChanged();
-
-    /**
-     * The corresponding stateChanged-Getter
-     * <p>
-     * Queries if the State of the Field {@code processedPortion} has changed
-     * </p>
-     *
-     * @return processedPortionChanged returns true if the state of the field {@code processedPortion} has been changed
-     */
-    boolean isProcessedPortionChanged();
-
-    /**
      * Gets the {@code StringProperty}-Object of the {@code list}-Field.
      *
      * @return listNameProperty - Is not {@code null}.
      */
     StringProperty listNameProperty();
-
-    /**
-     * The corresponding stateChanged-Getter
-     * <p>
-     * Queries if the State of the Field {@code keyWords} has changed
-     * </p>
-     *
-     * @return keywWordsChanged returns true if the state of the field {@code keyWords} has been changed
-     */
-    boolean isKeyWordsChanged();
-
-    /**
-     * The corresponding stateChanged-Getter
-     * <p>
-     * Queries if the State of the Field {@code list} has changed
-     * </p>
-     *
-     * @return listChanged returns true if the state of the field {@code list} has been changed
-     */
-    boolean isListNameChanged();
 
     List<String> getKeyWordList();
 }

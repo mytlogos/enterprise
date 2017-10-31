@@ -13,7 +13,7 @@ import java.util.WeakHashMap;
 /**
  *
  */
-abstract class AbstractCreationEntry extends EnterpriseEntry implements CreationEntry {
+public abstract class AbstractCreationEntry extends EnterpriseEntry implements CreationEntry {
     private static Map<DataEntry, Integer> references = new WeakHashMap<>();
     User user;
     Creation creation;
@@ -86,12 +86,6 @@ abstract class AbstractCreationEntry extends EnterpriseEntry implements Creation
         }
     }
 
-    @Override
-    public void setUpdated() {
-        user.setUpdated();
-        creation.setUpdated();
-        getCreator().setUpdated();
-    }
 
     @Override
     public void fromDataBase() {
@@ -99,7 +93,6 @@ abstract class AbstractCreationEntry extends EnterpriseEntry implements Creation
         creation.fromDataBase();
         getCreator().fromDataBase();
 
-        setUpdated();
         setEntryOld();
     }
 }

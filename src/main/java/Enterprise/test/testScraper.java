@@ -21,8 +21,8 @@ import scrape.sources.posts.PostScraper;
 import scrape.sources.posts.PostSearchEntry;
 import scrape.sources.posts.strategies.ContentWrapper;
 import scrape.sources.posts.strategies.intface.FilterElement;
+import scrape.sources.toc.Processor;
 import scrape.sources.toc.strategies.impl.HeaderFilter;
-import scrape.sources.toc.strategies.impl.TocProcessorImpl;
 import scrape.sources.toc.strategies.intface.HeaderElement;
 import scrape.sources.toc.strategies.intface.TocProcessor;
 
@@ -346,16 +346,11 @@ public class testScraper extends Application {
     }
 
     private void doGetAllTocs(IntegerProperty property, String link) {
-        try {
-            TocProcessor processor = new TocProcessorImpl();
-            Document document = Scraper.getCleanDocument(link);
-            processor.process(document);
+        TocProcessor processor = new Processor();
+        processor.process(link);
 
-            property.set(property.get() + 1);
+        property.set(property.get() + 1);
 //            System.out.println(property.get());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     private void doGetAllChapters(String s) {

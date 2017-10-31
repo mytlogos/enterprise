@@ -35,6 +35,6 @@ public abstract class SourceableContentCont<R extends Enum<R> & Module> extends 
         Creator creator = new CreatorImpl.CreatorBuilder(author).build();
         Creation creation = new CreationImpl.CreationImplBuilder(title).build();
 
-        return new SourceableEntryImpl(new SimpleUser(), creation, creator, new SourceableImpl(), module);
+        return new SourceableEntryImpl(new SimpleUser(), creation, creator, SourceableImpl.get(), module);
     }
 }

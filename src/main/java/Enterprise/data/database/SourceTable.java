@@ -1,6 +1,6 @@
 package Enterprise.data.database;
 
-import Enterprise.data.ReflectUpdate;
+import Enterprise.data.update.UpdateReflector;
 import scrape.sources.Source;
 import scrape.sources.posts.FeedGetter;
 import scrape.sources.posts.PostConfigs;
@@ -236,7 +236,7 @@ public class SourceTable extends AbstractDataTable<Source> {
     }
 
     @Override
-    final protected Set<String> getStatements(ReflectUpdate classSpy, Source entry) {
-        return classSpy.updateStrings(entry.getPostConfigs(), entry, getTableName(), getTableId());
+    final protected Set<String> getStatements(UpdateReflector classSpy, Source entry) {
+        return classSpy.getUpdateStrings(entry.getPostConfigs(), entry, getTableId(), getTableName());
     }
 }

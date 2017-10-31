@@ -1,4 +1,7 @@
-package scrape.sources.chapter;
+package scrape.sources.toc.novel;
+
+import scrape.sources.toc.Path;
+import scrape.sources.toc.PathFinder;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -130,11 +133,11 @@ class VolumeManager {
             map = resolvedMappedPaths;
         }
 
-        for (String s : map.keySet()) {
-            Set<String> selector = map.get(s).stream().map(Path::getTagSelector).collect(Collectors.toSet());
+        for (String key : map.keySet()) {
+            Set<String> selector = map.get(key).stream().map(Path::getTagSelector).filter(s -> !s.matches(".*> a$")).collect(Collectors.toSet());
 
             if (!selector.isEmpty()) {
-                selectorMap.put(s, selector);
+                selectorMap.put(key, selector);
             }
         }
     }

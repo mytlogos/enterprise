@@ -111,7 +111,7 @@ public abstract class SourceableEditController<R extends Enum<R> & Module> exten
     /**
      * Checks if {@code creationEntry} is null, if true
      * it sets the text of all Text Nodes.
-     * If the field is not null, it will proceed to bind the {@link Enterprise.data.intface.CreationEntry}
+     * If the field is not null, it will proceed to bindByOwn the {@link Enterprise.data.intface.CreationEntry}
      * object to the graphic Nodes.
      */
     protected void loadEntry() {

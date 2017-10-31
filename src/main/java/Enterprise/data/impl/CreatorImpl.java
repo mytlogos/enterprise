@@ -2,16 +2,12 @@ package Enterprise.data.impl;
 
 import Enterprise.data.Cache;
 import Enterprise.data.Default;
-import Enterprise.data.OpEntryCarrier;
 import Enterprise.data.Person;
 import Enterprise.data.intface.Creation;
 import Enterprise.data.intface.Creator;
-import Enterprise.data.intface.DataEntry;
 import Enterprise.misc.DataAccess;
 import Enterprise.misc.SQLUpdate;
 import Enterprise.misc.SetList;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.util.Builder;
@@ -26,22 +22,20 @@ import java.util.Objects;
  * @see Creator
  */
 @DataAccess(daoClass = "CreatorTable")
-public class CreatorImpl extends AbstractDataEntry implements DataEntry, Comparable<Creator>, Creator {
+public class CreatorImpl extends AbstractDataEntry implements Comparable<Creator>, Creator {
 
     private static Cache<String, CreatorImpl> creatorCache = new Cache<>();
-    @SQLUpdate(stateGet = "isNameChanged", valueGet = "getName", columnField = "nameC")
+
+    @SQLUpdate(columnField = "nameC")
     private StringProperty name = new SimpleStringProperty();
-    @SQLUpdate(stateGet = "isSortNameChanged", valueGet = "getSortName", columnField = "sortNameC")
+    @SQLUpdate(columnField = "sortNameC")
     private StringProperty sortName = new SimpleStringProperty();
-    @SQLUpdate(stateGet = "isStatusChanged", valueGet = "getStatus", columnField = "statusC")
+    @SQLUpdate(columnField = "statusC")
     private StringProperty status = new SimpleStringProperty();
+
     // TODO: 30.08.2017 implement
     private Person personalInfo;
     private List<Creation> creatorWorks = new SetList<>();
-    private BooleanProperty nameChanged = new SimpleBooleanProperty(false);
-    private BooleanProperty sortNameChanged = new SimpleBooleanProperty(false);
-    private BooleanProperty statusChanged = new SimpleBooleanProperty(false);
-
     /**
      * The constructor of {@code CreatorImpl}
      */
@@ -51,41 +45,6 @@ public class CreatorImpl extends AbstractDataEntry implements DataEntry, Compara
         this.sortName.set(builder.sortName);
         this.status.set(builder.status);
         this.personalInfo = builder.person;
-
-        invalidListener();
-        bindUpdated();
-    }
-
-    /**
-     * adds invalidListeners to the dataField-Properties, sets stateChanged BooleanProperties to true,
-     * if state has changed
-     */
-    private void invalidListener() {
-        name.addListener(observable -> nameChanged.set(true));
-        sortName.addListener(observable -> sortNameChanged.set(true));
-        status.addListener(observable -> statusChanged.set(true));
-    }
-
-    @Override
-    protected void bindUpdated() {
-        updated.addListener((observable, oldValue, newValue) -> {
-            if (newValue && !newEntry) {
-                OpEntryCarrier.getInstance().addUpdate(this);
-            }
-        });
-        updated.bind(nameChanged.or(sortNameChanged).or(statusChanged));
-    }
-
-    @Override
-    public void setUpdated() {
-        nameChanged.set(false);
-        sortNameChanged.set(false);
-        statusChanged.set(false);
-    }
-
-    @Override
-    public boolean isSortNameChanged() {
-        return sortNameChanged.get();
     }
 
     @Override
@@ -101,26 +60,6 @@ public class CreatorImpl extends AbstractDataEntry implements DataEntry, Compara
     @Override
     public List<Creation> getCreatorWorks() {
         return Collections.unmodifiableList(creatorWorks);
-    }
-
-    @Override
-    public boolean isUpdated() {
-        return updated.get();
-    }
-
-    @Override
-    public BooleanProperty updatedProperty() {
-        return updated;
-    }
-
-    @Override
-    public boolean isNameChanged() {
-        return nameChanged.get();
-    }
-
-    @Override
-    public boolean isStatusChanged() {
-        return statusChanged.get();
     }
 
     @Override

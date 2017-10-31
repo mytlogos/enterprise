@@ -1,4 +1,4 @@
-package scrape.sources.chapter;
+package scrape.sources.toc;
 
 import org.jsoup.nodes.Element;
 
@@ -30,16 +30,22 @@ public class Path implements Cloneable, Comparable<Path> {
         return path;
     }
 
-    public void addParent(Element element) {
+    public Path addParent(Element element) {
         path.addFirst(element);
+        return this;
     }
 
-    public void addChild(Element element) {
+    public Path addChild(Element element) {
         path.addLast(element);
+        return this;
     }
 
     public Element getLast() {
         return !path.isEmpty() ? path.getLast() : null;
+    }
+
+    public Element getFirst() {
+        return !path.isEmpty() ? path.getFirst() : null;
     }
 
     public boolean isEmpty() {
@@ -56,7 +62,7 @@ public class Path implements Cloneable, Comparable<Path> {
         }
     }
 
-    public void resolve(Path basePath) {
+    public Path resolve(Path basePath) {
         int min = Math.min(basePath.path.size(), path.size());
         Path thisClone = this.clone();
         for (int i = 0; i < min; i++) {
@@ -64,6 +70,7 @@ public class Path implements Cloneable, Comparable<Path> {
                 path.removeFirst();
             }
         }
+        return this;
     }
 
     public Path clone() {
@@ -71,7 +78,7 @@ public class Path implements Cloneable, Comparable<Path> {
         return new Path(path);
     }
 
-    String getTagSelector() {
+    public String getTagSelector() {
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < path.size(); i++) {
 
@@ -101,5 +108,20 @@ public class Path implements Cloneable, Comparable<Path> {
             }
         }
         return compare;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Path path = (Path) o;
+
+        return getPath().equals(path.getPath());
+    }
+
+    @Override
+    public int hashCode() {
+        return getPath().hashCode();
     }
 }

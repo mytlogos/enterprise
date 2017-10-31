@@ -36,18 +36,6 @@ public interface Entry {
     boolean isNewEntry();
 
     /**
-     * sets internal flags to false - meaning that the Object changes were saved into Database
-     */
-    void setUpdated();
-
-    /**
-     * returns the internal updated-Flag
-     *
-     * @return updated returns true if this {@code Database} state was changed
-     */
-    boolean isUpdated();
-
-    /**
      * Sets the settings of the Entry, because it was created
      * from an existing source (database) not user input.
      */

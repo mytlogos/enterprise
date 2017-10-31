@@ -157,6 +157,6 @@ public abstract class SourceableAddController<E extends Enum<E> & Module> extend
         source.addAll(observableSource);
         String tlGroup = validateStringInput(translator);
 
-        return new SourceableImpl(source, tlGroup);
+        return SourceableImpl.get(source, tlGroup);
     }
 }

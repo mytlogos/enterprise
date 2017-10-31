@@ -4,8 +4,6 @@ import Enterprise.data.Default;
 import Enterprise.data.impl.AbstractDataEntry;
 import Enterprise.data.intface.Creation;
 import Enterprise.data.intface.DataEntry;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import scrape.sources.Source;
 
 import java.time.LocalDateTime;
@@ -221,22 +219,4 @@ public class Post extends AbstractDataEntry implements Comparable<Post>, DataEnt
         return result;
     }
 
-    @Override
-    public void setUpdated() {
-    }
-
-    @Override
-    public boolean isUpdated() {
-        return false;
-    }
-
-    @Override
-    public BooleanProperty updatedProperty() {
-        return new SimpleBooleanProperty();
-    }
-
-    @Override
-    protected void bindUpdated() {
-        throw new IllegalAccessError();
-    }
 }

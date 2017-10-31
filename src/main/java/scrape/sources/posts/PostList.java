@@ -35,7 +35,7 @@ public class PostList extends SimpleListProperty<Post> {
     /**
      * Binds the list of this {@code PostList} to the parameter.
      *
-     * @param listObjectProperty listProperty to bind the list of this to
+     * @param listObjectProperty listProperty to bindByOwn the list of this to
      */
     public void bindToList(ObjectProperty<ObservableList<Post>> listObjectProperty) {
         listObjectProperty.bind(this);

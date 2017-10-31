@@ -10,7 +10,7 @@ import javafx.beans.property.StringProperty;
  * </p>
  * <p> This Class is not Thread-safe</p>
  */
-public interface Creation extends DataEntry, Comparable<Creation> {
+public interface Creation extends DataEntry, ContainerEntry, Comparable<Creation> {
     /**
      * Gets the {@code Creator} of this Work
      *
@@ -27,66 +27,6 @@ public interface Creation extends DataEntry, Comparable<Creation> {
      * @throws IllegalArgumentException thrown if creator is null
      */
     void setCreator(Creator creator) throws IllegalArgumentException;
-
-    /**
-     * The corresponding stateChanged-Getter
-     * <p>
-     * Queries if the State of the Field "workStatus" has changed
-     * </p>
-     *
-     * @return workStatusChanged returns true if the state of the field "workStatus" has been changed
-     */
-    boolean isWorkStatusChanged();
-
-    /**
-     * The corresponding stateChanged-Getter
-     * <p>
-     * Queries if the State of the Field "title" has changed
-     * </p>
-     *
-     * @return titleChanged returns true if the state of the field "title" has been changed
-     */
-    boolean isTitleChanged();
-
-    /**
-     * The corresponding stateChanged-Getter
-     * <p>
-     * Queries if the State of the Field "series" has changed
-     * </p>
-     *
-     * @return workStatusChanged returns true if the state of the field "series" has been changed
-     */
-    boolean isSeriesChanged();
-
-    /**
-     * The corresponding stateChanged-Getter
-     * <p>
-     * Queries if the State of the Field "dateLastPortion" has changed
-     * </p>
-     *
-     * @return dateLastPortionChanged returns true if the state of the field "dateLastPortion" has been changed
-     */
-    boolean isDateLastPortionChanged();
-
-    /**
-     * The corresponding stateChanged-Getter
-     * <p>
-     * Queries the invalidationState of the Field "numPortion"
-     * </p>
-     *
-     * @return numPortionChanged returns true if the state of the field "numPortion" has been changed
-     */
-    boolean isNumPortionChanged();
-
-    /**
-     * The corresponding stateChanged-Getter
-     * <p>
-     * Queries if the State of the Field "coverPath" has changed
-     * </p>
-     *
-     * @return coverPathChanged returns true if the state of the field "coverPath" has been changed
-     */
-    boolean isCoverPathChanged();
 
     /**
      * The corresponding Getter-Method of the PropertyField "workStatus".
@@ -218,6 +158,14 @@ public interface Creation extends DataEntry, Comparable<Creation> {
      * @return coverPath - returns the Object of that Field, is not {@code null}.
      */
     StringProperty coverPathProperty();
+
+    /**
+     * Gets the String Representation of the Path for the ToC of this Creation.
+     *
+     * @return tocPath - returns the string representation of the uri
+     * or null if not set
+     */
+    String getTocLocation();
 
     /**
      * Implementation of {@link Comparable}

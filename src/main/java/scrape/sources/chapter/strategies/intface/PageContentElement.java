@@ -5,5 +5,5 @@ import scrape.sources.posts.strategies.intface.FilterElement;
 /**
  *
  */
-public interface ChapterElement extends FilterElement {
+public interface PageContentElement extends FilterElement {
 }

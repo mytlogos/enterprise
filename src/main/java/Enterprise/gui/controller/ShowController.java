@@ -96,7 +96,7 @@ public abstract class ShowController<E extends CreationEntry, R extends Enum<R> 
      * Binds the {@code property} to the {@link Text#textProperty()}
      * of the given {@code Text} unidirectional.
      *
-     * @param text     text to bind to
+     * @param text     text to bindByOwn to
      * @param property property which provides the content
      */
     void bindToText(Text text, StringProperty property) {
@@ -117,7 +117,7 @@ public abstract class ShowController<E extends CreationEntry, R extends Enum<R> 
      * Binds the entry to the nodes of this instance.
      */
     protected void bindEntry() {
-        //bind properties to Text nodes
+        //bindByOwn properties to Text nodes
         bindToText(workStatus, entryData.getCreation().workStatusProperty());
         bindToText(creatorSort, entryData.getCreator().sortNameProperty());
         bindToText(collection, entryData.getCreation().seriesProperty());

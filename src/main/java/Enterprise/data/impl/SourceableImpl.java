@@ -1,10 +1,10 @@
 package Enterprise.data.impl;
 
 import Enterprise.data.Default;
-import Enterprise.data.OpEntryCarrier;
 import Enterprise.data.intface.Entry;
 import Enterprise.data.intface.Sourceable;
 import Enterprise.data.intface.User;
+import Enterprise.data.update.EntryWrapper;
 import Enterprise.misc.DataAccess;
 import Enterprise.misc.SQLUpdate;
 import javafx.beans.property.BooleanProperty;
@@ -26,29 +26,10 @@ public class SourceableImpl extends AbstractDataEntry implements Sourceable {
 
     private User user;
 
-    @SQLUpdate(stateGet = "isTranslatorChanged", valueGet = "getTranslator", columnField = "translatorC")
+    @SQLUpdate(columnField = "translatorC")
     private StringProperty translator = new SimpleStringProperty();
 
     private BooleanProperty sourceListChanged = new SimpleBooleanProperty(false);
-    private BooleanProperty translatorChanged = new SimpleBooleanProperty(false);
-
-    /**
-     * The constructor of {@code SourceableImpl}
-     */
-    public SourceableImpl() {
-        this(Default.VALUE, new SourceList(), Default.STRING);
-        user = new SimpleUser();
-    }
-
-    /**
-     * The constructor of {@code SourceableImpl}
-     *
-     * @param sourceList list of sources for this {@code SourceableImpl}
-     * @param translator translator of this {@code SourceableImpl}
-     */
-    public SourceableImpl(SourceList sourceList, String translator) {
-        this(Default.VALUE, sourceList, translator);
-    }
 
     /**
      * The constructor of {@code SourceableImpl}
@@ -57,13 +38,29 @@ public class SourceableImpl extends AbstractDataEntry implements Sourceable {
      * @param sourceList list of sources for this {@code SourceableImpl}
      * @param translator translator of this {@code SourceableImpl}
      */
-    public SourceableImpl(int id, SourceList sourceList, String translator) {
+    private SourceableImpl(int id, SourceList sourceList, String translator) {
         super(id);
         this.sourceList = sourceList;
         this.translator.set(translator);
 
         validateState();
-        bindUpdated();
+    }
+
+    public static SourceableImpl get() {
+        SourceableImpl sourceable = get(Default.VALUE, new SourceList(), Default.STRING);
+        // TODO: 22.10.2017 check this ?
+        sourceable.user = new SimpleUser();
+        return sourceable;
+    }
+
+    public static SourceableImpl get(SourceList sourceList, String translator) {
+        return get(Default.VALUE, sourceList, translator);
+    }
+
+    public static SourceableImpl get(int id, SourceList sourceList, String translator) {
+        SourceableImpl sourceable = new SourceableImpl(id, sourceList, translator);
+        EntryWrapper.wrap(sourceable, sourceable.sourceListChanged);
+        return sourceable;
     }
 
     /**
@@ -88,16 +85,6 @@ public class SourceableImpl extends AbstractDataEntry implements Sourceable {
     }
 
     @Override
-    public boolean isSourceListChanged() {
-        return sourceListChanged.get();
-    }
-
-    @Override
-    public boolean isTranslatorChanged() {
-        return translatorChanged.get();
-    }
-
-    @Override
     public SourceList getSourceList() {
         return sourceList;
     }
@@ -112,33 +99,6 @@ public class SourceableImpl extends AbstractDataEntry implements Sourceable {
         super.fromDataBase();
         sourceList.forEach(Entry::setEntryOld);
         sourceList.setUpdated();
-    }
-
-    @Override
-    public void setUpdated() {
-        sourceList.setUpdated();
-        translatorChanged.set(false);
-    }
-
-    @Override
-    protected void bindUpdated() {
-        updated.addListener((observable, oldValue, newValue) -> {
-            if (newValue && !newEntry) {
-                OpEntryCarrier.getInstance().addUpdate(this);
-            }
-        });
-        translator.addListener(observable -> translatorChanged.set(true));
-        updated.bind(sourceList.listChangedProperty().or(translatorChanged));
-    }
-
-    @Override
-    public boolean isUpdated() {
-        return updated.get();
-    }
-
-    @Override
-    public BooleanProperty updatedProperty() {
-        return updated;
     }
 
     @Override

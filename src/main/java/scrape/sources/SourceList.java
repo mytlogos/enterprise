@@ -1,6 +1,7 @@
 package scrape.sources;
 
 import Enterprise.data.intface.Sourceable;
+import Enterprise.data.update.EntryWrapper;
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -97,7 +98,6 @@ public class SourceList extends SimpleListProperty<Source> implements Comparable
      */
     public void setUpdated() {
         listChanged.set(false);
-        this.forEach(Source::setUpdated);
     }
 
     /**
@@ -255,7 +255,7 @@ public class SourceList extends SimpleListProperty<Source> implements Comparable
     }
 
     private void addSourceListener(Source source) {
-        source.updatedProperty().addListener((observable, oldValue, newValue) -> {
+        EntryWrapper.getWrapper(source).addListener((observable, oldValue, newValue) -> {
             if (newValue && !source.isNewEntry()) {
                 listChanged.set(true);
             }

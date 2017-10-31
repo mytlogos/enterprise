@@ -54,17 +54,8 @@ public abstract class EnterpriseEntry implements Entry {
         dead = false;
     }
 
-    /**
-     * Binds an BooleanProperty field named "updated".
-     * It is important to call this method in the constructors
-     * of the varying implementations, because the update function
-     * of the DAO classes need an up-to-date indicator of the inner state.
-     */
-    protected abstract void bindUpdated();
-
     @Override
     public void fromDataBase() {
-        setUpdated();
         setEntryOld();
     }
 }

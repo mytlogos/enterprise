@@ -5,10 +5,10 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import scrape.sources.ConfigSetter;
 import scrape.sources.chapter.ChapterConfigs;
-import scrape.sources.chapter.strategies.impl.ChapterContentFilter;
 import scrape.sources.chapter.strategies.impl.ChapterPagination;
 import scrape.sources.chapter.strategies.impl.ChapterTitleFilter;
-import scrape.sources.chapter.strategies.intface.ChapterElement;
+import scrape.sources.chapter.strategies.impl.PageContentFilter;
+import scrape.sources.chapter.strategies.intface.PageContentElement;
 import scrape.sources.chapter.strategies.intface.PaginationElement;
 import scrape.sources.posts.strategies.ContentWrapper;
 import scrape.sources.posts.strategies.intface.ElementFilter;
@@ -42,8 +42,8 @@ public class ChapterConfigSetter extends ConfigSetter {
         return tryAll(body, new ChapterTitleFilter());
     }
 
-    private ChapterElement tryAllChapters(Element body) {
-        return tryAll(body, new ChapterContentFilter());
+    public PageContentElement tryAllPageContent(Element body) {
+        return tryAll(body, new PageContentFilter());
     }
 
     public PaginationElement tryAllPagination(Element body) {
@@ -58,7 +58,7 @@ public class ChapterConfigSetter extends ConfigSetter {
         if (wrapper != null) {
             Element contentWrapper = wrapper.apply(document);
 
-            ChapterElement chapterElement = tryAllChapters(contentWrapper);
+            PageContentElement chapterElement = tryAllPageContent(contentWrapper);
             TitleElement titleElement = tryAllTitles(contentWrapper);
             PaginationElement paginationElement = tryAllPagination(contentWrapper);
 

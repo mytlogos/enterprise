@@ -1,6 +1,6 @@
 package Enterprise.data.intface;
 
-import Enterprise.data.ReflectUpdate;
+import Enterprise.data.update.ReflectUpdate;
 import Enterprise.misc.SQLUpdate;
 
 import java.sql.Connection;

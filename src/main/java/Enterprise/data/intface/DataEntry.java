@@ -1,7 +1,6 @@
 package Enterprise.data.intface;
 
 import Enterprise.misc.SQLUpdate;
-import javafx.beans.property.BooleanProperty;
 
 /**
  * Represents an Data Model Object, which will be saved into a persistent storage.
@@ -32,11 +31,4 @@ public interface DataEntry extends Entry {
      * @throws IllegalAccessError       if table is no instance of {@link DataTable}
      */
     void setId(int id, Table table);
-
-    /**
-     * Required for {@code BooleanBinding} of the Container-Class.
-     *
-     * @return updatedProperty returns the internal updateProperty {@code Property}
-     */
-    BooleanProperty updatedProperty();
 }

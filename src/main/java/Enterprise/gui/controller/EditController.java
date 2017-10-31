@@ -77,8 +77,8 @@ public abstract class EditController<E extends CreationEntry, R extends Enum<R> 
      * Binds a {@link StringProperty} bidirectional to the
      * {@link ComboBox#valueProperty()} of the provided {@code ComboBox}.
      *
-     * @param box      {@code ComboBox} to bind
-     * @param property {@code Property} to bind
+     * @param box      {@code ComboBox} to bindByOwn
+     * @param property {@code Property} to bindByOwn
      */
     void bindToComboBox(ComboBox<String> box, StringProperty property) {
         box.valueProperty().bindBidirectional(property);
@@ -106,7 +106,7 @@ public abstract class EditController<E extends CreationEntry, R extends Enum<R> 
         unbindFromComboBox(ownStatus, creationEntry.getUser().ownStatusProperty());
         unbindFromComboBox(creator, creationEntry.getCreator().nameProperty());
 
-        //unbind the bidirectional bind
+        //unbind the bidirectional bindByOwn
         title.textProperty().unbindBidirectional(creationEntry.getCreation().titleProperty());
         presentCreations.textProperty().unbindBidirectional(creationEntry.getCreation().numPortionProperty());
 
@@ -116,7 +116,7 @@ public abstract class EditController<E extends CreationEntry, R extends Enum<R> 
         rating.textProperty().unbindBidirectional(creationEntry.getUser().ratingProperty());
         commentArea.textProperty().unbindBidirectional(creationEntry.getUser().commentProperty());
 
-        //unbind the unidirectional bind
+        //unbind the unidirectional bindByOwn
         creationEntry.getCreator().nameProperty().unbind();
         creationEntry.getCreator().sortNameProperty().unbind();
         creationEntry.getCreation().seriesProperty().unbind();

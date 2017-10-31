@@ -79,7 +79,7 @@ public class SourceableTable extends AbstractDataTable<Sourceable> {
         SourceList sources = (SourceList) EntrySourceTable.getInstance().getSources(id);
         String tl = getString(rs, translatorC);
 
-        entry = new SourceableImpl(id, sources, tl);
+        entry = SourceableImpl.get(id, sources, tl);
 //        sources.setSourceable(entry);
         entry.setEntryOld();
         return entry;

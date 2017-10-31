@@ -1,12 +1,14 @@
 package Enterprise.data.impl;
 
 import Enterprise.data.Default;
-import Enterprise.data.OpEntryCarrier;
 import Enterprise.data.intface.User;
 import Enterprise.misc.DataAccess;
 import Enterprise.misc.SQLUpdate;
 import Enterprise.misc.SetList;
-import javafx.beans.property.*;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 
 import java.util.List;
 
@@ -18,30 +20,23 @@ import java.util.List;
 @DataAccess(daoClass = "UserTable")
 public class SimpleUser extends AbstractDataEntry implements User {
 
-    @SQLUpdate(stateGet = "isOwnStatusChanged", valueGet = "getOwnStatus", columnField = "ownStatusC")
-    private StringProperty ownStatus = new SimpleStringProperty();
+    @SQLUpdate(columnField = "ownStatusC")
+    private final StringProperty ownStatus = new SimpleStringProperty();
 
-    @SQLUpdate(stateGet = "isCommentChanged", valueGet = "getComment", columnField = "commentC")
-    private StringProperty comment = new SimpleStringProperty();
+    @SQLUpdate(columnField = "commentC")
+    private final StringProperty comment = new SimpleStringProperty();
 
-    @SQLUpdate(stateGet = "isRatingChanged", valueGet = "getRating", columnField = "ratingC")
-    private IntegerProperty rating = new SimpleIntegerProperty();
+    @SQLUpdate(columnField = "ratingC")
+    private final IntegerProperty rating = new SimpleIntegerProperty();
 
-    @SQLUpdate(stateGet = "isProcessedPortionChanged", valueGet = "getProcessedPortion", columnField = "processedPortionC")
-    private IntegerProperty processedPortion = new SimpleIntegerProperty();
+    @SQLUpdate(columnField = "processedPortionC")
+    private final IntegerProperty processedPortion = new SimpleIntegerProperty();
 
-    @SQLUpdate(stateGet = "isListNameChanged", valueGet = "getListName", columnField = "listC")
-    private StringProperty listName = new SimpleStringProperty();
+    @SQLUpdate(columnField = "listC")
+    private final StringProperty listName = new SimpleStringProperty();
 
-    @SQLUpdate(stateGet = "isKeyWordsChanged", valueGet = "getKeyWords", columnField = "keyWordsC")
-    private StringProperty keyWords = new SimpleStringProperty();
-
-    private BooleanProperty ownStatusChanged = new SimpleBooleanProperty(false);
-    private BooleanProperty commentChanged = new SimpleBooleanProperty(false);
-    private BooleanProperty ratingChanged = new SimpleBooleanProperty(false);
-    private BooleanProperty processedPortionChanged = new SimpleBooleanProperty(false);
-    private BooleanProperty listNameChanged = new SimpleBooleanProperty(false);
-    private BooleanProperty keyWordsChanged = new SimpleBooleanProperty(false);
+    @SQLUpdate(columnField = "keyWordsC")
+    private final StringProperty keyWords = new SimpleStringProperty();
 
     /**
      * The no-argument constructor of {@code SimpleUser}
@@ -85,8 +80,6 @@ public class SimpleUser extends AbstractDataEntry implements User {
         this.keyWords.set(keyWords);
 
         validateState();
-        invalidListeners();
-        bindUpdated();
     }
 
     /**
@@ -121,48 +114,6 @@ public class SimpleUser extends AbstractDataEntry implements User {
         if (!message.isEmpty()) {
             throw new IllegalArgumentException(message);
         }
-    }
-
-    @Override
-    protected void bindUpdated() {
-        updated.addListener((observable, oldValue, newValue) -> {
-            if (newValue && !newEntry) {
-                OpEntryCarrier.getInstance().addUpdate(this);
-            }
-        });
-        updated.bind(ownStatusChanged.or(commentChanged).or(ratingChanged).or(processedPortionChanged).or(listNameChanged).or(keyWordsChanged));
-    }
-
-    /**
-     * adds invalidListeners to dataField-Properties, set stateChanged-Flags to true, if state has changed
-     */
-    private void invalidListeners() {
-        ownStatus.addListener(observable -> ownStatusChanged.set(true));
-        comment.addListener(observable -> commentChanged.set(true));
-        rating.addListener(observable -> ratingChanged.set(true));
-        processedPortion.addListener(observable -> processedPortionChanged.set(true));
-        listName.addListener(observable -> listNameChanged.set(true));
-        keyWords.addListener(observable -> keyWordsChanged.set(true));
-    }
-
-    @Override
-    public boolean isUpdated() {
-        return updated.get();
-    }
-
-    @Override
-    public BooleanProperty updatedProperty() {
-        return updated;
-    }
-
-    @Override
-    public void setUpdated() {
-        listNameChanged.set(false);
-        processedPortionChanged.set(false);
-        ratingChanged.set(false);
-        commentChanged.set(false);
-        ownStatusChanged.set(false);
-        keyWordsChanged.set(false);
     }
 
     @Override
@@ -226,38 +177,8 @@ public class SimpleUser extends AbstractDataEntry implements User {
     }
 
     @Override
-    public boolean isOwnStatusChanged() {
-        return ownStatusChanged.get();
-    }
-
-    @Override
-    public boolean isCommentChanged() {
-        return commentChanged.get();
-    }
-
-    @Override
-    public boolean isRatingChanged() {
-        return ratingChanged.get();
-    }
-
-    @Override
-    public boolean isProcessedPortionChanged() {
-        return processedPortionChanged.get();
-    }
-
-    @Override
     public StringProperty listNameProperty() {
         return listName;
-    }
-
-    @Override
-    public boolean isKeyWordsChanged() {
-        return keyWordsChanged.get();
-    }
-
-    @Override
-    public boolean isListNameChanged() {
-        return listNameChanged.get();
     }
 
     @Override
@@ -285,25 +206,25 @@ public class SimpleUser extends AbstractDataEntry implements User {
         SimpleUser that = (SimpleUser) o;
 
         return (ownStatus != null ? ownStatus.get().equals(that.ownStatus.get()) :
-                that.ownStatus == null) && (comment != null ? comment.get().equals(that.comment.get()) :
+                that.ownStatus == null) && (comment.get() != null ? comment.get().equals(that.comment.get()) :
 
                 that.comment == null) && (rating != null ? rating.get() == that.rating.get() :
                 that.rating == null) && (processedPortion != null ? processedPortion.get() == that.processedPortion.get() :
 
-                that.processedPortion == null) && (listName != null ? listName.get().equals(that.listName.get()) :
-                that.listName == null) && (keyWords != null ? keyWords.get().equals(that.keyWords.get()) :
+                that.processedPortion == null) && (listName.get() != null ? listName.get().equals(that.listName.get()) :
+                that.listName == null) && (keyWords.get() != null ? keyWords.get().equals(that.keyWords.get()) :
 
                 that.keyWords == null);
     }
 
     @Override
     public int hashCode() {
-        int result = ownStatus != null ? ownStatus.hashCode() : 0;
-        result = 31 * result + (comment != null ? comment.hashCode() : 0);
-        result = 31 * result + (rating != null ? rating.hashCode() : 0);
-        result = 31 * result + (processedPortion != null ? processedPortion.hashCode() : 0);
-        result = 31 * result + (listName != null ? listName.hashCode() : 0);
-        result = 31 * result + (keyWords != null ? keyWords.hashCode() : 0);
+        int result = ownStatus.get() != null ? ownStatus.get().hashCode() : 0;
+        result = 31 * result + (comment.get() != null ? comment.hashCode() : 0);
+        result = 31 * result + rating.get();
+        result = 31 * result + processedPortion.get();
+        result = 31 * result + (listName.get() != null ? listName.get().hashCode() : 0);
+        result = 31 * result + (keyWords.get() != null ? keyWords.get().hashCode() : 0);
         return result;
     }
 

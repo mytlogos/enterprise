@@ -26,22 +26,6 @@ public interface Sourceable extends DataEntry, Comparable<Sourceable> {
     String getTranslator();
 
     /**
-     * Gets the value of the {@code translatorChanged} flag.
-     *
-     * @return translatorChanged - if the state of the {@code translator} changed since construction
-     * or the last call of {@link #setUpdated()}.
-     */
-    boolean isTranslatorChanged();
-
-    /**
-     * Gets the value of the {@code sourceListChanged} flag.
-     *
-     * @return sourceListChanged - if the state of the {@code sourceList} changed since construction
-     * or the last call of {@link #setUpdated()}.
-     */
-    boolean isSourceListChanged();
-
-    /**
      * Gets the translator-{@code StringProperty}.
      *
      * @return translator - a StringProperty for the User Interface, is not{@code null}.

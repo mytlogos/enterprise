@@ -2,12 +2,13 @@ package scrape.sources;
 
 import Enterprise.data.Cache;
 import Enterprise.data.Default;
-import Enterprise.data.OpEntryCarrier;
 import Enterprise.data.impl.AbstractDataEntry;
 import Enterprise.data.intface.Creation;
 import Enterprise.data.intface.DataEntry;
 import Enterprise.data.intface.Sourceable;
+import Enterprise.data.update.EntryWrapper;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
@@ -19,10 +20,10 @@ import scrape.sources.posts.PostConfigs;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 /**
  * This class represents a Source from the internet.
@@ -42,17 +43,18 @@ import java.util.Set;
  * </p>
  */
 public class Source extends AbstractDataEntry implements DataEntry, Comparable<Source> {
-    private static Cache<String, Source> sourceCache = new Cache<>();
-    private final ObservableSet<Sourceable> creationEntries = FXCollections.observableSet();
-    private final Set<Sourceable> deletedEntries = new HashSet<>();
     private StringProperty sourceName = new SimpleStringProperty();
     private StringProperty url = new SimpleStringProperty();
     private SourceType sourceType;
-    private PostConfigs postConfigs = new PostConfigs();
 
+    private PostConfigs postConfigs = new PostConfigs();
     private ChapterConfigs chapterConfigs = new ChapterConfigs();
 
-    private Map<Creation, Post> newestPosts = new HashMap<>();
+    private static Cache<String, Source> sourceCache = new Cache<>();
+    private final ObservableSet<Sourceable> creationEntries = FXCollections.observableSet();
+    private final Set<Sourceable> deletedEntries = new HashSet<>();
+
+    private Map<Creation, Post> newestPosts = new TreeMap<>();
     /**
      * The constructor of {@code Source}.
      *
@@ -71,13 +73,19 @@ public class Source extends AbstractDataEntry implements DataEntry, Comparable<S
             this.url.set(uri.toString());
         }
         sourceType = type;
-
         setListener();
-        bindUpdated();
     }
 
     public static Source create(int id, String url, SourceType type) throws URISyntaxException {
-        return sourceCache.checkCache(new Source(url, type, id), source -> source.url.get());
+        Source value = new Source(url, type, id);
+        Source cache = sourceCache.checkCache(value, source -> source.url.get());
+
+        if (cache == value) {
+            BooleanProperty bridge = new SimpleBooleanProperty();
+            EntryWrapper.wrap(value.postConfigs).addListener(observable -> bridge.set(true));
+            EntryWrapper.wrap(value, bridge);
+        }
+        return cache;
     }
 
     public static Source create(String url, SourceType type) throws URISyntaxException {
@@ -116,17 +124,6 @@ public class Source extends AbstractDataEntry implements DataEntry, Comparable<S
 
     public Post getNewestPost(Creation entry) {
         return newestPosts.get(entry);
-    }
-
-    @Override
-    protected void bindUpdated() {
-        updated.bind(postConfigs.updatedProperty());
-        updated.addListener((observable, oldValue, newValue) -> {
-            if (newValue && !newEntry) {
-                System.out.println("ready to update");
-                OpEntryCarrier.getInstance().addUpdate(this);
-            }
-        });
     }
 
     /**
@@ -198,21 +195,6 @@ public class Source extends AbstractDataEntry implements DataEntry, Comparable<S
      */
     public StringProperty urlProperty() {
         return url;
-    }
-
-    @Override
-    public void setUpdated() {
-        postConfigs.setUpdated();
-    }
-
-    @Override
-    public boolean isUpdated() {
-        return updated.get();
-    }
-
-    @Override
-    public BooleanProperty updatedProperty() {
-        return updated;
     }
 
     Set<Sourceable> getSourceables() {

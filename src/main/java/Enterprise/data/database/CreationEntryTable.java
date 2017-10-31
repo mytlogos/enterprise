@@ -3,6 +3,7 @@ package Enterprise.data.database;
 import Enterprise.data.impl.CreationEntryImpl;
 import Enterprise.data.impl.SourceableEntryImpl;
 import Enterprise.data.intface.*;
+import Enterprise.data.update.EntryWrapper;
 import Enterprise.misc.SetList;
 import Enterprise.modules.BasicModules;
 
@@ -412,7 +413,7 @@ public class CreationEntryTable extends AbstractRelationTable<CreationEntry> {
 
         for (CreationEntry entry : entries) {
             User user = entry.getUser();
-            if (user.isUpdated()) {
+            if (EntryWrapper.getWrapper(entry).isUpdated()) {
                 users.add(user);
             }
         }
@@ -431,7 +432,7 @@ public class CreationEntryTable extends AbstractRelationTable<CreationEntry> {
 
         for (CreationEntry entry : entries) {
             Creator creator = entry.getCreator();
-            if (creator.isUpdated()) {
+            if (EntryWrapper.getWrapper(entry).isUpdated()) {
                 creators.add(creator);
             }
         }
@@ -449,7 +450,7 @@ public class CreationEntryTable extends AbstractRelationTable<CreationEntry> {
 
         for (CreationEntry entry : entries) {
             Creation creation = entry.getCreation();
-            if (creation.isUpdated()) {
+            if (EntryWrapper.getWrapper(entry).isUpdated()) {
                 creations.add(creation);
             }
         }
@@ -469,7 +470,7 @@ public class CreationEntryTable extends AbstractRelationTable<CreationEntry> {
             if (entry instanceof SourceableEntry) {
                 Sourceable sourceable = ((SourceableEntry) entry).getSourceable();
 
-                if (sourceable.isUpdated()) {
+                if (EntryWrapper.getWrapper(entry).isUpdated()) {
                     sourceables.add(sourceable);
                 }
             }
