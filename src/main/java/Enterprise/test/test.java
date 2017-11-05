@@ -28,10 +28,8 @@ public class test {
 
     private static void getProcess(Processor process, String s) {
         System.out.println("for " + s);
-        Element processed = process.process(s);
+        String processed = process.process(s);
         System.out.println(processed);
-
-        writeToc(processed);
     }
 
     private static void writeToc(Element processed) {

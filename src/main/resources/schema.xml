@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<creation>
+    <title>Das Abenteuer von Hairy Trotter</title>
+    <section type="mainStory" isExtra="false" title="Geburtstunde" sectionIndex="1">
+        <chapter totIndex="1" sectIndex="1" isExtra="false">
+            <title></title>
+            <internetSource>http://www.sousetsuka.com//</internetSource>
+            <subchapter totalSubIndex="1" chaptIndex="1" isExtra="false">
+                <title>Heute ist ein scheiß Tag.</title>
+                <internetSource>Heute ist ein scheiß Tag.</internetSource>
+                <localSource>Heute ist ein scheiß Tag.</localSource>
+            </subchapter>
+            <subchapter chaptIndex="" isExtra="false" totalSubIndex="">
+                <title></title>
+                <internetSource>http://www.sousetsuka.com//</internetSource>
+            </subchapter>
+        </chapter>
+    </section>
+    <section type="SS" isExtra="true" title="POV Mutter" sectionIndex="1.5">
+        <chapter totIndex="2" sectIndex="1" isExtra="false">
+            <title></title>
+            <internetSource>http://www.sousetsuka.com//</internetSource>
+            <localSource></localSource>
+        </chapter>
+        <chapter totIndex="3" sectIndex="2.5" isExtra="false">
+            <title></title>
+            <internetSource></internetSource>
+        </chapter>
+        <chapter totIndex="3" sectIndex="2" isExtra="false">
+            <title></title>
+            <internetSource></internetSource>
+        </chapter>
+        <chapter totIndex="4" sectIndex="3" isExtra="false">
+            <title></title>
+            <internetSource></internetSource>
+        </chapter>
+        <chapter totIndex="5" sectIndex="4" isExtra="false">
+            <title></title>
+            <internetSource></internetSource>
+        </chapter>
+        <chapter totIndex="6" sectIndex="5" isExtra="false">
+            <title></title>
+            <internetSource></internetSource>
+        </chapter>
+    </section>
+    <section type="mainStory" isExtra="false" title="Schule" sectionIndex="2">
+        <chapter totIndex="7" sectIndex="1" isExtra="false">
+            <title></title>
+            <internetSource></internetSource>
+        </chapter>
+        <chapter totIndex="8" sectIndex="2" isExtra="false">
+            <title></title>
+            <internetSource></internetSource>
+        </chapter>
+        <chapter totIndex="9" sectIndex="3" isExtra="false">
+            <title></title>
+            <internetSource></internetSource>
+        </chapter>
+        <chapter totIndex="10" sectIndex="4" isExtra="false">
+            <title></title>
+            <internetSource></internetSource>
+        </chapter>
+        <chapter totIndex="11" sectIndex="5" isExtra="false">
+            <title></title>
+            <internetSource></internetSource>
+        </chapter>
+        <chapter totIndex="12" sectIndex="6" isExtra="false">
+            <title></title>
+            <internetSource></internetSource>
+        </chapter>
+        <chapter totIndex="13" sectIndex="7" isExtra="false">
+            <title></title>
+            <internetSource></internetSource>
+        </chapter>
+        <chapter totIndex="14" sectIndex="8" isExtra="false">
+            <title></title>
+            <internetSource></internetSource>
+        </chapter>
+        <chapter totIndex="15" sectIndex="9" isExtra="false">
+            <title></title>
+            <internetSource></internetSource>
+        </chapter>
+    </section>
+    <section type="mainStory" isExtra="false" title="Universität" sectionIndex="3">
+        <chapter totIndex="16" sectIndex="1" isExtra="false">
+            <title></title>
+            <internetSource></internetSource>
+        </chapter>
+        <chapter totIndex="17" sectIndex="2" isExtra="false">
+            <title></title>
+            <internetSource></internetSource>
+        </chapter>
+        <chapter totIndex="18" sectIndex="3" isExtra="false">
+            <title></title>
+            <internetSource></internetSource>
+        </chapter>
+        <chapter totIndex="19" sectIndex="4" isExtra="false">
+            <title></title>
+            <internetSource></internetSource>
+        </chapter>
+        <chapter totIndex="20" sectIndex="5" isExtra="false">
+            <title></title>
+            <internetSource></internetSource>
+        </chapter>
+        <chapter totIndex="21" sectIndex="6" isExtra="false">
+            <title></title>
+            <internetSource></internetSource>
+        </chapter>
+        <chapter totIndex="22" sectIndex="7" isExtra="false">
+            <title></title>
+            <internetSource></internetSource>
+        </chapter>
+        <chapter totIndex="23" sectIndex="8" isExtra="false">
+            <title></title>
+            <internetSource></internetSource>
+        </chapter>
+        <chapter totIndex="24" sectIndex="9" isExtra="false">
+            <title></title>
+            <internetSource></internetSource>
+        </chapter>
+        <chapter totIndex="25" sectIndex="10" isExtra="false">
+            <title></title>
+            <internetSource></internetSource>
+        </chapter>
+    </section>
+</creation>

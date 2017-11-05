@@ -109,7 +109,6 @@ abstract class ModifyEntry<E extends Enum<E> & Module, R extends Enum<R> & Mode>
             root = loader.load();
         } catch (IOException e) {
             logger.log(Level.SEVERE, "could not load file", e);
-            e.printStackTrace();
         }
 
         Stage stage = new Stage();

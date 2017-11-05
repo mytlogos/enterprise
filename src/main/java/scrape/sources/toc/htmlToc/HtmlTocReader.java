@@ -1,10 +1,17 @@
-package scrape.sources.toc;
+package scrape.sources.toc.htmlToc;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import scrape.Node;
+import scrape.sources.toc.CreationRoot;
+import scrape.sources.toc.intface.Portion;
+import scrape.sources.toc.intface.Section;
+import scrape.sources.toc.intface.SubPortion;
+import scrape.sources.toc.intface.TocReader;
+import scrape.sources.toc.novel.Chapter;
+import scrape.sources.toc.novel.NovelSection;
+import scrape.sources.toc.novel.SubChapter;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,14 +21,28 @@ import java.util.stream.Collectors;
 /**
  *
  */
-public class TocReader extends AbstractTocs {
-    private final Element toc;
+public class HtmlTocReader extends HtmlAbstractTocs implements TocReader {
+    private Element toc;
 
-    public TocReader(Element toc) {
-        this.toc = toc;
+    private HtmlTocReader() {
     }
 
-    public TocReader(String url) throws IOException {
+    public static HtmlTocReader get() {
+        return new HtmlTocReader();
+    }
+
+    @Override
+    public CreationRoot read(String path) {
+        try {
+            ready(path);
+        } catch (IOException e) {
+            return new CreationRoot("N/A");
+        }
+
+        return getCreationRoot();
+    }
+
+    private void ready(String url) throws IOException {
         Document parse = Jsoup.parse(new File(url), "UTF-8");
         Element body = parse.body();
         if (body != null) {
@@ -31,55 +52,59 @@ public class TocReader extends AbstractTocs {
         }
     }
 
-    public Node read() {
+    private CreationRoot getCreationRoot() {
         Elements select = toc.select(creationTitleTag + "#" + creationTitleId);
-        Node result;
+        CreationRoot result;
         if (!select.isEmpty()) {
-            result = new Node(select.get(0).text());
+            result = new CreationRoot(select.get(0).text());
         } else {
-            result = new Node("");
+            result = new CreationRoot("N/A");
         }
 
         if (hasVolumes()) {
-            result.addChildren(getVolumeNodes());
+            result.addAllSections(getVolumeNodes());
         } else if (hasChapters()) {
-            result.addChildren(getChapterNodes(toc));
+            result.addAllPortions(getChapterNodes(toc));
         }
         return result;
     }
 
-    private List<Node> getVolumeNodes() {
+    private List<Section> getVolumeNodes() {
         Elements volumes = getVolumes();
         return volumes.stream().map(this::createVolumeNode).collect(Collectors.toList());
     }
 
-    private Node createVolumeNode(Element volume) {
+    private Section createVolumeNode(Element volume) {
         Elements select = volume.select(childrenContainerTag + ":not(:empty)");
-        Node node = new Node(volume.ownText());
+        // TODO: 01.11.2017 read exact name from toc
+        Section node = new NovelSection(volume.ownText(), "Volume");
 
         if (!select.isEmpty()) {
-            node.addChildren(getChapterNodes(select.first()));
+            node.addAll(getChapterNodes(select.first()));
         }
         return node;
     }
 
-    private List<Node> getChapterNodes(Element element) {
+    private List<Portion> getChapterNodes(Element element) {
         Elements select = element.select("[" + chapterIdAttr + "]");
         return select.stream().map(this::createChapterNode).collect(Collectors.toList());
     }
 
-    private Node createChapterNode(Element chapter) {
-        Node node = new Node(chapter.ownText());
+    private Portion createChapterNode(Element chapter) {
+        // TODO: 01.11.2017 read exact name from toc
+        Portion node = new Chapter(chapter.ownText());
 
         if (has(chapter, subChapterIdAttr)) {
-            node.addChildren(getSubChapterNodes(chapter));
+            node.addAll(getSubChapterNodes(chapter));
         }
+
         return node;
     }
 
-    private List<Node> getSubChapterNodes(Element chapter) {
+    private List<SubPortion> getSubChapterNodes(Element chapter) {
         Elements select = chapter.select("[" + subChapterIdAttr + "]");
-        return select.stream().map(element -> new Node(element.ownText())).collect(Collectors.toList());
+        // TODO: 01.11.2017 read exact name from toc
+        return select.stream().map(element -> new SubChapter(element.ownText())).collect(Collectors.toList());
     }
 
 

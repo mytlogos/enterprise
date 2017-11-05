@@ -35,6 +35,7 @@ public class ItemFactory {
         return items;
     }
 
+    // TODO: 03.11.2017 check with column if raw type can be changed
     public CheckMenuItem getCheckMenuItem(ContentController controller, Column column) {
         return checkMenuItemFactory(column.getName(), column.getDefaultSelect(),
                 (observable, oldValue, newValue) -> {

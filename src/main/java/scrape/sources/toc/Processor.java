@@ -12,7 +12,6 @@ import scrape.sources.toc.novel.VolumeSearcher;
 import scrape.sources.toc.strategies.intface.TocProcessor;
 
 import java.io.IOException;
-import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -21,32 +20,34 @@ import java.util.List;
 public class Processor implements TocProcessor {
 
     @Override
-    public Element process(String link) {
-        Element toc = null;
+    public String process(String link) {
+        String location = null;
         if (link.contains("gravitytales")) {
-            List<Element> elements = GravityNovel.lookUpToc(link);
+            location = GravityNovel.lookUpToc(link);
             // TODO: 21.10.2017 figure that out
         } else {
             Element contentElement = getContentElement(link);
 
             if (contentElement != null) {
                 VolumeSearcher volumeSearcher = new VolumeSearcher(link, contentElement);
-                List<Element> volumeTocs = volumeSearcher.getVolumeTocs();
-
+                List<String> volumeTocs = volumeSearcher.getVolumeTocs();
 
                 if (volumeTocs.isEmpty()) {
                     ChapterSearcher chapterSearcher = new ChapterSearcher();
-                    toc = chapterSearcher.getChapterToc(contentElement);
+                    location = chapterSearcher.getChapterToc(contentElement);
                 } else {
-                    toc = volumeTocs.stream().max(Comparator.comparingInt(element -> element.children().size())).orElse(null);
+//                    Element maxToc = volumeTocs.stream().max(Comparator.comparingInt(element -> element.children().size())).orElse(null);
+                    // TODO: 02.11.2017 save toc
+                    // TODO: 02.11.2017 return location
+                    location = "";
                 }
             }
         }
-        checkForFurtherChapters(toc);
-        return toc;
+        checkForFurtherChapters(location);
+        return location;
     }
 
-    private void checkForFurtherChapters(Element toc) {
+    private void checkForFurtherChapters(String tocLocation) {
         // TODO: 21.10.2017 check for further chapters with chapterpagination
     }
 

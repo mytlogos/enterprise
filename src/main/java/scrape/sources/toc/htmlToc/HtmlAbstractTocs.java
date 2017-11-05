@@ -1,20 +1,26 @@
-package scrape.sources.toc;
+package scrape.sources.toc.htmlToc;
 
 /**
  *
  */
-class AbstractTocs {
+class HtmlAbstractTocs {
     String creationTitleTag = "a";
     String creationTitleId = "enterprise-title";
+
     String tocTag = "div";
     String tocId = "enterprise-toc";
+
     String childrenContainerTag = "div";
+
     String volumeTag = "h1";
-    String chapterTag = "h2";
-    String subChapterTag = "h3";
     String volumeId = "data-volumeId";
+
+    String chapterTag = "h2";
     String chapterIdAttr = "data-totalChapterId";
+
+    String subChapterTag = "h3";
     String subChapterIdAttr = "data-subChapterIdAttr";
+
 
     String getVolumeId(int count) {
         return "volume " + count;

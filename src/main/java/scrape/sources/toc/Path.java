@@ -14,7 +14,7 @@ public class Path implements Cloneable, Comparable<Path> {
         path = new LinkedList<>();
     }
 
-    public Path(LinkedList path) {
+    public Path(LinkedList<Element> path) {
         this.path = new LinkedList<>(path);
     }
 

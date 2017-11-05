@@ -21,9 +21,9 @@ public class GravityNovel {
     private int Id;
 
 
-    public static List<Element> lookUpToc(String link) {
+    public static String lookUpToc(String link) {
         if (link == null || link.isEmpty()) {
-            return new ArrayList<>();
+            return "";
         }
         String string = "http://gravitytales.com/api/novels/";
         Gson gson = new Gson();
@@ -45,12 +45,12 @@ public class GravityNovel {
                 GravityToc[] tocs = getJson(chapterGroups, gson, GravityToc[].class);
 
                 List<GravityChapter> chapterList = getGravityChapters(gson, tocs);
-                return convertToElements(novel, chapterList);
+                return createToc(novel, chapterList);
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return new ArrayList<>();
+        return "";
     }
 
     private static List<GravityChapter> getGravityChapters(Gson gson, GravityToc[] tocs) throws IOException {
@@ -62,7 +62,7 @@ public class GravityNovel {
         return chapterList;
     }
 
-    private static List<Element> convertToElements(GravityNovel novel, List<GravityChapter> chapterList) {
+    private static String createToc(GravityNovel novel, List<GravityChapter> chapterList) {
         List<Element> elements = new ArrayList<>();
 
         for (GravityChapter gravityChapter : chapterList) {
@@ -74,7 +74,8 @@ public class GravityNovel {
 
             elements.add(element);
         }
-        return elements;
+        // TODO: 02.11.2017 convert the elements to an toc
+        return "";
     }
 
     private static <T> T getJson(String link, Gson gson, Class<T> classOfT) throws IOException {

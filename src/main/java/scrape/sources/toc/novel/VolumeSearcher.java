@@ -6,7 +6,7 @@ import org.jsoup.nodes.TextNode;
 import org.jsoup.select.Elements;
 import scrape.sources.toc.Path;
 import scrape.sources.toc.PathFinder;
-import scrape.sources.toc.TocBuilder;
+import scrape.sources.toc.htmlToc.HtmlTocBuilder;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -33,7 +33,7 @@ public class VolumeSearcher {
         }
     }
 
-    public List<Element> getVolumeTocs() {
+    public List<String> getVolumeTocs() {
         System.out.println("for " + link);
 
         //get volumeTerms with hits
@@ -51,19 +51,19 @@ public class VolumeSearcher {
         return getVolumeTocs(container, firstCommonParent);
     }
 
-    private List<Element> getVolumeTocs(VolumeManager container, Element firstCommonParent) {
+    private List<String> getVolumeTocs(VolumeManager container, Element firstCommonParent) {
         container.resolve(container.getCommonPath());
 
         Map<String, List<Path>> resolvedMappedPaths = container.getResolvedMappedPaths();
 
-        List<Element> volumes = new ArrayList<>();
+        List<String> volumes = new ArrayList<>();
         for (String key : resolvedMappedPaths.keySet()) {
             volumes.add(getVolumeTocs(firstCommonParent, resolvedMappedPaths, key));
         }
         return volumes;
     }
 
-    private Element getVolumeTocs(Element firstCommonParent, Map<String, List<Path>> resolvedMappedPaths, String key) {
+    private String getVolumeTocs(Element firstCommonParent, Map<String, List<Path>> resolvedMappedPaths, String key) {
         List<Path> paths = resolvedMappedPaths.get(key);
 
         paths.sort(Comparator.comparingInt(this::getFirstIndex));
@@ -99,31 +99,38 @@ public class VolumeSearcher {
         return buildToc(mapMap);
     }
 
-    private Element buildToc(SortedMap<Element, SortedMap<Element, List<Element>>> map) {
-        TocBuilder builder;
+    private String buildToc(SortedMap<Element, SortedMap<Element, List<Element>>> map) {
+        HtmlTocBuilder builder;
 
         if (map.isEmpty()) {
-            builder = new TocBuilder();
+            builder = new HtmlTocBuilder();
         } else {
-            builder = new TocBuilder(map.firstKey().baseUri());
+            builder = new HtmlTocBuilder(map.firstKey().baseUri());
         }
 
+
+        // TODO: 02.11.2017 read the chapter number from the element
+        // TODO: 02.11.2017 check if element is an extra or not
+        // TODO: 02.11.2017 check type of elements
+        int volumeCounter = 1;
         for (Element volume : map.keySet()) {
 
             SortedMap<Element, List<Element>> elementListMap = map.get(volume);
             if (!elementListMap.isEmpty()) {
-                builder.addVolume(volume.ownText());
+                builder.addSection("volume", false, volume.ownText(), volumeCounter++);
             }
 
+            int chapterCounter = 1;
             for (Element chapter : elementListMap.keySet()) {
-                builder.addChapter(chapter.ownText());
+                builder.addChapter(chapter.ownText(), "", chapterCounter++, false);
 
+                int subChapterCounter = 1;
                 for (Element subChapter : elementListMap.get(chapter)) {
-                    builder.addSubChapter(subChapter.ownText(), subChapter.absUrl("href"));
+                    builder.addSubChapter(subChapter.ownText(), subChapter.absUrl("href"), subChapterCounter, false);
                 }
             }
         }
-        return builder.getToc();
+        return builder.build();
     }
 
     private SortedMap<Element, List<Element>> lookPrimary(Element basicElement, Elements elements) {

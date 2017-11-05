@@ -3,7 +3,7 @@ package scrape.sources.toc.novel;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import scrape.PatternSearcher;
-import scrape.sources.toc.TocBuilder;
+import scrape.sources.toc.htmlToc.HtmlTocBuilder;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -23,7 +23,7 @@ public class ChapterSearcher {
     // remove links with prologue/epilogue
     // ignore links leading to sites with asiatic languages
 
-    public Element getChapterToc(Element contentElement) {
+    public String getChapterToc(Element contentElement) {
         String firstLvlDomain = getFirstLvlDomain(contentElement);
 
         Elements toc = contentElement.select(":matchesOwn((?i)^(index|table of content(s)?|content(s)?|chapters|chapter list)(\\s|$)):not(a)").not(".sp-head");
@@ -33,7 +33,7 @@ public class ChapterSearcher {
         Elements ownDomainLinks = allLinks.select("[href*=" + firstLvlDomain + "]:not(strike,s,del)");
         Elements beginning = ownDomainLinks.select("a:matches((?i)prologue), [href~=prologue(/|$)]");
 
-        Element linkToc = null;
+        String location = "";
 
         if (!ownDomainLinks.isEmpty()) {
             System.out.println("for " + contentElement.baseUri());
@@ -43,12 +43,14 @@ public class ChapterSearcher {
             } else {
                 elements = ownDomainLinks;
             }
-            linkToc = process(elements);
+            location = process(elements);
         }
-        return linkToc;
+        // TODO: 02.11.2017 save toc
+        // TODO: 02.11.2017 return location of saved toc
+        return location;
     }
 
-    private Element process(List<Element> selected) {
+    private String process(List<Element> selected) {
         List<Element> elements = getElements(selected);
         return createToc(elements);
     }
@@ -153,21 +155,24 @@ public class ChapterSearcher {
         return relation < 0.5;
     }
 
-    private Element createToc(List<Element> elements) {
-        TocBuilder tocBuilder;
+    private String createToc(List<Element> elements) {
+        HtmlTocBuilder tocBuilder;
 
         if (elements.isEmpty()) {
-            tocBuilder = new TocBuilder();
+            tocBuilder = new HtmlTocBuilder();
         } else {
-            tocBuilder = new TocBuilder(elements.get(0).baseUri());
+            tocBuilder = new HtmlTocBuilder(elements.get(0).baseUri());
         }
 
-        elements.forEach(element -> {
+        // TODO: 02.11.2017 read the chapter number from the element
+        // TODO: 02.11.2017 check if element is an extra or not
+        int counter = 1;
+        for (Element element : elements) {
             String url = element.absUrl("href");
             String text = element.text();
-            tocBuilder.addChapter(text, url);
-        });
-        return tocBuilder.getToc();
+            tocBuilder.addChapter(text, url, counter++, false);
+        }
+        return tocBuilder.build();
     }
 
     private Elements getAllLinks(Element contentElement, Elements toc) {

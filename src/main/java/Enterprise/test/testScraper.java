@@ -15,7 +15,6 @@ import scrape.LinkDetective;
 import scrape.Scraper;
 import scrape.sources.Source;
 import scrape.sources.chapter.ChapterScraper;
-import scrape.sources.chapter.GravityNovel;
 import scrape.sources.chapter.strategies.ChapterConfigSetter;
 import scrape.sources.posts.PostScraper;
 import scrape.sources.posts.PostSearchEntry;
@@ -212,42 +211,13 @@ public class testScraper extends Application {
 
 //        tryIt(integer, "https://youshokutranslations.wordpress.com/theotherworlddininghall/v1c15/");
         doSequential(getTocs(), this::doGetAllTocs);
-        doConcurrent(getTocs(), this::printTocs);
+        doConcurrent(getTocs(), this::doGetAllTocs);
 //        getChapters().forEach(this::tryNextLink);
 //        openAll(getChapters());
 //        browseGuiLess(getChapters());
 //        browse(getChapters().get(0));
 //        doGetAllChapters("http://gravitytales.com/Novel/era-of-disaster/eod-chapter-4");
 //        getChapters().forEach(this::doGetAllChapters);
-    }
-
-    private void printTocs(IntegerProperty property, String s) {
-        List<Element> selected = new ArrayList<>();
-        try {
-            Document document = Scraper.getCleanDocument(s);
-            if (document.location().contains("gravitytales")) {
-                selected = GravityNovel.lookUpToc(document.location());
-            } else {
-                ContentWrapper wrapper = ContentWrapper.tryAll(document);
-
-                if (wrapper == null) {
-                    System.out.println(document.location() + " not supported");
-                } else {
-                    Element content = wrapper.apply(document);
-                    selected = content.select("a");
-                }
-            }
-
-            List<String> list = new ArrayList<>();
-            list.add("LINK");
-            selected.forEach(element -> list.add((element.attr("href"))));
-            list.add("TEXT");
-            selected.forEach(element -> list.add((element.text())));
-
-            map.put(s, list);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     public static <K, V extends Comparable<? super V>> List<Map.Entry<K, V>> sortByValue(Map<K, V> map) {
