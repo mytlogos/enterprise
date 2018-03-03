@@ -37,3 +37,4 @@ gorgon.log.lck
 src/main/java/scrape/sources/anime/
 src/main/java/scrape/sources/manga/
 /enterpriseHibernate.db
+/novel/
