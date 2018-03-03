@@ -1,7 +1,6 @@
 package scrape.sources;
 
-import Enterprise.data.intface.Sourceable;
-import Enterprise.data.update.EntryWrapper;
+import enterprise.data.intface.Sourceable;
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -37,6 +36,18 @@ public class SourceList extends SimpleListProperty<Source> implements Comparable
         addInvalidListener();
     }
 
+    public SourceList(Collection<Source> sources) {
+        super(FXCollections.observableArrayList(sources));
+        addInvalidListener();
+    }
+
+    /**
+     * Sets internal Update flag to true, if list changed.
+     */
+    private void addInvalidListener() {
+        this.addListener((InvalidationListener) observable -> listChanged.set(true));
+    }
+
     /**
      * Gets a list of deleted {@code Sources} of this class.
      *
@@ -68,13 +79,6 @@ public class SourceList extends SimpleListProperty<Source> implements Comparable
      */
     public void clearLocalDeleted() {
         deletedSources.clear();
-    }
-
-    /**
-     * Sets internal Update flag to true, if list changed.
-     */
-    private void addInvalidListener() {
-        this.addListener((InvalidationListener) observable -> listChanged.set(true));
     }
 
     /**
@@ -121,6 +125,26 @@ public class SourceList extends SimpleListProperty<Source> implements Comparable
         return listChanged;
     }
 
+    @Override
+    public int compareTo(SourceList o) {
+        return this.size() - o.size();
+    }
+
+    @Override
+    public boolean remove(Object obj) {
+        /*if (obj instanceof Source) {
+            deletedSources.add((Source) obj);
+            if (((Source) obj).getSourceables().isEmpty()) {
+                deletedGlobalSources.add((Source) obj);
+                globalSources.remove(obj);
+            }
+        }*/
+        if (obj instanceof Source) {
+            deletedGlobalSources.add((Source) obj);
+        }
+        return super.remove(obj);
+    }
+
     /**
      * // TODO: 26.08.2017 do the doc
      *
@@ -153,11 +177,16 @@ public class SourceList extends SimpleListProperty<Source> implements Comparable
         }*/
         if (!this.contains(source)) {
             addedSources.add(source);
-            addSourceListener(source);
             return super.add(source);
         } else {
             return false;
         }
+    }
+
+    @Override
+    public boolean addAll(Collection<? extends Source> c) {
+        removeAll(c);
+        return super.addAll(c);
     }
 
     /**
@@ -227,47 +256,12 @@ public class SourceList extends SimpleListProperty<Source> implements Comparable
         return processed;
     }
 
-    @Override
-    public boolean addAll(Collection<? extends Source> c) {
-        removeAll(c);
-        c.forEach(this::addSourceListener);
-        return super.addAll(c);
-    }
-
-    @Override
-    public boolean remove(Object obj) {
-        /*if (obj instanceof Source) {
-            deletedSources.add((Source) obj);
-            if (((Source) obj).getSourceables().isEmpty()) {
-                deletedGlobalSources.add((Source) obj);
-                globalSources.remove(obj);
-            }
-        }*/
-        if (obj instanceof Source) {
-            deletedGlobalSources.add((Source) obj);
-        }
-        return super.remove(obj);
-    }
-
-    @Override
-    public int compareTo(SourceList o) {
-        return this.size() - o.size();
-    }
-
-    private void addSourceListener(Source source) {
-        EntryWrapper.getWrapper(source).addListener((observable, oldValue, newValue) -> {
-            if (newValue && !source.isNewEntry()) {
-                listChanged.set(true);
-            }
-        });
-    }
-
     /*public void setSourceable(Sourceable sourceable) {
         Set<Sourceable> sourceables = new TreeSet<>();
         sourceables.add(sourceable);
         this.forEach(source -> {
             if (mappedRelation.containsKey(source)) {
-                mappedRelation.get(source).add(sourceable);
+                mappedRelation.getAll(source).add(sourceable);
             } else {
                 mappedRelation.put(source, sourceables);
             }

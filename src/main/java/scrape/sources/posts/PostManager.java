@@ -1,8 +1,8 @@
 package scrape.sources.posts;
 
-import Enterprise.data.intface.Creation;
-import Enterprise.data.intface.SourceableEntry;
-import Enterprise.gui.enterprise.controller.PostView;
+import enterprise.data.intface.Creation;
+import enterprise.data.intface.SourceableEntry;
+import enterprise.gui.enterprise.PostView;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.concurrent.ScheduledService;
@@ -43,10 +43,6 @@ public class PostManager {
         initScheduled();
     }
 
-    public static PostManager getInstance() {
-        return MANAGER;
-    }
-
     private void initScheduled() {
         scheduledScraper.setOnSucceeded(event -> {
             List<Post> postList;
@@ -64,6 +60,10 @@ public class PostManager {
         });
     }
 
+    public static PostManager getInstance() {
+        return MANAGER;
+    }
+
     private void showNotification() {
         Notifications.
                 create().
@@ -72,6 +72,11 @@ public class PostManager {
                 hideAfter(Duration.minutes(1)).
                 onAction(event -> PostView.getInstance().openNew()).
                 show();
+    }
+
+    public void addPosts(Collection<Post> posts) {
+        this.posts.addAll(posts);
+        this.posts.sort(PostView.getInstance().SORTED_BY.getComparator());
     }
 
     public PostList getNewPosts() {
@@ -88,7 +93,9 @@ public class PostManager {
      * @param sourceableEntry {@code Sourceable} with data to add a new key-value pair
      */
     public void addSearchEntries(SourceableEntry sourceableEntry) {
+        System.out.println("converting into searchEntry");
         List<PostSearchEntry> entries = convert(sourceableEntry);
+        System.out.println("adding searchEntries");
         searchEntries.addAll(entries);
     }
 
@@ -98,9 +105,14 @@ public class PostManager {
 
         List<PostSearchEntry> entries = new ArrayList<>();
 
-        for (Source source : sourceableEntry.getSourceable().getSourceList()) {
-            PostSearchEntry entry = new PostSearchEntry(creation, source, keyWords);
-            entries.add(entry);
+        //todo enable sourceList from hibernate, else it stays null
+
+        SourceList sourceList = sourceableEntry.getSourceable().getSourceList();
+        if (sourceList != null) {
+            for (Source source : sourceList) {
+                PostSearchEntry entry = new PostSearchEntry(creation, source, keyWords);
+                entries.add(entry);
+            }
         }
 
         return entries;
@@ -162,11 +174,6 @@ public class PostManager {
      */
     public PostList getPosts() {
         return posts;
-    }
-
-    public void addPosts(Collection<Post> posts) {
-        this.posts.addAll(posts);
-        this.posts.sort(PostView.getInstance().SORTED_BY.getComparator());
     }
 
     /**

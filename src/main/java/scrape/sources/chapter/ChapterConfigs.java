@@ -12,10 +12,10 @@ import scrape.sources.posts.strategies.intface.TitleElement;
  *
  */
 public class ChapterConfigs implements ScrapeConfigs {
-    private ObjectProperty<ContentWrapper> wrapper = new SimpleObjectProperty<>();
-    private ObjectProperty<PageContentElement> content = new SimpleObjectProperty<>();
-    private ObjectProperty<TitleElement> title = new SimpleObjectProperty<>();
-    private ObjectProperty<PaginationElement> pagination = new SimpleObjectProperty<>();
+    private final ObjectProperty<ContentWrapper> wrapper = new SimpleObjectProperty<>();
+    private final ObjectProperty<PageContentElement> content = new SimpleObjectProperty<>();
+    private final ObjectProperty<TitleElement> title = new SimpleObjectProperty<>();
+    private final ObjectProperty<PaginationElement> pagination = new SimpleObjectProperty<>();
     private boolean init = false;
 
     public ContentWrapper getWrapper() {

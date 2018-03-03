@@ -1,6 +1,6 @@
 package scrape;
 
-import Enterprise.data.intface.Creation;
+import enterprise.data.intface.Creation;
 import scrape.sources.Source;
 import scrape.sources.posts.PostSearchEntry;
 
@@ -28,6 +28,14 @@ public class ChapterSearchEntry extends SearchEntry implements Comparable<Chapte
     }
 
     @Override
+    public int hashCode() {
+        int result = getCreation() != null ? getCreation().hashCode() : 0;
+        result = 31 * result + getSource().hashCode();
+        result = 31 * result + getCreation().hashCode();
+        return result;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -38,14 +46,6 @@ public class ChapterSearchEntry extends SearchEntry implements Comparable<Chapte
                 getCreation().equals(that.getCreation()) :
                 that.getCreation() == null) &&
                 getSource().equals(that.getSource());
-    }
-
-    @Override
-    public int hashCode() {
-        int result = getCreation() != null ? getCreation().hashCode() : 0;
-        result = 31 * result + getSource().hashCode();
-        result = 31 * result + getCreation().hashCode();
-        return result;
     }
 
     @Override

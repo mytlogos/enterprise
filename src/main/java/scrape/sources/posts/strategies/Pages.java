@@ -10,7 +10,7 @@ import java.util.function.Function;
 /**
  *
  */
-public enum Pages implements Function<Document, Document> {
+enum Pages implements Function<Document, Document> {
     ;
 
     @Override

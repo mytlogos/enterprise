@@ -10,32 +10,15 @@ import java.util.stream.Collectors;
  *
  */
 class VolumeManager {
-    private Map<String, List<Path>> mappedPaths = new HashMap<>();
+    private final Map<String, List<Path>> resolvedMappedPaths = new HashMap<>();
+    private final Map<String, Set<String>> selectorMap = new HashMap<>();
+    private Map<String, List<Path>> mappedPaths;
     private boolean resolved = false;
-    private Map<String, List<Path>> resolvedMappedPaths = new HashMap<>();
-    private Map<String, Set<String>> selectorMap = new HashMap<>();
     private Path mostCommonPath = null;
     private Map<String, Path> linkedListMap = null;
 
     VolumeManager(Map<String, List<Path>> mappedPaths) {
         this.mappedPaths = mappedPaths;
-    }
-
-    Map<String, List<Path>> getMappedPaths() {
-        return mappedPaths;
-    }
-
-    void resolve(Path path) {
-        for (String s : mappedPaths.keySet()) {
-            List<Path> paths = new ArrayList<>();
-            mappedPaths.get(s).forEach(elementPath -> {
-                Path clone = elementPath.clone();
-                clone.resolve(path);
-                paths.add(clone);
-            });
-            resolvedMappedPaths.put(s, paths);
-        }
-        resolved = true;
     }
 
     public boolean isResolved() {
@@ -51,12 +34,46 @@ class VolumeManager {
         }
     }
 
+    Map<String, List<Path>> getMappedPaths() {
+        return mappedPaths;
+    }
+
     public Map<String, Set<String>> getResolvedSelectors() {
         if (!selectorMap.isEmpty()) {
             return selectorMap;
         } else {
             readySelectorMap();
             return selectorMap;
+        }
+    }
+
+    void resolve(Path path) {
+        for (String s : mappedPaths.keySet()) {
+            List<Path> paths = new ArrayList<>();
+            mappedPaths.get(s).forEach(elementPath -> {
+                Path clone = elementPath.clone();
+                clone.resolve(path);
+                paths.add(clone);
+            });
+            resolvedMappedPaths.put(s, paths);
+        }
+        resolved = true;
+    }
+
+    private void readySelectorMap() {
+        Map<String, List<Path>> map;
+        if (resolvedMappedPaths.isEmpty()) {
+            map = mappedPaths;
+        } else {
+            map = resolvedMappedPaths;
+        }
+
+        for (String key : map.keySet()) {
+            Set<String> selector = map.get(key).stream().map(Path::getTagSelector).filter(s -> !s.matches(".*> a$")).collect(Collectors.toSet());
+
+            if (!selector.isEmpty()) {
+                selectorMap.put(key, selector);
+            }
         }
     }
 
@@ -79,6 +96,17 @@ class VolumeManager {
             return new Path();
         }
         return mostCommonPath;
+    }
+
+    private Map<String, Path> getCommonMappedPath() {
+        if (!mappedPaths.isEmpty()) {
+            if (linkedListMap == null) {
+                produceCommonMappedPath();
+            }
+            return linkedListMap;
+        } else {
+            return new HashMap<>();
+        }
     }
 
     private void produceCommonMappedPath() {
@@ -110,34 +138,6 @@ class VolumeManager {
                         mappedPaths.get(key).add(path);
                     }
                 }
-            }
-        }
-    }
-
-    private Map<String, Path> getCommonMappedPath() {
-        if (!mappedPaths.isEmpty()) {
-            if (linkedListMap == null) {
-                produceCommonMappedPath();
-            }
-            return linkedListMap;
-        } else {
-            return new HashMap<>();
-        }
-    }
-
-    private void readySelectorMap() {
-        Map<String, List<Path>> map;
-        if (resolvedMappedPaths.isEmpty()) {
-            map = mappedPaths;
-        } else {
-            map = resolvedMappedPaths;
-        }
-
-        for (String key : map.keySet()) {
-            Set<String> selector = map.get(key).stream().map(Path::getTagSelector).filter(s -> !s.matches(".*> a$")).collect(Collectors.toSet());
-
-            if (!selector.isEmpty()) {
-                selectorMap.put(key, selector);
             }
         }
     }

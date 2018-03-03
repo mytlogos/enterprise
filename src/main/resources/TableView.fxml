@@ -6,21 +6,19 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.web.WebView?>
-<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:id="root" xmlns="http://javafx.com/javafx/8.0.111"
-            fx:controller="Enterprise.test.TableViewer">
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:id="root" xmlns="http://javafx.com/javafx/"
+            fx:controller="enterprise.test.TableViewer">
     <center>
         <WebView fx:id="browser" prefHeight="500.0" prefWidth="1000.0"/>
     </center>
     <bottom>
         <HBox prefWidth="200.0" spacing="1.0" BorderPane.alignment="CENTER">
-            <children>
-                <TextField fx:id="name" prefHeight="25.0" prefWidth="313.0" promptText="URL" HBox.hgrow="ALWAYS"/>
-                <Button fx:id="addUrl" mnemonicParsing="false" onAction="#addInternet" text="Öffne Internet"/>
-                <Button fx:id="addPC" mnemonicParsing="false" onAction="#addLocal" text="PC durchsuchen"/>
-            </children>
             <padding>
                 <Insets bottom="1.0" left="1.0" right="1.0" top="1.0"/>
             </padding>
+            <TextField fx:id="name" prefHeight="25.0" prefWidth="313.0" promptText="URL" HBox.hgrow="ALWAYS"/>
+            <Button fx:id="addUrl" mnemonicParsing="false" onAction="#addInternet" text="Öffne Internet"/>
+            <Button fx:id="addPC" mnemonicParsing="false" onAction="#addLocal" text="PC durchsuchen"/>
         </HBox>
     </bottom>
 </BorderPane>

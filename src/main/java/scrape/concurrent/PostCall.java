@@ -1,9 +1,10 @@
 package scrape.concurrent;
 
+import enterprise.data.Default;
+import enterprise.data.dataAccess.DataAccessManager;
 import scrape.sources.Source;
 import scrape.sources.posts.Post;
 import scrape.sources.posts.PostManager;
-import scrape.sources.posts.PostTable;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -11,6 +12,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Predicate;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 /**
@@ -18,14 +20,14 @@ import java.util.stream.Collectors;
  */
 public class PostCall implements Callable<Boolean> {
 
-    private Action action;
+    private final Action action;
 
     public PostCall(Action action) {
         this.action = action;
     }
 
     @Override
-    public Boolean call() throws Exception {
+    public Boolean call() {
         return action.doAction();
     }
 
@@ -33,7 +35,9 @@ public class PostCall implements Callable<Boolean> {
         GET_ENTRIES {
             @Override
             boolean doAction() {
-                List<Post> posts = PostTable.getInstance().getEntries();
+//                List<Post> posts = PostTable.get().getCreationEntries();
+                List<Post> posts = new ArrayList<>();
+
                 if (!posts.isEmpty()) {
                     PostManager.getInstance().addPosts(posts);
                     Map<Source, List<Post>> postMap = mapWithSource(posts);
@@ -60,7 +64,8 @@ public class PostCall implements Callable<Boolean> {
             boolean doAction() {
                 List<Post> posts = PostManager.getInstance().getPosts();
                 List<Post> filtered = filterPosts(posts);
-                return PostTable.getInstance().insert(filtered);
+//                boolean insert = PostTable.get().insert(filtered);
+                return false;
             }
         },
         DELETE_ENTRIES {
@@ -74,11 +79,17 @@ public class PostCall implements Callable<Boolean> {
                         collect(Collectors.toList());
 
                 oldPosts.addAll(posts);
-                return PostTable.getInstance().delete(oldPosts);
+                try {
+                    DataAccessManager.manager.delete(new ArrayList<>(oldPosts));
+                    return true;
+                } catch (Exception e) {
+                    Default.LOGGER.log(Level.SEVERE, "exception occurred while deleting old posts", e);
+                    return false;
+                }
             }
 
-            Set<Post> posts = new HashSet<>();
-            ExecutorService executor = Executors.newSingleThreadExecutor();
+            final Set<Post> posts = new HashSet<>();
+            final ExecutorService executor = Executors.newSingleThreadExecutor();
             boolean started = false;
 
             public void startTimer() {

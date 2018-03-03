@@ -33,10 +33,10 @@ public class ChapterTitleFilter implements ElementFilter<TitleElement> {
         DOUBLE_PARENTAL("p > b > i", Type.SINGLE),
         P_CONTAINS("p:contains(chapter)", Type.SINGLE),;
 
+        final Type type;
         String novel;
         String chapter;
         String title;
-        Type type;
 
         Titles(String novel, String chapter, Type type) {
             this.novel = novel;

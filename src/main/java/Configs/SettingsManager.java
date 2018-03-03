@@ -1,6 +1,6 @@
 package Configs;
 
-import Enterprise.misc.TriConsumer;
+import enterprise.misc.TriConsumer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,9 +10,9 @@ import java.util.prefs.Preferences;
  * // TODO: 01.10.2017 does not load or save user changed settings, only default
  */
 public class SettingsManager {
-    private static SettingsManager settings = new SettingsManager();
-    private Preferences projectPreferences = Preferences.userRoot().node("enterprise");
-    private List<Setting> registered = new ArrayList<>();
+    private static final SettingsManager settings = new SettingsManager();
+    private final Preferences projectPreferences = Preferences.userRoot().node("enterprise");
+    private final List<Setting> registered = new ArrayList<>();
 
     private SettingsManager() {
         if (settings != null) {
@@ -27,16 +27,6 @@ public class SettingsManager {
     public void register(Setting setting) {
         registered.add(setting);
         loadSetting(setting);
-    }
-
-    public void saveSettings() {
-        for (Setting setting : registered) {
-            Preferences preferences = getPreferences(setting);
-
-            for (String s : setting.getKeys()) {
-                preferences.put(s, setting.getSetting(s));
-            }
-        }
     }
 
     private void loadSetting(Setting setting) {
@@ -63,7 +53,14 @@ public class SettingsManager {
         return preferences;
     }
 
-    private void save(Preferences preferences, String s, String value) {
+    public void saveSettings() {
+        for (Setting setting : registered) {
+            Preferences preferences = getPreferences(setting);
+
+            for (String s : setting.getKeys()) {
+                preferences.put(s, setting.getSetting(s));
+            }
+        }
     }
 
     public void saveContentControllerSettings() {
@@ -71,11 +68,11 @@ public class SettingsManager {
     }
 
     private void contentControlSettings(TriConsumer<Preferences, Setting, String> triConsumer) {
-        /*for (BasicModules basicModules : BasicModules.values()) {
+        /*for (BasicModule basicModules : BasicModule.values()) {
 
             Preferences moduleNode = preferences.node(basicModules.toString());
 
-            ContentController controller = (ContentController) ControlComm.getInstance().getController(basicModules, BasicModes.CONTENT);
+            Content controller = (Content) ControlComm.get().getController(basicModules, BasicMode.CONTENT);
             List<Column<? extends CreationEntry,?>> set = controller.getColumnManager().getColumns();
 
             for (Setting o : set) {
@@ -107,5 +104,8 @@ public class SettingsManager {
 //                System.out.println("null value of Key: " + key);
             }
         }
+    }
+
+    private void save(Preferences preferences, String s, String value) {
     }
 }

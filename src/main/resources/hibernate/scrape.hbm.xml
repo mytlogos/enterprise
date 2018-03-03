@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+
+    <class name="scrape.sources.Source">
+        <id name="id">
+            <generator class="increment"/>
+        </id>
+        <property name="sourceName" type="string"/>
+        <property name="url" type="string"/>
+        <property name="sourceType" access="field">
+            <type name="org.hibernate.type.EnumType">
+                <param name="enumClass">scrape.sources.SourceType</param>
+                <param name="useNamed">true</param>
+            </type>
+        </property>
+        <!--<property name="postConfigs"/>-->
+    </class>
+
+    <class name="scrape.sources.posts.PostConfigs">
+        <id name="id">
+            <generator class="increment"/>
+        </id>
+        <!--<property name="archive"/>
+        <property name="feed"/>
+        <property name="wrapper"/>
+        <property name="posts"/>
+        <property name="time"/>
+        <property name="title"/>
+        <property name="postBody"/>
+        <property name="footer"/>-->
+    </class>
+
+    <class name="scrape.sources.posts.Post" table="" mutable="false">
+        <id name="id">
+            <generator class="increment"/>
+        </id>
+        <property name="sticky" access="field"/>
+        <many-to-one name="source" cascade="save-update" access="field"/>
+        <property name="followLink" access="field"/>
+        <property name="title" access="field"/>
+        <property name="timeStamp" access="field"/>
+        <property name="content" access="field"/>
+    </class>
+</hibernate-mapping>

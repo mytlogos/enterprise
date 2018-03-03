@@ -43,11 +43,10 @@ public class HeaderFilter {
         PAGELIST(".PageList"),
         SITE_NAV(".site-nav"),
         FUSION_MENU("nav.fusion-sticky-menu"),
-        SHADOW_NAV(".shadow:has(.nav)")
-        ;
+        SHADOW_NAV(".shadow:has(.nav)");
 
 
-        private String selector;
+        private final String selector;
 
         Headers(String selector) {
             this.selector = selector;

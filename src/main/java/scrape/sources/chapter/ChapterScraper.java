@@ -17,8 +17,8 @@ import java.util.concurrent.Executors;
  * // FIXME: 08.10.2017 breaks of prematurely, some site are not wholly scraped
  */
 public class ChapterScraper extends Scraper<ChapterConfigs, ChapterSearchEntry> {
-    private Set<String> visited = new HashSet<>();
-    private ChapterFormat format = new ChapterFormat();
+    private final Set<String> visited = new HashSet<>();
+    private final ChapterFormat format = new ChapterFormat();
     private int counter = 0;
 
     public static ChapterScraper scraper(ChapterSearchEntry searchEntry) throws IOException {
@@ -26,22 +26,6 @@ public class ChapterScraper extends Scraper<ChapterConfigs, ChapterSearchEntry> 
         ChapterScraper scraper = new ChapterScraper();
         scraper.init(searchEntry);
         return scraper;
-    }
-
-    public Element getChapter() {
-        return format.format(document, configs);
-    }
-
-    public Element getChapter(String s) {
-        try {
-            document = getCleanDocument(s);
-            System.out.println("i am doing sth");
-            System.out.println(++counter);
-            return new ChapterFormat().format(document, configs);
-        } catch (IOException e) {
-            System.out.println("could not get chapter for " + s);
-            return null;
-        }
     }
 
     public List<Element> getChapters(List<String> strings) {
@@ -52,7 +36,7 @@ public class ChapterScraper extends Scraper<ChapterConfigs, ChapterSearchEntry> 
                 initConfigs(document);
             }
         } catch (IOException e) {
-            System.out.println("could not get chapter for " + strings.get(0));
+            System.out.println("could not getAll chapter for " + strings.get(0));
             return new ArrayList<>();
         }
         List<Element> elements = new ArrayList<>();
@@ -63,6 +47,40 @@ public class ChapterScraper extends Scraper<ChapterConfigs, ChapterSearchEntry> 
             }
         });
         return elements;
+    }
+
+    private void initConfigs(Document document) {
+        new ChapterConfigSetter(configs, document).setConfigs();
+    }
+
+    private Element getChapter(String s) {
+        try {
+            document = getCleanDocument(s);
+            System.out.println("i am doing sth");
+            System.out.println(++counter);
+            return new ChapterFormat().format(document, configs);
+        } catch (IOException e) {
+            System.out.println("could not getAll chapter for " + s);
+            return null;
+        }
+    }
+
+    public Element getChapter() {
+        return format.format(document, configs);
+    }
+
+    private void init(ChapterSearchEntry entry) throws IOException {
+        this.source = entry.getSource();
+        initScraper();
+        this.search = entry;
+    }
+
+    private void initScraper() throws IOException {
+        document = getCleanDocument(source.getUrl());
+        this.configs = source.getChapterConfigs();
+        if (!configs.isInit()) {
+            initConfigs(document);
+        }
     }
 
     public Deque<Element> getAllChapters() {
@@ -133,23 +151,5 @@ public class ChapterScraper extends Scraper<ChapterConfigs, ChapterSearchEntry> 
 
     public Deque<Element> getChapterFromTo(int from, int to) {
         return new LinkedList<>();
-    }
-
-    private void initScraper() throws IOException {
-        document = getCleanDocument(source.getUrl());
-        this.configs = source.getChapterConfigs();
-        if (!configs.isInit()) {
-            initConfigs(document);
-        }
-    }
-
-    private void initConfigs(Document document) {
-        new ChapterConfigSetter(configs, document).setConfigs();
-    }
-
-    private void init(ChapterSearchEntry entry) throws IOException {
-        this.source = entry.getSource();
-        initScraper();
-        this.search = entry;
     }
 }

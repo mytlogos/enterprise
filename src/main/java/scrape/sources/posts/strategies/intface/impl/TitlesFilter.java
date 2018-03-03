@@ -87,7 +87,7 @@ public class TitlesFilter implements ElementFilter<TitleElement> {
             },
             ENTRY_AND_PARENT(ENTRY_TITLE, RECENT_POSTS);
 
-            Titles[] mixture = new Titles[0];
+            Titles[] mixture;
 
             Mixture(Titles... titles) {
                 mixture = titles;

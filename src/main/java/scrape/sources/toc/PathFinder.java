@@ -32,8 +32,14 @@ public class PathFinder {
         return path;
     }
 
-    static Path getCompletePath(Element startElement, Element basicElement) {
-        return getPath(startElement, basicElement, new Path()).addChild(startElement);
+    public static Path getCommonPath(Path... linkedLists) {
+        return getCommonPath(Arrays.asList(linkedLists));
+    }
+
+    private static List<Path> getCompletePaths(Element basicElement, List<Element> links) {
+        List<Path> paths = new ArrayList<>();
+        links.forEach(element -> paths.add(getCompletePath(element, basicElement)));
+        return paths;
     }
 
     public static Path getCommonPath(List<Path> linkedLists) {
@@ -52,10 +58,6 @@ public class PathFinder {
             if (elementPositionCheck(linkedLists, element, path, i)) break;
         }
         return path;
-    }
-
-    public static Path getCommonPath(Path... linkedLists) {
-        return getCommonPath(Arrays.asList(linkedLists));
     }
 
     private static boolean elementPositionCheck(List<Path> linkedLists, Element element, Path path, int i) {
@@ -111,9 +113,7 @@ public class PathFinder {
         return new HashMap<>();
     }
 
-    public static List<Path> getCompletePaths(Element basicElement, List<Element> links) {
-        List<Path> paths = new ArrayList<>();
-        links.forEach(element -> paths.add(getCompletePath(element, basicElement)));
-        return paths;
+    private static Path getCompletePath(Element startElement, Element basicElement) {
+        return getPath(startElement, basicElement, new Path()).addChild(startElement);
     }
 }

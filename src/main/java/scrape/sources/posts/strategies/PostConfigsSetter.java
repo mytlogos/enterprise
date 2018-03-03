@@ -1,6 +1,6 @@
 package scrape.sources.posts.strategies;
 
-import Enterprise.misc.Log;
+import enterprise.data.Default;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -19,7 +19,7 @@ import java.util.logging.Level;
 public class PostConfigsSetter extends ConfigSetter {
 
     private final Document document;
-    private PostConfigs configs;
+    private final PostConfigs configs;
 
     public PostConfigsSetter(PostConfigs configs, Document document) {
         this.document = document;
@@ -44,8 +44,26 @@ public class PostConfigsSetter extends ConfigSetter {
                 return true;
             }
         }
-        Log.classLogger(this).log(Level.WARNING, document.baseUri() + " is not supported");
+        Default.LOGGER.log(Level.WARNING, document.baseUri() + " is not supported");
         return false;
+    }
+
+    private PostElement getPostFilter(Element element) {
+        if (element != null) {
+            List<PostElement> filters = new PostsFilter().getFilter();
+
+            for (PostElement filter : filters) {
+                Elements applied = filter.apply(element);
+
+                if (applied != null && !applied.isEmpty() && validPosts(applied)) {
+                    setOptionalConfigs(applied);
+
+                    configs.setPosts(filter);
+                    return filter;
+                }
+            }
+        }
+        return null;
     }
 
     private boolean validPosts(Elements postElements) {
@@ -70,25 +88,6 @@ public class PostConfigsSetter extends ConfigSetter {
         } else {
             return false;
         }
-    }
-
-
-    private PostElement getPostFilter(Element element) {
-        if (element != null) {
-            List<PostElement> filters = new PostsFilter().getFilter();
-
-            for (PostElement filter : filters) {
-                Elements applied = filter.apply(element);
-
-                if (applied != null && !applied.isEmpty() && validPosts(applied)) {
-                    setOptionalConfigs(applied);
-
-                    configs.setPosts(filter);
-                    return filter;
-                }
-            }
-        }
-        return null;
     }
 
     private void setOptionalConfigs(Elements applied) {

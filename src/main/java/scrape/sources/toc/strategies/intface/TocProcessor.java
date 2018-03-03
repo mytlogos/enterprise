@@ -1,8 +1,10 @@
 package scrape.sources.toc.strategies.intface;
 
+import scrape.sources.toc.structure.CreationRoot;
+
 /**
  *
  */
 public interface TocProcessor {
-    String process(String link);
+    CreationRoot process(String link);
 }

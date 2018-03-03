@@ -4,49 +4,47 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <AnchorPane xmlns:fx="http://javafx.com/fxml/1" fx:id="root" prefHeight="533.0" prefWidth="786.0"
-            xmlns="http://javafx.com/javafx/8.0.111">
-    <children>
-        <TextField fx:id="title" layoutX="82.0" layoutY="22.0" promptText="Titel"/>
-        <ComboBox fx:id="creator" editable="true" layoutX="327.0" layoutY="22.0" prefWidth="150.0" promptText="Autor"/>
-        <ComboBox fx:id="creatorSort" editable="true" layoutX="596.0" layoutY="22.0" prefWidth="150.0"
-                  promptText="Autorensortierung"/>
-        <ComboBox fx:id="collection" editable="true" layoutX="82.0" layoutY="85.0" prefWidth="150.0"
-                  promptText="Reihe"/>
-        <TextField fx:id="presentCreations" layoutX="328.0" layoutY="85.0" promptText="Anzahl Folgen"/>
-        <TextField fx:id="dateLastCreation" layoutX="597.0" layoutY="85.0" promptText="Datum der letzten Folge"/>
-        <TextField fx:id="processedCreations" layoutX="83.0" layoutY="144.0" promptText="Anzahl gesehener Folgen"/>
-        <ComboBox fx:id="ownStatus" editable="true" layoutX="327.0" layoutY="144.0" prefWidth="150.0"
-                  promptText="Eigener Status"/>
-        <ComboBox fx:id="workStatus" editable="true" layoutX="597.0" layoutY="144.0" prefWidth="150.0"
-                  promptText="Status des Autors"/>
-        <ComboBox fx:id="translator" editable="true" layoutX="83.0" layoutY="205.0" prefWidth="150.0"
-                  promptText="Sub-Gruppe"/>
-        <TextField fx:id="rating" layoutX="328.0" layoutY="205.0" prefHeight="25.0" prefWidth="46.0" promptText="1-10"/>
-        <TextField fx:id="keyWords" layoutX="598.0" layoutY="205.0" promptText="für Scraper"/>
-        <TextArea fx:id="commentArea" layoutX="15.0" layoutY="253.0" prefHeight="236.0" prefWidth="322.0"
-                  promptText="Kommentar"/>
-        <ImageView fx:id="coverImage" fitHeight="236.0" fitWidth="261.0" layoutX="348.0" layoutY="253.0"
-                   pickOnBounds="true" preserveRatio="true"/>
-        <Label layoutX="491.0" layoutY="26.0" text="Autorensortierung:"/>
-        <Label layoutX="519.0" layoutY="88.0" text="Letzte Folge:"/>
-        <Label layoutX="491.0" layoutY="148.0" text="Status vom Autor:"/>
-        <Label layoutX="246.0" layoutY="148.0" text="Eigener Status:"/>
-        <Label layoutX="285.0" layoutY="88.0" text="Folge:"/>
-        <Label layoutX="285.0" layoutY="25.0" text="Autor:"/>
-        <Label layoutX="22.0" layoutY="147.0" text="Gesehen"/>
-        <Label layoutX="31.0" layoutY="88.0" text="Reihe:"/>
-        <Label layoutX="37.0" layoutY="25.0" text="Titel:"/>
-        <Label layoutX="15.0" layoutY="209.0" text="Übersetzer:"/>
-        <Label layoutX="260.0" layoutY="209.0" text="Bewertung:"/>
-        <Button fx:id="endEditBtn" layoutX="11.0" layoutY="500.0" mnemonicParsing="false" onAction="#endEdit"
-                prefHeight="25.0" prefWidth="765.0" text="Bearbeiten beenden"/>
-        <Label layoutX="526.0" layoutY="209.0" text="Stichwörter "/>
-        <Button fx:id="addLocalCoverBtn" layoutX="620.0" layoutY="346.0" mnemonicParsing="false"
-                onAction="#addLocalImage" text="Durchsuchen"/>
-        <TextField fx:id="coverURI" layoutX="620.0" layoutY="254.0" prefHeight="25.0" prefWidth="129.0"
-                   promptText="Cover"/>
-        <Button fx:id="addInternetCoverBtn" layoutX="620.0" layoutY="299.0" mnemonicParsing="false"
-                onAction="#addNetImage" prefHeight="25.0" prefWidth="78.0" text="Internet"/>
-    </children>
+            xmlns="http://javafx.com/javafx/">
 
+    <TextField fx:id="title" layoutX="82.0" layoutY="22.0" promptText="Titel"/>
+    <ComboBox fx:id="creator" editable="true" layoutX="327.0" layoutY="22.0" prefWidth="150.0" promptText="Autor"/>
+    <ComboBox fx:id="creatorSort" editable="true" layoutX="596.0" layoutY="22.0" prefWidth="150.0"
+              promptText="Autorensortierung"/>
+    <ComboBox fx:id="collection" editable="true" layoutX="82.0" layoutY="85.0" prefWidth="150.0"
+              promptText="Reihe"/>
+    <TextField fx:id="presentCreations" layoutX="328.0" layoutY="85.0" promptText="Anzahl Folgen"/>
+    <TextField fx:id="dateLastCreation" layoutX="597.0" layoutY="85.0" promptText="Datum der letzten Folge"/>
+    <TextField fx:id="processedCreations" layoutX="83.0" layoutY="144.0" promptText="Anzahl gesehener Folgen"/>
+    <ComboBox fx:id="ownStatus" editable="true" layoutX="327.0" layoutY="144.0" prefWidth="150.0"
+              promptText="Eigener Status"/>
+    <ComboBox fx:id="workStatus" editable="true" layoutX="597.0" layoutY="144.0" prefWidth="150.0"
+              promptText="Status des Autors"/>
+    <ComboBox fx:id="translator" editable="true" layoutX="83.0" layoutY="205.0" prefWidth="150.0"
+              promptText="Sub-Gruppe"/>
+    <TextField fx:id="rating" layoutX="328.0" layoutY="205.0" prefHeight="25.0" prefWidth="46.0" promptText="1-10"/>
+    <TextField fx:id="keyWords" layoutX="598.0" layoutY="205.0" promptText="für Scraper"/>
+    <TextArea fx:id="commentArea" layoutX="15.0" layoutY="253.0" prefHeight="236.0" prefWidth="322.0"
+              promptText="Kommentar"/>
+    <ImageView fx:id="coverImage" fitHeight="236.0" fitWidth="261.0" layoutX="348.0" layoutY="253.0"
+               pickOnBounds="true" preserveRatio="true"/>
+    <Label layoutX="491.0" layoutY="26.0" text="Autorensortierung:"/>
+    <Label layoutX="519.0" layoutY="88.0" text="Letzte Folge:"/>
+    <Label layoutX="491.0" layoutY="148.0" text="Status vom Autor:"/>
+    <Label layoutX="246.0" layoutY="148.0" text="Eigener Status:"/>
+    <Label layoutX="285.0" layoutY="88.0" text="Folge:"/>
+    <Label layoutX="285.0" layoutY="25.0" text="Autor:"/>
+    <Label layoutX="22.0" layoutY="147.0" text="Gesehen"/>
+    <Label layoutX="31.0" layoutY="88.0" text="Reihe:"/>
+    <Label layoutX="37.0" layoutY="25.0" text="Titel:"/>
+    <Label layoutX="15.0" layoutY="209.0" text="Übersetzer:"/>
+    <Label layoutX="260.0" layoutY="209.0" text="Bewertung:"/>
+    <Button fx:id="endEditBtn" layoutX="11.0" layoutY="500.0" mnemonicParsing="false" onAction="#endEdit"
+            prefHeight="25.0" prefWidth="765.0" text="Bearbeiten beenden"/>
+    <Label layoutX="526.0" layoutY="209.0" text="Stichwörter "/>
+    <Button layoutX="620.0" layoutY="346.0" mnemonicParsing="false"
+            onAction="#addLocalImage" text="Durchsuchen"/>
+    <TextField fx:id="coverURI" layoutX="620.0" layoutY="254.0" prefHeight="25.0" prefWidth="129.0"
+               promptText="Cover"/>
+    <Button layoutX="620.0" layoutY="299.0" mnemonicParsing="false"
+            onAction="#addNetImage" prefHeight="25.0" prefWidth="78.0" text="Internet"/>
 </AnchorPane>

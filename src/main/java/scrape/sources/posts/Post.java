@@ -1,41 +1,50 @@
 package scrape.sources.posts;
 
-import Enterprise.data.Default;
-import Enterprise.data.impl.AbstractDataEntry;
-import Enterprise.data.intface.Creation;
-import Enterprise.data.intface.DataEntry;
+import enterprise.data.Default;
+import enterprise.data.impl.AbstractDataEntry;
+import enterprise.data.intface.Creation;
+import enterprise.data.intface.DataEntry;
+import gorgon.external.DataAccess;
+import gorgon.external.GorgonEntry;
+import scrape.scrapeDaos.PostDao;
 import scrape.sources.Source;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.time.format.DateTimeFormatter;
 
 /**
  * This class represents a Post of a blog.
  * It is immutable.
  */
-public class Post extends AbstractDataEntry implements Comparable<Post>, DataEntry {
+@DataAccess(PostDao.class)
+public final class Post extends AbstractDataEntry implements DataEntry, GorgonEntry {
     private boolean sticky;
     private Source source;
     private String followLink;
     private String title;
-    private List<String> content = new ArrayList<>();
-    private String footer = Default.STRING;
     private LocalDateTime timeStamp;
     private Creation creation;
+    private String content;
+    private String footer = Default.STRING;
 
+    Post() {
+
+    }
+
+
+    public Post(Source source, String title, String content, String footer, LocalDateTime timeStamp, String followLink, boolean isSticky) {
+        this(source, title, timeStamp, followLink, null, isSticky);
+        this.content = content;
+        this.footer = footer;
+        validateState();
+    }
 
     /**
      * The constructor of {@code Post}.
      */
-    public Post(Source source, String title, LocalDateTime dateTime, String followLink, Creation creation, boolean isSticky) {
-        this(Default.VALUE, source, title, dateTime, followLink, creation, isSticky);
-    }
-
-    public Post(int id, Source source, String title, LocalDateTime dateTime, String followLink, Creation creation, boolean isSticky) {
-        super(id);
+    public Post(Source source, String title, LocalDateTime timeStamp, String followLink, Creation creation, boolean isSticky) {
         this.title = title;
-        this.timeStamp = dateTime;
+        this.timeStamp = timeStamp;
         this.followLink = followLink;
         this.creation = creation;
         this.sticky = isSticky;
@@ -44,14 +53,6 @@ public class Post extends AbstractDataEntry implements Comparable<Post>, DataEnt
         } else {
             this.source = Default.SOURCE;
         }
-        validateState();
-    }
-
-    public Post(Source source, String title, List<String> content, String footer, LocalDateTime timeStamp, String followLink, boolean isSticky) {
-        this(source, title, timeStamp, followLink, null, isSticky);
-        this.content = content;
-        this.footer = footer;
-        validateState();
     }
 
     private void validateState() {
@@ -93,39 +94,13 @@ public class Post extends AbstractDataEntry implements Comparable<Post>, DataEnt
     }
 
     /**
-     * Returns the timestamp.
-     *
-     * @return time - may be null
-     */
-    public LocalDateTime getTimeStamp() {
-        return timeStamp;
-    }
-
-    /**
      * Returns a String representation of
      * the timestamp without timezone.
      *
      * @return string
      */
     public String getTime() {
-        String timeString = String.valueOf(timeStamp.getDayOfMonth()) + "." +
-                timeStamp.getMonthValue() + "." +
-                timeStamp.getYear() + " " +
-                timeStamp.getHour() + ":";
-        String minute;
-        if (timeStamp.getMinute() < 10) {
-            minute = "0" + timeStamp.getMinute();
-        } else {
-            minute = "" + timeStamp.getMinute();
-        }
-        String second;
-        if (timeStamp.getSecond() < 10) {
-            second = "0" + timeStamp.getSecond();
-        } else {
-            second = "" + timeStamp.getSecond();
-        }
-        timeString = timeString.concat(minute).concat(":").concat(second);
-        return timeString;
+        return timeStamp.format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss"));
     }
 
     /**
@@ -138,21 +113,12 @@ public class Post extends AbstractDataEntry implements Comparable<Post>, DataEnt
     }
 
     /**
-     * Returns the title of this {@code Post}.
-     *
-     * @return title - returns {@link Default#STRING} if not value was set
-     */
-    public String getTitle() {
-        return title;
-    }
-
-    /**
      * Gets the content of the {@code Post}.
      *
      * @return the content in a {@code List}, every element represents one paragraph.
      * Is empty if no value was set
      */
-    public List<String> getContent() {
+    public String getContent() {
         return content;
     }
 
@@ -166,20 +132,6 @@ public class Post extends AbstractDataEntry implements Comparable<Post>, DataEnt
     }
 
     /**
-     * Returns the {@code content} of this {@code Post}
-     * as an String, with every element in one line each.
-     *
-     * @return content - as an {@code String}
-     */
-    public String getContentString() {
-        StringBuilder builder = new StringBuilder();
-        for (String s : content) {
-            builder.append(s).append("\n");
-        }
-        return builder.toString();
-    }
-
-    /**
      * @return
      */
     public boolean isSticky() {
@@ -187,18 +139,44 @@ public class Post extends AbstractDataEntry implements Comparable<Post>, DataEnt
     }
 
     @Override
-    public String toString() {
+    public int compareTo(GorgonEntry gorgonEntry) {
+        if (gorgonEntry == null) return -1;
+        if (gorgonEntry == this) return 0;
+        if (!(gorgonEntry instanceof Post)) return -1;
+
+        Post o = (Post) gorgonEntry;
+
+        int compare = o.getTimeStamp().compareTo(getTimeStamp());
+
+        if (compare == 0) {
+            compare = getTitle().compareTo(o.getTitle());
+        }
+        return compare;
+    }
+
+    /**
+     * Returns the timestamp.
+     *
+     * @return time - may be null
+     */
+    public LocalDateTime getTimeStamp() {
+        return timeStamp;
+    }
+
+    /**
+     * Returns the title of this {@code Post}.
+     *
+     * @return title - returns {@link Default#STRING} if not value was set
+     */
+    public String getTitle() {
         return title;
     }
 
     @Override
-    public int compareTo(Post o) {
-        int compare;
-        compare = o.getTimeStamp().compareTo(timeStamp);
-        if (compare == 0) {
-            compare = title.compareTo(o.getTitle());
-        }
-        return compare;
+    public int hashCode() {
+        int result = 31 * timeStamp.hashCode();
+        result = 31 * result * title.hashCode();
+        return result;
     }
 
     @Override
@@ -213,10 +191,16 @@ public class Post extends AbstractDataEntry implements Comparable<Post>, DataEnt
     }
 
     @Override
-    public int hashCode() {
-        int result = 31 * timeStamp.hashCode();
-        result = 31 * result * title.hashCode();
-        return result;
+    public String toString() {
+        return "Post{" +
+                "sticky=" + sticky +
+                ", source=" + source +
+                ", followLink='" + followLink + '\'' +
+                ", title='" + title + '\'' +
+                ", timeStamp=" + timeStamp +
+                ", creation=" + creation +
+                ", content='" + content + '\'' +
+                ", footer='" + footer + '\'' +
+                '}';
     }
-
 }

@@ -1,6 +1,6 @@
 package Configs;
 
-import Enterprise.modules.Module;
+import enterprise.modules.Module;
 
 import java.util.Set;
 

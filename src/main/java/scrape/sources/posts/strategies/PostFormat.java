@@ -4,7 +4,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import scrape.Formatter;
-import scrape.sources.ElementsSieve;
+import scrape.sources.PostsFilter;
 import scrape.sources.posts.ParseTime;
 import scrape.sources.posts.PostConfigs;
 import scrape.sources.posts.PostSearchEntry;
@@ -30,14 +30,6 @@ public class PostFormat extends Formatter {
         return getString(element, LINK_SELECTOR, Element::text);
     }
 
-    public String getLink(Element element) {
-        return getString(element, LINK_SELECTOR, element1 -> element1.attr(LINK_ATTRIBUTE));
-    }
-
-    public String getTime(Element element) {
-        return getString(element, TIME_SELECTOR, element1 -> element1.attr(TIME_ATTRIBUTE));
-    }
-
     private String getString(Element element, String selector, Function<Element, String> function) {
         Elements elements = element.select(selector);
         if (elements.size() == 1) {
@@ -45,6 +37,14 @@ public class PostFormat extends Formatter {
         } else {
             return null;
         }
+    }
+
+    public String getLink(Element element) {
+        return getString(element, LINK_SELECTOR, element1 -> element1.attr(LINK_ATTRIBUTE));
+    }
+
+    public String getTime(Element element) {
+        return getString(element, TIME_SELECTOR, element1 -> element1.attr(TIME_ATTRIBUTE));
     }
 
     public Element timeElement(String time) {
@@ -74,6 +74,19 @@ public class PostFormat extends Formatter {
         return null;
     }
 
+    public Elements format(Document document, PostConfigs configs) {
+        Elements elements = unFormatted(document, configs);
+        return format(elements, configs);
+    }
+
+    public Elements unFormatted(Document document, PostConfigs configs) {
+        Objects.requireNonNull(document);
+        Objects.requireNonNull(configs);
+
+        Element wrapper = configs.getWrapper().apply(document);
+        return configs.getPosts().apply(wrapper);
+    }
+
     public Elements format(Elements elements, PostConfigs configs) {
         Objects.requireNonNull(elements);
         Objects.requireNonNull(configs);
@@ -97,19 +110,6 @@ public class PostFormat extends Formatter {
         return posts;
     }
 
-    public Elements format(Document document, PostConfigs configs) {
-        Elements elements = unFormatted(document, configs);
-        return format(elements, configs);
-    }
-
-    public Elements unFormatted(Document document, PostConfigs configs) {
-        Objects.requireNonNull(document);
-        Objects.requireNonNull(configs);
-
-        Element wrapper = configs.getWrapper().apply(document);
-        return configs.getPosts().apply(wrapper);
-    }
-
     public Elements format(Document document, PostConfigs configs, PostSearchEntry entry) {
         Objects.requireNonNull(document);
         Objects.requireNonNull(configs);
@@ -117,7 +117,7 @@ public class PostFormat extends Formatter {
         Element wrapper = configs.getWrapper().apply(document);
         Elements elements = configs.getPosts().apply(wrapper);
 
-        elements = new ElementsSieve(entry).filterPosts(elements);
+        elements = new PostsFilter(entry).filter(elements);
         return format(elements, configs);
     }
 }

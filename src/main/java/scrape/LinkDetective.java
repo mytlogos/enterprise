@@ -34,16 +34,6 @@ public class LinkDetective {
         return result;
     }
 
-    public String tryPrevLink(String currentLink) {
-        String result;
-        if (ParseTime.patternAvailable(currentLink, "\\d{4}/[0-1]?\\d/([0-3]?\\d)?")) {
-            result = changeDatePath();
-        } else {
-            result = changeNormalPath(currentLink, Operate.PREVIOUS);
-        }
-        return result;
-    }
-
     private String changeDatePath() {
         return "";
     }
@@ -130,6 +120,16 @@ public class LinkDetective {
             }
         }
         return pathPart;
+    }
+
+    public String tryPrevLink(String currentLink) {
+        String result;
+        if (ParseTime.patternAvailable(currentLink, "\\d{4}/[0-1]?\\d/([0-3]?\\d)?")) {
+            result = changeDatePath();
+        } else {
+            result = changeNormalPath(currentLink, Operate.PREVIOUS);
+        }
+        return result;
     }
 
     private enum Operate {

@@ -1,6 +1,6 @@
 package scrape.sources.chapter.strategies;
 
-import Enterprise.misc.Log;
+import enterprise.data.Default;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import scrape.sources.ConfigSetter;
@@ -34,22 +34,6 @@ public class ChapterConfigSetter extends ConfigSetter {
 
     }
 
-    private <E extends FilterElement> E tryAll(Element body, ElementFilter<E> filter) {
-        return getFirstFilter(body, filter.getFilter());
-    }
-
-    private TitleElement tryAllTitles(Element body) {
-        return tryAll(body, new ChapterTitleFilter());
-    }
-
-    public PageContentElement tryAllPageContent(Element body) {
-        return tryAll(body, new PageContentFilter());
-    }
-
-    public PaginationElement tryAllPagination(Element body) {
-        return tryAll(body, new ChapterPagination());
-    }
-
     @Override
     public boolean setConfigs() {
         ContentWrapper wrapper = ContentWrapper.tryAll(document);
@@ -70,11 +54,27 @@ public class ChapterConfigSetter extends ConfigSetter {
                 configs.setInit();
                 return true;
             } else {
-                Log.classLogger(this).log(Level.WARNING, document.baseUri() + " is not supported");
+                Default.LOGGER.log(Level.WARNING, document.baseUri() + " is not supported");
                 return false;
             }
         } else {
             return false;
         }
+    }
+
+    public PageContentElement tryAllPageContent(Element body) {
+        return tryAll(body, new PageContentFilter());
+    }
+
+    private TitleElement tryAllTitles(Element body) {
+        return tryAll(body, new ChapterTitleFilter());
+    }
+
+    public PaginationElement tryAllPagination(Element body) {
+        return tryAll(body, new ChapterPagination());
+    }
+
+    private <E extends FilterElement> E tryAll(Element body, ElementFilter<E> filter) {
+        return getFirstFilter(body, filter.getFilter());
     }
 }

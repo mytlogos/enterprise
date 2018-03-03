@@ -1,8 +1,8 @@
 package scrape.sources.toc.novel;
 
 import org.jsoup.nodes.Document;
-import scrape.sources.toc.CreationRoot;
-import scrape.sources.toc.Leaf;
+import scrape.sources.toc.structure.CreationRoot;
+import scrape.sources.toc.structure.Leaf;
 
 /**
  * Transforms the Table of Contents from {@link CreationRoot}
@@ -13,7 +13,7 @@ import scrape.sources.toc.Leaf;
  * need to have an valid local path to the Files, else
  * it will be skipped.
  */
-public class TocTransformer {
+class TocTransformer {
 
     public Document transform(CreationRoot root) {
         // TODO: 03.11.2017 implement

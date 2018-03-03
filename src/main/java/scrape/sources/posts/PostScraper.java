@@ -4,7 +4,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import scrape.Scraper;
-import scrape.sources.ElementsSieve;
+import scrape.sources.PostsFilter;
 import scrape.sources.Source;
 import scrape.sources.posts.strategies.PostConfigsSetter;
 import scrape.sources.posts.strategies.PostFormat;
@@ -22,8 +22,8 @@ import java.util.Objects;
  * // TODO: 02.10.2017 problems in getting the right posts
  */
 public class PostScraper extends Scraper<PostConfigs, PostSearchEntry> {
+    private final Elements unformattedElements = new Elements();
     private Elements formattedElements;
-    private Elements unformattedElements = new Elements();
 
     public static PostScraper scraper(PostSearchEntry searchEntry) throws IOException {
         validate(searchEntry);
@@ -32,46 +32,8 @@ public class PostScraper extends Scraper<PostConfigs, PostSearchEntry> {
         return scraper;
     }
 
-    public static PostScraper scraper(Source source) throws IOException {
-        Objects.requireNonNull(source);
-        PostScraper scraper = new PostScraper();
-        scraper.init(source);
-        scraper.formattedElements = scraper.getAll();
-        return scraper;
-    }
-
     private static void validate(PostSearchEntry searchEntry) {
         Objects.requireNonNull(searchEntry, "null for searchEntry not allowed");
-    }
-
-    public List<Post> getPosts(PostSearchEntry entry) throws IOException {
-        validate(entry);
-        Objects.requireNonNull(document);
-
-        this.search = entry;
-        Elements filtered = new ElementsSieve(search).filterPosts(unformattedElements);
-        return new PostParser().toPosts(filtered, entry);
-    }
-
-    public List<Post> getPosts() {
-        Objects.requireNonNull(document);
-        Elements elements = getPostElements();
-        return new PostParser().toPosts(elements, search);
-    }
-
-    private Elements getPostElements() {
-        formattedElements = getAll();
-        if (search.getKeyWords().isEmpty()) {
-            return formattedElements;
-        } else {
-            Elements elements = new ElementsSieve(search).filterPosts(unformattedElements);
-            return new PostFormat().format(elements, source.getPostConfigs());
-        }
-    }
-
-    private void init(Source source) throws IOException {
-        this.source = source;
-        initScraper();
     }
 
     private void init(PostSearchEntry entry) throws IOException {
@@ -86,6 +48,28 @@ public class PostScraper extends Scraper<PostConfigs, PostSearchEntry> {
         if (!configs.isInit()) {
             initConfigs(document);
         }
+    }
+
+    public static PostScraper scraper(Source source) throws IOException {
+        Objects.requireNonNull(source);
+        PostScraper scraper = new PostScraper();
+        scraper.init(source);
+        scraper.formattedElements = scraper.getAll();
+        return scraper;
+    }
+
+    private void init(Source source) throws IOException {
+        this.source = source;
+        initScraper();
+    }
+
+    public List<Post> getPosts(PostSearchEntry entry) {
+        validate(entry);
+        Objects.requireNonNull(document);
+
+        this.search = entry;
+        Elements filtered = new PostsFilter(search).filter(unformattedElements);
+        return new PostParser().toPosts(filtered, entry);
     }
 
     private Elements getAll() {
@@ -104,16 +88,6 @@ public class PostScraper extends Scraper<PostConfigs, PostSearchEntry> {
             }*/
         }
         return elements;
-    }
-
-    public Elements postsFromPage(Document document) {
-        Document cleaned = cleanDoc(document);
-        unformattedElements.addAll(new PostFormat().unFormatted(cleaned, configs));
-        return new PostFormat().format(cleaned, configs);
-    }
-
-    private void initConfigs(Document document) {
-        new PostConfigsSetter(configs, document).setConfigs();
     }
 
     /**
@@ -141,15 +115,10 @@ public class PostScraper extends Scraper<PostConfigs, PostSearchEntry> {
         return postElements;
     }
 
-    private boolean checkSecondaryPages(Document document, Elements elements) {
-        //check if this archive has a next page and get content
-        while (hasNextPage(document)) {
-            Elements secondaryElements = fromNextPage(document);
-            elements.addAll(secondaryElements);
-
-            if (checkTime(secondaryElements)) return true;
-        }
-        return false;
+    public List<Post> getPosts() {
+        Objects.requireNonNull(document);
+        Elements elements = getPostElements();
+        return new PostParser().toPosts(elements, search);
     }
 
     /**
@@ -174,12 +143,32 @@ public class PostScraper extends Scraper<PostConfigs, PostSearchEntry> {
         }
     }
 
+    private Elements getPostElements() {
+        formattedElements = getAll();
+        if (search.getKeyWords().isEmpty()) {
+            return formattedElements;
+        } else {
+            Elements elements = new PostsFilter(search).filter(unformattedElements);
+            return new PostFormat().format(elements, source.getPostConfigs());
+        }
+    }
+
+    private void initConfigs(Document document) {
+        new PostConfigsSetter(configs, document).setConfigs();
+    }
+
+    private Elements postsFromPage(Document document) {
+        Document cleaned = cleanDoc(document);
+        unformattedElements.addAll(new PostFormat().unFormatted(cleaned, configs));
+        return new PostFormat().format(cleaned, configs);
+    }
+
     /**
      * Returns the oldest {@code LocalDateTime} of the attributes specified by {@link PostFormat}
      * of {@code elements}.
      * If there is no oldest {@code LocalDateTime}, it will return {@code LocalDateTime.now()}
      *
-     * @param elements elements to get the oldest time from
+     * @param elements elements to getAll the oldest time from
      * @return oldest time or {@code LocalDateTime.now()}
      * @throws IllegalArgumentException if an element of the input parameter
      *                                  has no parsable time
@@ -201,13 +190,24 @@ public class PostScraper extends Scraper<PostConfigs, PostSearchEntry> {
         return localDateTimes.stream().min(LocalDateTime::compareTo).orElse(LocalDateTime.now());
     }
 
-    private Elements fromNextPage(Document document) {
-        // TODO: 08.09.2017 gets the next page if needed
-        return new Elements();
+    private boolean checkSecondaryPages(Document document, Elements elements) {
+        //check if this archive has a next page and getAll content
+        while (hasNextPage(document)) {
+            Elements secondaryElements = fromNextPage(document);
+            elements.addAll(secondaryElements);
+
+            if (checkTime(secondaryElements)) return true;
+        }
+        return false;
     }
 
     private boolean hasNextPage(Document document) {
         // TODO: 06.10.2017 implement this if needed
         return true;
+    }
+
+    private Elements fromNextPage(Document document) {
+        // TODO: 08.09.2017 gets the next page if needed
+        return new Elements();
     }
 }

@@ -11,8 +11,6 @@ import javafx.scene.layout.AnchorPane;
 import scrape.sources.posts.Post;
 import scrape.sources.posts.PostScraper;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -39,28 +37,24 @@ public class Sourcery implements Initializable {
     @FXML
     private ComboBox<Post> postsBox;
 
-    public Sourcery() throws URISyntaxException {
+    public Sourcery() {
+    }
+
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        doItBtn.disableProperty().bind(urlField.textProperty().isEmpty().or(matchField.textProperty().isEmpty()));
     }
 
     @FXML
     void displayPost(ActionEvent event) {
         Post post = postsBox.getValue();
         title.setText(post.getTitle());
-        StringBuilder stringBuilder = new StringBuilder();
-        for (String s : post.getContent()) {
-            stringBuilder.append(s).append("\n");
-        }
-        content.setText(stringBuilder.toString());
+        content.setText(post.getContent());
         footer.setText(post.getFooter());
     }
 
     @FXML
-    void getPost() throws URISyntaxException, IOException {
+    void getPost() {
 
-    }
-
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
-        doItBtn.disableProperty().bind(urlField.textProperty().isEmpty().or(matchField.textProperty().isEmpty()));
     }
 }

@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="enterprise.test.Data" table="DATA_ASJI" mutable="false">
+        <id name="id">
+            <generator class="increment"/>
+        </id>
+        <property name="name"/>
+        <!--<property name="address"/>-->
+        <many-to-one name="address" cascade="save-update"/>
+    </class>
+
+    <class name="enterprise.test.Address" abstract="true">
+        <id name="id">
+            <generator class="increment"/>
+        </id>
+        <property name="address"/>
+        <union-subclass name="enterprise.test.StreetAddress"/>
+    </class>
+</hibernate-mapping>

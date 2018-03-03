@@ -1,6 +1,6 @@
 package scrape.sources.posts;
 
-import Enterprise.data.intface.Creation;
+import enterprise.data.intface.Creation;
 import scrape.SearchEntry;
 import scrape.sources.Source;
 
@@ -11,7 +11,7 @@ import java.util.List;
  *
  */
 public class PostSearchEntry extends SearchEntry implements Comparable<PostSearchEntry> {
-    private List<String> keyWords;
+    private final List<String> keyWords;
 
     public PostSearchEntry(Creation creation, Source source, List<String> keyWords) {
         super(creation, source);
@@ -32,8 +32,12 @@ public class PostSearchEntry extends SearchEntry implements Comparable<PostSearc
         }
     }
 
-    public List<String> getKeyWords() {
-        return Collections.unmodifiableList(keyWords);
+    @Override
+    public int hashCode() {
+        int result = getCreation() != null ? getCreation().hashCode() : 0;
+        result = 31 * result + getSource().hashCode();
+        result = 31 * result + getKeyWords().hashCode();
+        return result;
     }
 
     @Override
@@ -50,12 +54,8 @@ public class PostSearchEntry extends SearchEntry implements Comparable<PostSearc
                 getKeyWords().equals(that.getKeyWords());
     }
 
-    @Override
-    public int hashCode() {
-        int result = getCreation() != null ? getCreation().hashCode() : 0;
-        result = 31 * result + getSource().hashCode();
-        result = 31 * result + getKeyWords().hashCode();
-        return result;
+    public List<String> getKeyWords() {
+        return Collections.unmodifiableList(keyWords);
     }
 
     @Override

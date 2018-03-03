@@ -50,11 +50,9 @@ public class PostList extends SimpleListProperty<Post> {
         return added;
     }
 
-
-    public void add(int index, Post element) {
-        if (!this.contains(element)) {
-            super.add(index, element);
-        }
+    public boolean addAll(Collection<? extends Post> c) {
+        this.removeAll(c);
+        return super.addAll(c);
     }
 
     public boolean addAll(int index, Collection<? extends Post> c) {
@@ -65,9 +63,10 @@ public class PostList extends SimpleListProperty<Post> {
         return addedAll;
     }
 
-    public boolean addAll(Collection<? extends Post> c) {
-        this.removeAll(c);
-        return super.addAll(c);
+    public void add(int index, Post element) {
+        if (!this.contains(element)) {
+            super.add(index, element);
+        }
     }
 
 }

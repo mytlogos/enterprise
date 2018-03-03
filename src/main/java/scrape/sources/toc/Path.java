@@ -8,26 +8,18 @@ import java.util.LinkedList;
  *
  */
 public class Path implements Cloneable, Comparable<Path> {
-    private LinkedList<Element> path;
+    private final LinkedList<Element> path;
 
     public Path() {
         path = new LinkedList<>();
     }
 
-    public Path(LinkedList<Element> path) {
+    private Path(LinkedList<Element> path) {
         this.path = new LinkedList<>(path);
     }
 
     public int getPathSize() {
         return path.size();
-    }
-
-    public Element get(int index) {
-        return path.get(index);
-    }
-
-    public LinkedList<Element> getPath() {
-        return path;
     }
 
     public Path addParent(Element element) {
@@ -62,6 +54,10 @@ public class Path implements Cloneable, Comparable<Path> {
         }
     }
 
+    public Element get(int index) {
+        return path.get(index);
+    }
+
     public Path resolve(Path basePath) {
         int min = Math.min(basePath.path.size(), path.size());
         Path thisClone = this.clone();
@@ -71,11 +67,6 @@ public class Path implements Cloneable, Comparable<Path> {
             }
         }
         return this;
-    }
-
-    public Path clone() {
-        // TODO: 16.10.2017 maybe do sth else
-        return new Path(path);
     }
 
     public String getTagSelector() {
@@ -111,6 +102,11 @@ public class Path implements Cloneable, Comparable<Path> {
     }
 
     @Override
+    public int hashCode() {
+        return getPath().hashCode();
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -120,8 +116,14 @@ public class Path implements Cloneable, Comparable<Path> {
         return getPath().equals(path.getPath());
     }
 
+    public LinkedList<Element> getPath() {
+        return path;
+    }
+
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
     @Override
-    public int hashCode() {
-        return getPath().hashCode();
+    public Path clone() {
+        // TODO: 16.10.2017 maybe do sth else
+        return new Path(path);
     }
 }

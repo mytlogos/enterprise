@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
+import scrape.sources.toc.structure.CreationRoot;
 
 import java.io.IOException;
 import java.net.URI;
@@ -21,9 +22,9 @@ public class GravityNovel {
     private int Id;
 
 
-    public static String lookUpToc(String link) {
+    public static CreationRoot lookUpToc(String link) {
         if (link == null || link.isEmpty()) {
-            return "";
+            return null;
         }
         String string = "http://gravitytales.com/api/novels/";
         Gson gson = new Gson();
@@ -50,7 +51,14 @@ public class GravityNovel {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return "";
+        return null;
+    }
+
+    private static <T> T getJson(String link, Gson gson, Class<T> classOfT) throws IOException {
+        Connection.Response response = Jsoup.connect(link).ignoreContentType(true).execute();
+        String novelsJsonArray = response.body();
+
+        return gson.fromJson(novelsJsonArray, classOfT);
     }
 
     private static List<GravityChapter> getGravityChapters(Gson gson, GravityToc[] tocs) throws IOException {
@@ -62,7 +70,7 @@ public class GravityNovel {
         return chapterList;
     }
 
-    private static String createToc(GravityNovel novel, List<GravityChapter> chapterList) {
+    private static CreationRoot createToc(GravityNovel novel, List<GravityChapter> chapterList) {
         List<Element> elements = new ArrayList<>();
 
         for (GravityChapter gravityChapter : chapterList) {
@@ -75,14 +83,7 @@ public class GravityNovel {
             elements.add(element);
         }
         // TODO: 02.11.2017 convert the elements to an toc
-        return "";
-    }
-
-    private static <T> T getJson(String link, Gson gson, Class<T> classOfT) throws IOException {
-        Connection.Response response = Jsoup.connect(link).ignoreContentType(true).execute();
-        String novelsJsonArray = response.body();
-
-        return gson.fromJson(novelsJsonArray, classOfT);
+        return null;
     }
 
     /**

@@ -1,10 +1,10 @@
 package scrape.sources.posts.strategies.intface.impl;
 
-import Enterprise.misc.TimeMeasure;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import scrape.sources.posts.strategies.intface.ElementFilter;
 import scrape.sources.posts.strategies.intface.PostElement;
+import tools.TimeMeasure;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,7 +40,7 @@ public class PostsFilter implements ElementFilter {
         },
         POST_EX_ASIDE(".post:not(.format-aside)") {
         },
-        ROW_NOVEL(Type.LESYT);
+        ROW_NOVEL();
 
         private String selector;
         private Type type;
@@ -50,8 +50,8 @@ public class PostsFilter implements ElementFilter {
         }
 
 
-        Posts(Type lesyt) {
-            this.type = lesyt;
+        Posts() {
+            this.type = Type.LESYT;
         }
 
 

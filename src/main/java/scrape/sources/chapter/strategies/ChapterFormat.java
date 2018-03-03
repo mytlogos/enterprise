@@ -47,6 +47,18 @@ public class ChapterFormat extends Formatter {
         return element;
     }
 
+    private void appendLinkElement(Element container, Element infoHolder, String id) {
+        Element linkContainer = new Element(PAGINATION_CONTAINER);
+        setId(linkContainer, id);
+
+        if (infoHolder != null) {
+            String link = getUrl(infoHolder);
+            linkContainer.attr(PAGINATION_LINK_ATTRIBUTE, link);
+        }
+
+        container.appendChild(linkContainer);
+    }
+
     public String getPreviousLink(Element element) {
         return stringByIdAttr(element, PAGINATION_PREV_ID, PAGINATION_LINK_ATTRIBUTE);
     }
@@ -72,7 +84,7 @@ public class ChapterFormat extends Formatter {
         return format(wrapper, configs);
     }
 
-    public Element format(Element element, ChapterConfigs configs) {
+    private Element format(Element element, ChapterConfigs configs) {
         Objects.requireNonNull(element);
         Objects.requireNonNull(configs);
 
@@ -84,18 +96,5 @@ public class ChapterFormat extends Formatter {
         // FIXME: 07.10.2017 cloning the elements is a temporary solution
         setPart(element.clone(), post, configs.getPagination());
         return post;
-    }
-
-
-    private void appendLinkElement(Element container, Element infoHolder, String id) {
-        Element linkContainer = new Element(PAGINATION_CONTAINER);
-        setId(linkContainer, id);
-
-        if (infoHolder != null) {
-            String link = getUrl(infoHolder);
-            linkContainer.attr(PAGINATION_LINK_ATTRIBUTE, link);
-        }
-
-        container.appendChild(linkContainer);
     }
 }

@@ -1,0 +1,76 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="enterprise.data.impl.AbstractCreationEntry" abstract="true">
+        <id name="id">
+            <generator class="increment"/>
+        </id>
+        <one-to-one name="user" access="field" cascade="save-update, delete"/>
+        <one-to-one name="creation" access="field" cascade="save-update, delete"/>
+
+        <property name="module" access="field">
+            <type name="org.hibernate.type.EnumType">
+                <param name="enumClass">enterprise.modules.BasicModule</param>
+                <param name="useNamed">true</param>
+            </type>
+        </property>
+
+        <union-subclass name="enterprise.data.impl.CreationEntryImpl"/>
+        <union-subclass name="enterprise.data.impl.SourceableEntryImpl">
+            <one-to-one name="sourceable" access="field" cascade="save-update, delete"/>
+        </union-subclass>
+    </class>
+
+    <class name="enterprise.data.intface.Creation" abstract="true">
+        <id name="id">
+            <generator class="increment"/>
+        </id>
+        <union-subclass name="enterprise.data.impl.CreationImpl">
+            <property name="title" type="string"/>
+            <property name="series" type="string"/>
+            <property name="dateLastPortion" type="string"/>
+            <property name="numPortion" type="integer"/>
+            <property name="coverPath" type="string"/>
+            <property name="workStatus" type="string"/>
+            <property name="tocLocation" type="string"/>
+            <many-to-one name="creator" cascade="save-update"/>
+        </union-subclass>
+    </class>
+
+
+    <class name="enterprise.data.intface.Creator" abstract="true">
+        <id name="id">
+            <generator class="increment"/>
+        </id>
+        <union-subclass name="enterprise.data.impl.CreatorImpl">
+            <property name="name" type="string"/>
+            <property name="sortName" type="string"/>
+            <property name="status" type="string"/>
+        </union-subclass>
+    </class>
+
+    <class name="enterprise.data.intface.User" abstract="true">
+        <id name="id">
+            <generator class="increment"/>
+        </id>
+        <union-subclass name="enterprise.data.impl.UserImpl">
+            <property name="ownStatus" type="string"/>
+            <property name="comment" type="string"/>
+            <property name="rating" type="integer"/>
+            <property name="processedPortion" type="integer"/>
+            <property name="listName" type="string"/>
+            <property name="keyWords" type="string"/>
+        </union-subclass>
+    </class>
+
+    <class name="enterprise.data.intface.Sourceable" abstract="true">
+        <id name="id">
+            <generator class="increment"/>
+        </id>
+        <union-subclass name="enterprise.data.impl.SourceableImpl">
+            <property name="translator" type="string"/>
+        </union-subclass>
+    </class>
+</hibernate-mapping>

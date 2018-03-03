@@ -1,13 +1,13 @@
 package scrape.concurrent;
 
-import Enterprise.misc.Log;
-import Enterprise.misc.TimeMeasure;
+import enterprise.data.Default;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
 import javafx.util.Duration;
 import scrape.sources.Source;
 import scrape.sources.SourceList;
 import scrape.sources.posts.*;
+import tools.TimeMeasure;
 
 import java.io.IOException;
 import java.util.*;
@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
  */
 public class ScheduledPostScraper extends ScheduledService<List<Post>> {
 
-    private Logger logger = Log.packageLogger(this);
+    private final Logger logger = Default.LOGGER;
 
     private Map<Source, List<PostSearchEntry>> searchMap = new HashMap<>();
     private TimeMeasure measure;
@@ -55,7 +55,7 @@ public class ScheduledPostScraper extends ScheduledService<List<Post>> {
             int progress = 0;
 
             @Override
-            protected List<Post> call() throws Exception {
+            protected List<Post> call() {
                 Thread.currentThread().setName("ScheduledPostScraper");
 
                 measure = TimeMeasure.start();

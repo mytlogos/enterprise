@@ -4,7 +4,7 @@ package Configs;
  *
  */
 public class SettingsRun implements Runnable {
-    private Action action;
+    private final Action action;
 
     public SettingsRun(Action action) {
         this.action = action;
@@ -19,7 +19,7 @@ public class SettingsRun implements Runnable {
         LOAD {
             @Override
             void doAction() {
-//                SettingsManager.getInstance().saveSettings();
+//                SettingsManager.get().saveSettings();
             }
         },
         SAVE {

@@ -27,10 +27,12 @@ class PostParser {
     }
 
     private Post getPost(PostSearchEntry searchEntry, Element postElement) {
-        String link = new PostFormat().getLink(postElement);
-        String title = new PostFormat().getTitle(postElement);
+        PostFormat format = new PostFormat();
+        String link = format.getLink(postElement);
+        String title = format.getTitle(postElement);
 
-        String time = new PostFormat().getTime(postElement);
+        //todo getAll content?
+        String time = format.getTime(postElement);
         LocalDateTime dateTime = ParseTime.parseTime(time);
         boolean isSticky = postElement.hasClass("sticky");
 

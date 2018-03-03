@@ -34,6 +34,10 @@ public class FeedGetter {
         return hasFeed;
     }
 
+    private static Document getDocument(String uri) throws IOException {
+        return Jsoup.connect(uri).get();
+    }
+
     // TODO: 05.09.2017 save feed in source
     private static boolean checkForFeed(String baseUrl, String[] appends, Source source) {
         boolean hasFeed = false;
@@ -47,10 +51,6 @@ public class FeedGetter {
             }
         }
         return hasFeed;
-    }
-
-    private static Document getDocument(String uri) throws IOException {
-        return Jsoup.connect(uri).get();
     }
 
     public static List<Feed> getFilter() {

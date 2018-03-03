@@ -10,8 +10,8 @@ import scrape.sources.toc.strategies.intface.TocElement;
  *
  */
 public class TocConfig implements ScrapeConfigs {
-    private ObjectProperty<HeaderElement> headerElement = new SimpleObjectProperty<>();
-    private ObjectProperty<TocElement> tocElement = new SimpleObjectProperty<>();
+    private final ObjectProperty<HeaderElement> headerElement = new SimpleObjectProperty<>();
+    private final ObjectProperty<TocElement> tocElement = new SimpleObjectProperty<>();
 
     private boolean init = false;
 

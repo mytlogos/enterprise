@@ -6,7 +6,9 @@ import org.jsoup.nodes.TextNode;
 import org.jsoup.select.Elements;
 import scrape.sources.toc.Path;
 import scrape.sources.toc.PathFinder;
-import scrape.sources.toc.htmlToc.HtmlTocBuilder;
+import scrape.sources.toc.intface.TocBuilder;
+import scrape.sources.toc.structure.CreationRoot;
+import tools.Condition;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -16,27 +18,29 @@ import java.util.stream.Collectors;
 /**
  *
  */
-public class VolumeSearcher {
-
-    private String link;
-    private Element wrapperElement;
-    private String[] volumeTerms = new String[]{
+public class VolumeSearcher extends Searcher {
+    private final String[] volumeTerms = new String[]{
             "volume", "arc", "book"
     };
+    private Element wrapperElement;
+    private TocBuilder builder;
 
-    public VolumeSearcher(String link, Element wrapperElement) {
-        this.link = link;
-        this.wrapperElement = wrapperElement;
+    public VolumeSearcher() {
 
-        if (link == null || link.isEmpty() || wrapperElement == null) {
-            throw new IllegalArgumentException();
-        }
     }
 
-    public List<String> getVolumeTocs() {
-        System.out.println("for " + link);
+    @Override
+    public CreationRoot search(Element wrapperElement, TocBuilder builder) {
+        Condition.check().nonNull(wrapperElement, builder);
+        this.builder = builder;
+        this.wrapperElement = wrapperElement;
+        return getVolumeTocs().stream().filter(Objects::nonNull).findFirst().orElse(null);
+    }
 
-        //get volumeTerms with hits
+    private List<CreationRoot> getVolumeTocs() {
+        System.out.println("for " + wrapperElement.baseUri());
+
+        //getAll volumeTerms with hits
         Map<String, Integer> occurrence = highestOccurrence(getWrapperClone().text());
 
         if (occurrence.isEmpty()) {
@@ -51,19 +55,19 @@ public class VolumeSearcher {
         return getVolumeTocs(container, firstCommonParent);
     }
 
-    private List<String> getVolumeTocs(VolumeManager container, Element firstCommonParent) {
+    private List<CreationRoot> getVolumeTocs(VolumeManager container, Element firstCommonParent) {
         container.resolve(container.getCommonPath());
 
         Map<String, List<Path>> resolvedMappedPaths = container.getResolvedMappedPaths();
 
-        List<String> volumes = new ArrayList<>();
+        List<CreationRoot> tocs = new ArrayList<>();
         for (String key : resolvedMappedPaths.keySet()) {
-            volumes.add(getVolumeTocs(firstCommonParent, resolvedMappedPaths, key));
+            tocs.add(getVolumeToc(firstCommonParent, resolvedMappedPaths, key));
         }
-        return volumes;
+        return tocs;
     }
 
-    private String getVolumeTocs(Element firstCommonParent, Map<String, List<Path>> resolvedMappedPaths, String key) {
+    private CreationRoot getVolumeToc(Element firstCommonParent, Map<String, List<Path>> resolvedMappedPaths, String key) {
         List<Path> paths = resolvedMappedPaths.get(key);
 
         paths.sort(Comparator.comparingInt(this::getFirstIndex));
@@ -91,7 +95,6 @@ public class VolumeSearcher {
                     elementListMap = lookSecondary(path);
                 } else {
                     elementListMap = lookPrimary(firstCommonParent, links);
-                    System.out.println("PRIMARY");
                 }
                 mapMap.put(path.getLast(), elementListMap);
             }
@@ -99,15 +102,14 @@ public class VolumeSearcher {
         return buildToc(mapMap);
     }
 
-    private String buildToc(SortedMap<Element, SortedMap<Element, List<Element>>> map) {
-        HtmlTocBuilder builder;
+    private CreationRoot buildToc(SortedMap<Element, SortedMap<Element, List<Element>>> map) {
 
         if (map.isEmpty()) {
-            builder = new HtmlTocBuilder();
+            builder.init("N/A", "N/A");
         } else {
-            builder = new HtmlTocBuilder(map.firstKey().baseUri());
+            // TODO: 05.11.2017 do the title thing
+            builder.init("", map.firstKey().baseUri());
         }
-
 
         // TODO: 02.11.2017 read the chapter number from the element
         // TODO: 02.11.2017 check if element is an extra or not
@@ -122,11 +124,11 @@ public class VolumeSearcher {
 
             int chapterCounter = 1;
             for (Element chapter : elementListMap.keySet()) {
-                builder.addChapter(chapter.ownText(), "", chapterCounter++, false);
+                builder.addPortion(chapter.ownText(), "", chapterCounter++, false);
 
                 int subChapterCounter = 1;
                 for (Element subChapter : elementListMap.get(chapter)) {
-                    builder.addSubChapter(subChapter.ownText(), subChapter.absUrl("href"), subChapterCounter, false);
+                    builder.addSubPortion(subChapter.ownText(), subChapter.absUrl("href"), subChapterCounter, false);
                 }
             }
         }

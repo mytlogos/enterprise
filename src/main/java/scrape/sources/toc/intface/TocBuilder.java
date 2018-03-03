@@ -1,5 +1,7 @@
 package scrape.sources.toc.intface;
 
+import scrape.sources.toc.structure.CreationRoot;
+
 /**
  * Builds a Table of Content (Toc) and saves
  * in a File in the directory defined in the
@@ -11,9 +13,17 @@ public interface TocBuilder {
      * Returns the String path of the location
      * of the File.
      *
-     * @return string - path or an empty String if it failed
+     * @return the Table of Contents tree, CreationRoot, or null, if it failed
      */
-    String build();
+    CreationRoot build();
+
+    /**
+     * Sets the title and baseUri of the Table of Contents.
+     *
+     * @param title   title of the creation, not null
+     * @param baseUri uri to the creation, not null
+     */
+    void init(String title, String baseUri);
 
     /**
      * Adds a Section to root of the Table of Contents.
@@ -35,7 +45,7 @@ public interface TocBuilder {
      * @param index     index of the chapter
      * @param isExtra   defines if this chapter is part of the main story
      */
-    void addChapter(String title, String globalSrc, String localSrc, double index, boolean isExtra);
+    void addPortion(String title, String globalSrc, String localSrc, double index, boolean isExtra);
 
     /**
      * Adds a Chapter to an available Section or the root if none is present.
@@ -45,7 +55,7 @@ public interface TocBuilder {
      * @param index     index of the chapter
      * @param isExtra   defines if this chapter is part of the main story
      */
-    void addChapter(String title, String globalSrc, double index, boolean isExtra);
+    void addPortion(String title, String globalSrc, double index, boolean isExtra);
 
     /**
      * Adds a Chapter to an available Section or the root if none is present.
@@ -56,7 +66,7 @@ public interface TocBuilder {
      * @param index     index of the chapter
      * @param isExtra   defines if this chapter is part of the main story
      */
-    void addSubChapter(String title, String globalSrc, String localSrc, double index, boolean isExtra);
+    void addSubPortion(String title, String globalSrc, String localSrc, double index, boolean isExtra);
 
     /**
      * Adds a Chapter to an available Section or the root if none is present.
@@ -66,5 +76,5 @@ public interface TocBuilder {
      * @param index     index of the chapter
      * @param isExtra   defines if this chapter is part of the main story
      */
-    void addSubChapter(String title, String globalSrc, double index, boolean isExtra);
+    void addSubPortion(String title, String globalSrc, double index, boolean isExtra);
 }

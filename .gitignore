@@ -1,19 +1,12 @@
 # Created by .ignore support plugin (hsz.mobi)
 ### Java template
-# Compiled class file
-*.class
-
 # Log file
 *.log
-
-# BlueJ files
-*.ctxt
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
 # Package Files #
-*.jar
 *.war
 *.ear
 *.zip
@@ -23,40 +16,24 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 .gitignore
-.idea/artifacts/
-.idea/compiler.xml
-.idea/description.html
-.idea/dictionaries/
-.idea/encodings.xml
-.idea/gradle.xml
-.idea/inspectionProfiles/
-.idea/libraries/
-.idea/misc.xml
-.idea/uiDesigner.xml
-.idea/vcs.xml
-.idea/workspace.xml
 log/
-out/production/Enterprise/
-sousetsuka-testchapter.html
-sousetsuka-testchapter2.html
-sousetsuka-testchapter3.html
-sousetsuka-testchapter4.html
-sousetsuka-testchapter5.html
-sousetsuka-testchapter6.html
-sousetsuka-testchapter7.html
 src/main/resources/sousetsuka-testchapter8.html
-src/Enterprise/deprecate/
-src/Enterprise/gui/dialogs/
-src/Enterprise/lib/
-src/Enterprise/test/ExtendWindow.java
-src/Enterprise/test/extendWindow.fxml
-src/Enterprise/test/mapclass.java
-src/scrape/sources/anime/
-src/scrape/sources/manga/
-src/scrape/src/
-untitled/
 /out/
 /enterprise.db
 /TestData/
-Neuer Ordner/
-/src/main/java/Enterprise/test/
+/src/test/
+ebooks/
+/img/
+scrapeProcess.uxf
+src/main/resources/test.html
+src/main/resources/tocSchema.xsd
+src/main/resources/xsi.xsd
+tocFile.txt
+enterprise - copy.db
+src/main/java/enterprise/test/
+/.idea/
+/target/
+gorgon.log.lck
+src/main/java/scrape/sources/anime/
+src/main/java/scrape/sources/manga/
+/enterpriseHibernate.db

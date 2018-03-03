@@ -1,16 +1,16 @@
 package scrape;
 
-import Enterprise.data.intface.Creation;
+import enterprise.data.intface.Creation;
 import scrape.sources.Source;
 
 /**
  *
  */
 public class SearchEntry {
-    protected Creation creationKey;
-    protected Source source;
+    protected final Source source;
+    final Creation creationKey;
 
-    public SearchEntry(Creation creation, Source source) {
+    protected SearchEntry(Creation creation, Source source) {
         this.creationKey = creation;
         this.source = source;
     }

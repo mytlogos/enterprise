@@ -11,6 +11,8 @@ import java.util.Iterator;
  *
  */
 public abstract class ConfigSetter {
+    public abstract boolean setConfigs();
+
     protected <E extends FilterElement> E tryAll(Elements elements, Collection<E> filters) {
         if (!elements.isEmpty() && filters != null && !filters.isEmpty()) {
             Element first = elements.get(0);
@@ -18,6 +20,21 @@ public abstract class ConfigSetter {
         } else {
             return null;
         }
+    }
+
+    protected <E extends FilterElement> E getFirstFilter(Element element, Collection<E> filters) {
+        Iterator<E> iterator = filters.iterator();
+        while (iterator.hasNext()) {
+            E filter = iterator.next();
+            Element apply = filter.apply(element);
+
+            if (apply != null) {
+                return filter;
+            } else {
+                iterator.remove();
+            }
+        }
+        return null;
     }
 
     private <E extends FilterElement> E tryFilter(Elements elements, Element first, Collection<E> filters) {
@@ -42,22 +59,4 @@ public abstract class ConfigSetter {
         }
         return false;
     }
-
-
-    protected <E extends FilterElement> E getFirstFilter(Element element, Collection<E> filters) {
-        Iterator<E> iterator = filters.iterator();
-        while (iterator.hasNext()) {
-            E filter = iterator.next();
-            Element apply = filter.apply(element);
-
-            if (apply != null) {
-                return filter;
-            } else {
-                iterator.remove();
-            }
-        }
-        return null;
-    }
-
-    public abstract boolean setConfigs();
 }

@@ -16,6 +16,13 @@ public abstract class Scraper<E extends ScrapeConfigs, R extends SearchEntry> {
     protected Source source;
     protected Document document;
 
+    protected static Document getDocument(String uri) throws IOException {
+        return Jsoup.connect(uri).get();
+    }
+
+    public static Document getCleanDocument(String uri) throws IOException {
+        return cleanDoc(Jsoup.connect(uri).maxBodySize(0).get());
+    }
 
     public static Document cleanDoc(Document document) {
         Whitelist whitelist = Whitelist.relaxed();
@@ -41,13 +48,5 @@ public abstract class Scraper<E extends ScrapeConfigs, R extends SearchEntry> {
 
         String cleaned = Jsoup.clean(document.outerHtml(), document.baseUri(), whitelist);
         return Jsoup.parse(cleaned, document.baseUri());
-    }
-
-    public static Document getDocument(String uri) throws IOException {
-        return Jsoup.connect(uri).get();
-    }
-
-    public static Document getCleanDocument(String uri) throws IOException {
-        return cleanDoc(Jsoup.connect(uri).maxBodySize(0).get());
     }
 }

@@ -20,7 +20,7 @@ import java.util.Collection;
  * // TODO: 06.10.2017 link should match the baseUri, same novel, not sth else
  */
 public class ChapterPagination implements PaginationFilter {
-    private static PaginationElement LastElement = element -> {
+    private static final PaginationElement LastElement = element -> {
         LinkDetective detective = new LinkDetective();
         String next = detective.tryNextLink(element.baseUri());
         String prev = detective.tryPrevLink(element.baseUri());

@@ -21,8 +21,7 @@ public class TocFilter implements ElementFilter<TocElement> {
         DOUBLE_CONTAINS_CATALOGUE("a:contains(?):contains(catalogue)", TYPE.SIMPLE_STEP),
         DOUBLE_CONTAINS_INDEX("a:contains(?):contains(index)", TYPE.SIMPLE_STEP),
         DOUBLE_CONTAINS_TOC("a:contains(?):contains(toc)", TYPE.SIMPLE_STEP),
-        MATCHES_OWN("a:matchesOwn(Table of Content(s)?)", TYPE.SIMPLE_STEP)
-        ;
+        MATCHES_OWN("a:matchesOwn(Table of Content(s)?)", TYPE.SIMPLE_STEP);
 
         private final String selector;
         private final TYPE type;
@@ -32,7 +31,6 @@ public class TocFilter implements ElementFilter<TocElement> {
             this.selector = selector;
             this.type = type;
         }
-
 
 
         @Override

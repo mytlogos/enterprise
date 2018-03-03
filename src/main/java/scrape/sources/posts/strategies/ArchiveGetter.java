@@ -1,6 +1,6 @@
 package scrape.sources.posts.strategies;
 
-import Enterprise.misc.Log;
+import enterprise.data.Default;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -31,6 +31,81 @@ public class ArchiveGetter {
      */
     public static boolean hasArchive(Document doc) {
         return !getArchiveElements(doc).isEmpty() || validArchive(checkWithLink(doc.location(), 0, 12));
+    }
+
+    private static Elements getArchiveElements(Document document) {
+        Elements archiveElements = new Elements();
+        archiveElements.addAll(document.getElementsByAttributeValueStarting("id", "calendar"));
+        archiveElements.addAll(document.getElementsByAttributeValueStarting("id", "archive"));
+
+        return archiveElements;
+    }
+
+    /**
+     * Tests if an available {@link ContentWrapper} is applicable on this {@link Document}.
+     * Tests furthermore if it contains Text and if an available {@link PostElement} is available,
+     * which is applicable on the Result of the {@code PostWrapper}.
+     *
+     * @param doc document to test
+     * @return true if it is an valid Archive
+     */
+    private static boolean validArchive(Document doc) {
+        ContentWrapper wrapper = ContentWrapper.tryAll(doc);
+
+        if (wrapper == null) {
+            return false;
+        } else {
+            final Element postWrapper = wrapper.apply(doc);
+
+            if (!postWrapper.hasText()) {
+                return false;
+            } else {
+                for (PostElement postElement : new PostsFilter().getFilter()) {
+                    Elements elements = postElement.apply(postWrapper);
+                    if (elements != null && !elements.isEmpty()) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private static Document checkWithLink(String uri, int startCounter, int maxMonthsDepth) {
+        LocalDate now = LocalDate.now();
+        int monthValue = now.getMonthValue();
+        int year = now.getYear();
+
+        Document doc = new Document("");
+
+        //goes back to 12 months if monthly page does not exist (in cases of inactivity of the blogger)
+        for (int i = startCounter; i < maxMonthsDepth; i++) {
+            try {
+                doc = getMonthArchive(uri, year, monthValue);
+                if (validArchive(doc)) {
+                    return doc;
+                }
+            } catch (IOException e) {
+                if (monthValue == 1) {
+                    year--;
+                    monthValue = 12;
+                } else {
+                    monthValue--;
+                }
+            }
+        }
+        return doc;
+    }
+
+    private static Document getMonthArchive(String uri, int year, int monthValue) throws IOException {
+        String month = monthValue < 10 ? "0" + monthValue : "" + monthValue;
+        String monthlyArchive = "/" + year + "/" + month;
+
+        return getDocument(uri + monthlyArchive);
+    }
+
+    private static Document getDocument(String uri) throws IOException {
+        return Jsoup.connect(uri).get();
     }
 
     public static List<ArchiveSearcher> getFilter() {
@@ -68,77 +143,6 @@ public class ArchiveGetter {
         return null;
     }
 
-    /**
-     * Tests if an available {@link ContentWrapper} is applicable on this {@link Document}.
-     * Tests furthermore if it contains Text and if an available {@link PostElement} is available,
-     * which is applicable on the Result of the {@code PostWrapper}.
-     *
-     * @param doc document to test
-     * @return true if it is an valid Archive
-     */
-    private static boolean validArchive(Document doc) {
-        ContentWrapper wrapper = ContentWrapper.tryAll(doc);
-
-        if (wrapper == null) {
-            return false;
-        } else {
-            final Element postWrapper = wrapper.apply(doc);
-
-            if (!postWrapper.hasText()) {
-                return false;
-            } else {
-                for (PostElement postElement : new PostsFilter().getFilter()) {
-                    Elements elements = postElement.apply(postWrapper);
-                    if (elements != null && !elements.isEmpty()) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
-    private static Elements getArchiveElements(Document document) {
-        Elements archiveElements = new Elements();
-        archiveElements.addAll(document.getElementsByAttributeValueStarting("id", "calendar"));
-        archiveElements.addAll(document.getElementsByAttributeValueStarting("id", "archive"));
-
-        return archiveElements;
-    }
-
-    private static Document checkWithLink(String uri, int startCounter, int maxMonthsDepth) {
-        LocalDate now = LocalDate.now();
-        int monthValue = now.getMonthValue();
-        int year = now.getYear();
-
-        Document doc = new Document("");
-
-        //goes back to 12 months if monthly page does not exist (in cases of inactivity of the blogger)
-        for (int i = startCounter; i < maxMonthsDepth; i++) {
-            try {
-                doc = getMonthArchive(uri, year, monthValue);
-                if (validArchive(doc)) {
-                    return doc;
-                }
-            } catch (IOException e) {
-                if (monthValue == 1) {
-                    year--;
-                    monthValue = 12;
-                } else {
-                    monthValue--;
-                }
-            }
-        }
-        return doc;
-    }
-
-    private static Document getMonthArchive(String uri, int year, int monthValue) throws IOException {
-        String month = monthValue < 10 ? "0" + monthValue : "" + monthValue;
-        String monthlyArchive = "/" + year + "/" + month;
-
-        return getDocument(uri + monthlyArchive);
-    }
-
     private static List<String> checkWithDocument(Document document, Elements archiveElements) {
         List<String> links = new ArrayList<>();
         for (Element archiveElement : archiveElements) {
@@ -165,10 +169,6 @@ public class ArchiveGetter {
         return monthlyLinks;
     }
 
-    private static Document getDocument(String uri) throws IOException {
-        return Jsoup.connect(uri).get();
-    }
-
     /**
      * Strategy class for searching and validating an Archive from a site
      * on the internet.
@@ -182,7 +182,7 @@ public class ArchiveGetter {
          * Strategy for searching the given document for an available archive widget.
          */
         WIDGET_ARCHIVE {
-            Function<Archive, Boolean> hasNext = archive -> {
+            final Function<Archive, Boolean> hasNext = archive -> {
                 archive.doc = null;
                 //terminate if search depth (maxMonth) is smaller than the counter
                 if (archive.links.size() <= archive.counter || archive.maxMonthsDepth <= archive.counter) {
@@ -193,7 +193,7 @@ public class ArchiveGetter {
                     try {
                         archive.doc = getDocument(link);
                     } catch (IOException e) {
-                        Log.packageLogger(this.getClass()).log(Level.SEVERE, "error in getting newest archive from widget for " + link, e);
+                        Default.LOGGER.log(Level.SEVERE, "exception occurred in getting newest archive from widget for " + link, e);
                     }
                 }
                 archive.counter++;
@@ -248,7 +248,7 @@ public class ArchiveGetter {
          * SearchDepth.
          */
         SITE_ARCHIVE {
-            Function<Archive, Boolean> hasNext = archive -> {
+            final Function<Archive, Boolean> hasNext = archive -> {
                 archive.doc = checkWithLink(archive.mainDoc.baseUri(), archive.counter, archive.maxMonthsDepth);
                 if (validArchive(archive.doc)) {
                     archive.counter++;
@@ -292,9 +292,11 @@ public class ArchiveGetter {
         }
     }
 
-    private static class Archive implements Iterable<Document> {
+    private static class Archive implements Iterable<Document>, Iterator<Document> {
         private Document mainDoc;
         private Document doc;
+        private boolean getNext = false;
+        private boolean hasNext = false;
 
         private List<String> links = new ArrayList<>();
         private String startUri = "";
@@ -302,27 +304,32 @@ public class ArchiveGetter {
         private int maxMonthsDepth = 12;
         private int counter = 0;
 
-        private Function<Archive, Boolean> hasNext = null;
+        private Function<Archive, Boolean> hasNextFunction;
 
         private Archive(Function<Archive, Boolean> hasNext, Consumer<Archive> init) {
-            this.hasNext = hasNext;
+            this.hasNextFunction = hasNext;
             init.accept(this);
         }
 
         @Override
         public Iterator<Document> iterator() {
-            final Archive instance = this;
-            return new Iterator<Document>() {
-                @Override
-                public boolean hasNext() {
-                    return hasNext.apply(instance);
-                }
+            return this;
+        }
 
-                @Override
-                public Document next() {
-                    return doc;
-                }
-            };
+        @Override
+        public boolean hasNext() {
+            if (getNext) {
+                getNext = false;
+                return hasNext = hasNextFunction.apply(this);
+            } else {
+                return hasNext;
+            }
+        }
+
+        @Override
+        public Document next() {
+            getNext = true;
+            return doc;
         }
     }
 }

@@ -1,7 +1,5 @@
 package scrape.sources.posts;
 
-import com.sun.istack.internal.NotNull;
-
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
@@ -64,7 +62,7 @@ public class ParseTime {
         return patternAvailable(s, HAS_TIME);
     }
 
-    public static boolean hasDate(String s) {
+    private static boolean hasDate(String s) {
         return patternAvailable(s, HAS_DATE);
     }
 
@@ -74,6 +72,12 @@ public class ParseTime {
 
     private static boolean hasDate(String s, String hasDate) {
         return patternAvailable(s, hasDate);
+    }
+
+    public static boolean patternAvailable(String s, String regex) {
+        Pattern pattern = compile(regex);
+        Matcher matcher = pattern.matcher(s);
+        return matcher.find();
     }
 
     private static LocalDateTime getRelative(String s) {
@@ -217,11 +221,5 @@ public class ParseTime {
         Pattern pattern = compile(regex);
         Matcher matcher = pattern.matcher(s);
         return matcher.find() ? matcher.group() : "";
-    }
-
-    public static boolean patternAvailable(String s, @NotNull String regex) {
-        Pattern pattern = compile(regex);
-        Matcher matcher = pattern.matcher(s);
-        return matcher.find();
     }
 }

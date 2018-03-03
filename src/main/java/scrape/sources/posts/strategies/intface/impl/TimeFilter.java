@@ -183,10 +183,15 @@ public class TimeFilter implements ElementFilter<TimeElement> {
     }
 
     public static class LINK_PAGE implements TimeElement {
-        TitleElement titleElement = null;
+        TitleElement titleElement;
 
         public LINK_PAGE(TitleElement titleElement) {
             this.titleElement = titleElement;
+        }
+
+        @Override
+        public String toString() {
+            return "LINK_PAGE";
         }
 
         @Override
@@ -214,7 +219,7 @@ public class TimeFilter implements ElementFilter<TimeElement> {
                     element = getByDateTime(document);
                 }
             } catch (IOException ignored) {
-                System.out.println("error occurred");
+                System.out.println("exception occurred");
                 // TODO: 11.09.2017 do sth here
             }
             return element;
@@ -234,9 +239,6 @@ public class TimeFilter implements ElementFilter<TimeElement> {
             return getElement(timeString);
         }
 
-        @Override
-        public String toString() {
-            return "LINK_PAGE";
-        }
+
     }
 }
