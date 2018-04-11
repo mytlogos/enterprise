@@ -84,7 +84,7 @@ public class GuiPaths {
         }
 
         @Override
-        public String tabName() {
+        public String showName() {
             return "";
         }
 

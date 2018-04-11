@@ -43,15 +43,10 @@ public class PostCall implements Callable<Boolean> {
                     Map<Source, List<Post>> postMap = mapWithSource(posts);
 
                     for (Source source : postMap.keySet()) {
-                        Post post = postMap.get(source).
+                        postMap.get(source).
                                 stream().
                                 max(Comparator.comparing(Post::getTimeStamp)).
-                                orElse(null);
-                        if (post != null) {
-                            source.putPost(post.getCreation(), post);
-                        } else {
-                            source.putPost(null, null);
-                        }
+                                ifPresent(post -> PostManager.getInstance().putPost(source, post));
                     }
                     return true;
                 } else {

@@ -1,24 +1,24 @@
 package enterprise.data.dataAccess.gorgon;
 
-import enterprise.data.dataAccess.DataAccessLayer;
-import enterprise.data.intface.CreationEntry;
+import enterprise.data.Default;
+import enterprise.data.dataAccess.DataAccessLayerImpl;
 import enterprise.data.intface.DataEntry;
-import enterprise.data.intface.SourceableEntry;
 import gorgon.external.Gorgon;
 import gorgon.external.PersistenceException;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 
 /**
  *
  */
-public class GorgonLayer implements DataAccessLayer {
+public class GorgonLayer extends DataAccessLayerImpl {
 
     private Gorgon gorgon;
 
     public GorgonLayer(String name, String location) {
+        super(name, location);
         gorgon = Gorgon.create(name, location);
     }
 
@@ -34,20 +34,11 @@ public class GorgonLayer implements DataAccessLayer {
     }
 
     @Override
-    public Collection<CreationEntry> getCreationEntries() {
-        List<CreationEntry> entries = gorgon.get(CreationEntry.class, true);
-        List<SourceableEntry> sourceableEntries = gorgon.get(SourceableEntry.class, true);
-
-        entries.addAll(sourceableEntries);
-        return entries;
-    }
-
-    @Override
     public void delete(Collection<DataEntry> entries) {
         try {
             gorgon.delete(entries);
         } catch (PersistenceException e) {
-            e.printStackTrace();
+            Default.LOGGER.log(Level.SEVERE, "deleting entries may have failed", e);
         }
     }
 
@@ -69,6 +60,7 @@ public class GorgonLayer implements DataAccessLayer {
 
     @Override
     public void close() {
-
+        super.close();
+        //todo close gorgon
     }
 }

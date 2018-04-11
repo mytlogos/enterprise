@@ -3,7 +3,6 @@ package enterprise.modules;
 import enterprise.data.EntryCarrier;
 import enterprise.data.intface.CreationEntry;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import tools.SetList;
 
@@ -27,14 +26,9 @@ public enum BasicModule implements Module {
     BasicModule(String tabName, boolean sourceable) {
         this.sourceable = sourceable;
         this.tabName = tabName;
-        entries.addListener((ListChangeListener<? super CreationEntry>) observable -> {
-            if (observable.next()) {
-                observable.getAddedSubList().forEach(System.out::println);
-            }
-        });
     }
 
-    public String tabName() {
+    public String showName() {
         return tabName;
     }
 

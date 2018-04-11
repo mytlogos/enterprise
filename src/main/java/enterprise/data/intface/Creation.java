@@ -12,7 +12,7 @@ import javafx.beans.property.StringProperty;
  * <p> This Class is not Thread-safe</p>
  */
 @DataAccess(CreationDao.class)
-public interface Creation extends DataEntry, ContainerEntry {
+public interface Creation extends DataEntry {
     /**
      * Gets the {@code Creator} of this Work
      *

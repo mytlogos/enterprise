@@ -9,21 +9,21 @@ import org.apache.commons.io.FileUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import scrape.ChapterSearchEntry;
-import scrape.LinkDetective;
 import scrape.Scraper;
+import scrape.sources.LinkDetective;
 import scrape.sources.Source;
 import scrape.sources.SourceType;
-import scrape.sources.chapter.ChapterScraper;
-import scrape.sources.chapter.strategies.ChapterConfigSetter;
+import scrape.sources.novel.chapter.ChapterScraper;
+import scrape.sources.novel.chapter.ChapterSearchEntry;
+import scrape.sources.novel.chapter.strategies.ChapterConfigSetter;
+import scrape.sources.novel.toc.NovelTocProcessor;
+import scrape.sources.novel.toc.strategies.impl.HeaderFilter;
+import scrape.sources.novel.toc.strategies.intface.HeaderElement;
+import scrape.sources.novel.toc.strategies.intface.TocProcessor;
 import scrape.sources.posts.PostScraper;
 import scrape.sources.posts.PostSearchEntry;
-import scrape.sources.posts.strategies.ContentWrapper;
+import scrape.sources.posts.strategies.PostWrapper;
 import scrape.sources.posts.strategies.intface.FilterElement;
-import scrape.sources.toc.NovelTocProcessor;
-import scrape.sources.toc.strategies.impl.HeaderFilter;
-import scrape.sources.toc.strategies.intface.HeaderElement;
-import scrape.sources.toc.strategies.intface.TocProcessor;
 import tools.TimeMeasure;
 
 import java.awt.*;
@@ -207,13 +207,13 @@ public class testScraper extends Application {
     }
 
     @Override
-    public void start(Stage primaryStage) throws Exception {
+    public void start(Stage primaryStage) {
         IntegerProperty integer = new SimpleIntegerProperty();
 //        doGetAllTocs(integer, getTocs().getAll(33));
 
 //        tryIt(integer, "https://youshokutranslations.wordpress.com/theotherworlddininghall/v1c15/");
         doSequential(getTocs(), this::doGetAllTocs);
-        doConcurrent(getTocs(), this::doGetAllTocs);
+//        doConcurrent(getTocs(), this::doGetAllTocs);
 //        getChapters().forEach(this::tryNextLink);
 //        openAll(getChapters());
 //        browseGuiLess(getChapters());
@@ -233,7 +233,7 @@ public class testScraper extends Application {
             }
         });
         measure.finish();
-        System.out.println(measure.getMessage(s -> "Time needed: " + s));
+        System.out.println(measure.getMessage(s -> "PostTime needed: " + s));
         errors.forEach(System.out::println);
         messages.forEach(System.out::println);
     }
@@ -338,7 +338,7 @@ public class testScraper extends Application {
         list.forEach(stringIntegerEntry -> System.out.println(stringIntegerEntry.getKey()));
 
         measure.finish();
-        System.out.println(measure.getMessage(s -> "Time needed: " + s));
+        System.out.println(measure.getMessage(s -> "PostTime needed: " + s));
         System.exit(0);
     }
 
@@ -438,7 +438,7 @@ public class testScraper extends Application {
 
         Document document = Jsoup.connect(s).get();
         document = PostScraper.cleanDoc(document);
-        ContentWrapper wrapper = ContentWrapper.tryAll(document);
+        PostWrapper wrapper = PostWrapper.tryAll(document);
 
         Element contentWrapper;
         if (wrapper == null) {

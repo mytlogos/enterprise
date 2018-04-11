@@ -12,5 +12,6 @@
         
         <mapping resource="/hibernate/enterprise.hbm.xml"/>
         <mapping resource="/hibernate/scrape.hbm.xml"/>
+        <mapping resource="/hibernate/data.hbm.xml"/>
     </session-factory>
 </hibernate-configuration>

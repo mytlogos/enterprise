@@ -4,6 +4,7 @@ import enterprise.data.intface.*;
 import scrape.sources.Source;
 import tools.SetList;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -13,14 +14,14 @@ import java.util.List;
 public class EntryCarrier {
     private static final EntryCarrier instance = new EntryCarrier();
 
-    private static final List<CreationEntry> deleted = new SetList<>();
+    private final List<DataEntry> deleted = new SetList<>();
     private final List<Creation> updateCreations = new SetList<>();
     private final List<User> updateUsers = new SetList<>();
     private final List<Creator> updateCreators = new SetList<>();
     private final List<Sourceable> updateSourceable = new SetList<>();
     private final List<Source> updateSources = new SetList<>();
     private final List<CreationEntry> updateEntries = new SetList<>();
-    private final List<CreationEntry> newEntries = new SetList<>();
+    private final List<DataEntry> newEntries = new SetList<>();
 
     /**
      * The singleton constructor of this {@code EntryCarrier},
@@ -46,7 +47,7 @@ public class EntryCarrier {
      *
      * @return newEntries - an unmodifiable list
      */
-    public List<CreationEntry> getNewEntries() {
+    public List<DataEntry> getNewEntries() {
         return Collections.unmodifiableList(newEntries);
     }
 
@@ -268,10 +269,18 @@ public class EntryCarrier {
      * @return true, if removed
      * @throws NullPointerException if entry is null
      */
-    public boolean removeNewEntry(CreationEntry entry) {
+    public boolean removeNewEntry(DataEntry entry) {
         if (entry == null) {
             throw new NullPointerException("entry is null");
         }
         return newEntries.remove(entry);
+    }
+
+    public void removeNewEntries(Collection<DataEntry> entries) {
+        newEntries.removeAll(entries);
+    }
+
+    public void removeDeleted(Collection<DataEntry> entries) {
+        deleted.removeAll(entries);
     }
 }

@@ -5,11 +5,11 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import scrape.sources.ConfigSetter;
-import scrape.sources.posts.PostConfigs;
+import scrape.sources.posts.PostConfig;
 import scrape.sources.posts.strategies.intface.*;
-import scrape.sources.posts.strategies.intface.impl.*;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -19,19 +19,19 @@ import java.util.logging.Level;
 public class PostConfigsSetter extends ConfigSetter {
 
     private final Document document;
-    private final PostConfigs configs;
+    private final PostConfig configs;
 
-    public PostConfigsSetter(PostConfigs configs, Document document) {
+    public PostConfigsSetter(PostConfig configs, Document document) {
         this.document = document;
         this.configs = configs;
     }
 
     @Override
-    public boolean setConfigs() {
+    public void setConfigs() {
         ArchiveSearcher searcher = ArchiveGetter.getArchiveSearcher(document);
         configs.setArchive(searcher);
 
-        ContentWrapper wrapper = ContentWrapper.tryAll(document);
+        PostWrapper wrapper = PostWrapper.tryAll(document);
         configs.setWrapper(wrapper);
 
         if (wrapper != null) {
@@ -39,18 +39,18 @@ public class PostConfigsSetter extends ConfigSetter {
             PostElement postFilter = getPostFilter(body);
 
             System.out.println("Configs:\n" + configs);
+
             if (postFilter != null) {
                 configs.setInit();
-                return true;
+                return;
             }
         }
         Default.LOGGER.log(Level.WARNING, document.baseUri() + " is not supported");
-        return false;
     }
 
     private PostElement getPostFilter(Element element) {
         if (element != null) {
-            List<PostElement> filters = new PostsFilter().getFilter();
+            Collection<Posts> filters = Filters.getPostsFilter();
 
             for (PostElement filter : filters) {
                 Elements applied = filter.apply(element);
@@ -67,13 +67,14 @@ public class PostConfigsSetter extends ConfigSetter {
     }
 
     private boolean validPosts(Elements postElements) {
-        TitleElement titleElement = tryAll(postElements, new TitlesFilter().getFilter());
-        TimeElement timeElement = tryAll(postElements, new TimeFilter().getFilter());
+        TitleElement titleElement = tryAll(postElements, Filters.getTitleFilter());
+        TimeElement timeElement = tryAll(postElements, Filters.getTimeFilter());
 
         if (timeElement == null && titleElement != null) {
-            TimeFilter.LINK_PAGE linkPage = new TimeFilter.LINK_PAGE(titleElement);
 
             List<TimeElement> list = new ArrayList<>();
+            PostTime linkPage = PostTime.LINK_PAGE;
+            linkPage.setTitleElement(titleElement);
             list.add(linkPage);
 
             timeElement = tryAll(postElements, list);
@@ -91,8 +92,8 @@ public class PostConfigsSetter extends ConfigSetter {
     }
 
     private void setOptionalConfigs(Elements applied) {
-        ContentElement contentElement = tryAll(applied, new ContentFilter().getFilter());
-        FooterElement footerElement = tryAll(applied, new FooterFilter().getFilter());
+        ContentElement contentElement = tryAll(applied, Filters.getContentFilter());
+        FooterElement footerElement = tryAll(applied, Filters.getFooterFilter());
 
         configs.setFooter(footerElement);
         configs.setPostBody(contentElement);

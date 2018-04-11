@@ -18,9 +18,7 @@ import java.text.DecimalFormat;
  * This class holds the common functionality and shareable fields
  * of all Controllers of the {@link BasicMode} {@code EDIT}.
  */
-public abstract class Edit<E extends CreationEntry> extends ModifyEntry {
-
-    protected E creationEntry;
+public abstract class Edit<E extends CreationEntry> extends ModifyEntry<E> {
 
     @FXML
     Button endEditBtn;
@@ -35,27 +33,27 @@ public abstract class Edit<E extends CreationEntry> extends ModifyEntry {
      * nodes.
      */
     void bindEntry() {
-        bindToComboBox(workStatus, creationEntry.getCreation().workStatusProperty());
-        bindToComboBox(creatorSort, creationEntry.getCreator().sortNameProperty());
-        bindToComboBox(collection, creationEntry.getCreation().seriesProperty());
-        bindToComboBox(ownStatus, creationEntry.getUser().ownStatusProperty());
-        bindToComboBox(creator, creationEntry.getCreator().nameProperty());
+        bindToComboBox(workStatus, entryData.getCreation().workStatusProperty());
+        bindToComboBox(creatorSort, entryData.getCreator().sortNameProperty());
+        bindToComboBox(collection, entryData.getCreation().seriesProperty());
+        bindToComboBox(ownStatus, entryData.getUser().ownStatusProperty());
+        bindToComboBox(creator, entryData.getCreator().nameProperty());
 
-        dateLastCreation.textProperty().bindBidirectional(creationEntry.getCreation().dateLastPortionProperty());
+        dateLastCreation.textProperty().bindBidirectional(entryData.getCreation().dateLastPortionProperty());
 
-        title.textProperty().bindBidirectional(creationEntry.getCreation().titleProperty());
+        title.textProperty().bindBidirectional(entryData.getCreation().titleProperty());
 
-        processedCreations.textProperty().bindBidirectional(creationEntry.getUser().processedPortionProperty(), new NumberStringConverter(new DecimalFormat("")));
+        processedCreations.textProperty().bindBidirectional(entryData.getUser().processedPortionProperty(), new NumberStringConverter(new DecimalFormat("")));
 
-        rating.textProperty().bindBidirectional(creationEntry.getUser().ratingProperty(), new NumberStringConverter(new DecimalFormat("")));
+        rating.textProperty().bindBidirectional(entryData.getUser().ratingProperty(), new NumberStringConverter(new DecimalFormat("")));
 
-        presentCreations.textProperty().bindBidirectional(creationEntry.getCreation().numPortionProperty(), new NumberStringConverter(new DecimalFormat("")));
+        presentCreations.textProperty().bindBidirectional(entryData.getCreation().numPortionProperty(), new NumberStringConverter(new DecimalFormat("")));
 
-        commentArea.textProperty().bindBidirectional(creationEntry.getUser().commentProperty());
+        commentArea.textProperty().bindBidirectional(entryData.getUser().commentProperty());
 
-        coverImage.setImage(new Image(new File(creationEntry.getCreation().getCoverPath()).toURI().toString()));
+        coverImage.setImage(new Image(new File(entryData.getCreation().getCoverPath()).toURI().toString()));
 
-        keyWords.textProperty().bindBidirectional(creationEntry.getUser().keyWordsProperty());
+        keyWords.textProperty().bindBidirectional(entryData.getUser().keyWordsProperty());
     }
 
     /**
@@ -74,37 +72,37 @@ public abstract class Edit<E extends CreationEntry> extends ModifyEntry {
      */
     void unBindEntry() {
         //unbind from the multiple comboBoxes
-        unbindFromComboBox(workStatus, creationEntry.getCreator().nameProperty());
-        unbindFromComboBox(creatorSort, creationEntry.getCreator().sortNameProperty());
-        unbindFromComboBox(collection, creationEntry.getCreation().seriesProperty());
-        unbindFromComboBox(ownStatus, creationEntry.getUser().ownStatusProperty());
-        unbindFromComboBox(creator, creationEntry.getCreator().nameProperty());
+        unbindFromComboBox(workStatus, entryData.getCreator().nameProperty());
+        unbindFromComboBox(creatorSort, entryData.getCreator().sortNameProperty());
+        unbindFromComboBox(collection, entryData.getCreation().seriesProperty());
+        unbindFromComboBox(ownStatus, entryData.getUser().ownStatusProperty());
+        unbindFromComboBox(creator, entryData.getCreator().nameProperty());
 
         //unbind the bidirectional bindByOwn
-        title.textProperty().unbindBidirectional(creationEntry.getCreation().titleProperty());
-        presentCreations.textProperty().unbindBidirectional(creationEntry.getCreation().numPortionProperty());
+        title.textProperty().unbindBidirectional(entryData.getCreation().titleProperty());
+        presentCreations.textProperty().unbindBidirectional(entryData.getCreation().numPortionProperty());
 
-        dateLastCreation.textProperty().unbindBidirectional(creationEntry.getCreation().dateLastPortionProperty());
-        processedCreations.textProperty().unbindBidirectional(creationEntry.getUser().processedPortionProperty());
+        dateLastCreation.textProperty().unbindBidirectional(entryData.getCreation().dateLastPortionProperty());
+        processedCreations.textProperty().unbindBidirectional(entryData.getUser().processedPortionProperty());
 
-        rating.textProperty().unbindBidirectional(creationEntry.getUser().ratingProperty());
-        commentArea.textProperty().unbindBidirectional(creationEntry.getUser().commentProperty());
+        rating.textProperty().unbindBidirectional(entryData.getUser().ratingProperty());
+        commentArea.textProperty().unbindBidirectional(entryData.getUser().commentProperty());
 
         //unbind the unidirectional bindByOwn
-        creationEntry.getCreator().nameProperty().unbind();
-        creationEntry.getCreator().sortNameProperty().unbind();
-        creationEntry.getCreation().seriesProperty().unbind();
+        entryData.getCreator().nameProperty().unbind();
+        entryData.getCreator().sortNameProperty().unbind();
+        entryData.getCreation().seriesProperty().unbind();
 
-        creationEntry.getUser().ownStatusProperty().unbind();
-        creationEntry.getCreator().statusProperty().unbind();
+        entryData.getUser().ownStatusProperty().unbind();
+        entryData.getCreator().statusProperty().unbind();
 
         if (coverPath != null) {
-            if (!creationEntry.getCreation().getCoverPath().equalsIgnoreCase(coverPath)) {
-                creationEntry.getCreation().setCoverPath(coverPath);
+            if (!entryData.getCreation().getCoverPath().equalsIgnoreCase(coverPath)) {
+                entryData.getCreation().setCoverPath(coverPath);
             }
         }
 
-        keyWords.textProperty().unbindBidirectional(creationEntry.getUser().keyWordsProperty());
+        keyWords.textProperty().unbindBidirectional(entryData.getUser().keyWordsProperty());
     }
 
     /**
@@ -124,11 +122,6 @@ public abstract class Edit<E extends CreationEntry> extends ModifyEntry {
     @FXML
     protected void endEdit() {
         Stage stage = (Stage) title.getScene().getWindow();
-        stage.fireEvent(
-                new WindowEvent(
-                        stage,
-                        WindowEvent.WINDOW_CLOSE_REQUEST
-                )
-        );
+        stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
     }
 }

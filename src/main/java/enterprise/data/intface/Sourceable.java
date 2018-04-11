@@ -3,7 +3,8 @@ package enterprise.data.intface;
 import enterprise.data.dataAccess.gorgon.daos.SourceableDao;
 import gorgon.external.DataAccess;
 import javafx.beans.property.StringProperty;
-import scrape.sources.SourceList;
+import javafx.collections.ObservableList;
+import scrape.sources.Source;
 
 import java.util.List;
 
@@ -18,7 +19,7 @@ public interface Sourceable extends DataEntry {
      *
      * @return sourceList - a list of sources of this {@code Sourceable}
      */
-    SourceList getSourceList();
+    ObservableList<Source> getSources();
 
     /**
      * Gets the translator, one or many in one String, of this {@code Sourceable}.

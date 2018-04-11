@@ -9,14 +9,15 @@ import enterprise.gui.controller.content.NovelContent;
 import enterprise.gui.general.BasicMode;
 import enterprise.gui.general.GlobalItemValues;
 import enterprise.modules.Module;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 import scrape.sources.Source;
-import scrape.sources.SourceList;
 import scrape.sources.SourceType;
 import scrape.sources.posts.PostManager;
+import tools.SetList;
 
 import java.net.URISyntaxException;
 
@@ -127,7 +128,7 @@ public abstract class SourceableAdd extends Add {
      */
     private Sourceable getSourceable() {
         ObservableList<Source> observableSource = sourceTable.getItems();
-        SourceList source = new SourceList();
+        ObservableList<Source> source = FXCollections.observableArrayList(new SetList<>());
         source.addAll(observableSource);
         String tlGroup = validateStringInput(translator);
 

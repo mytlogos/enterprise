@@ -10,9 +10,9 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
-import scrape.sources.toc.structure.CreationRoot;
-import scrape.sources.toc.structure.Leaf;
-import scrape.sources.toc.structure.intface.Node;
+import scrape.sources.novel.toc.structure.Leaf;
+import scrape.sources.novel.toc.structure.TableOfContent;
+import scrape.sources.novel.toc.structure.intface.Node;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,9 +39,9 @@ public class TocViewer {
     private TreeView<Node> portionsTree;
 
     private ViewMode viewMode = ViewMode.TABLE;
-    private CreationRoot rootNode;
+    private TableOfContent rootNode;
 
-    public void view(CreationRoot node) {
+    public void view(TableOfContent node) {
         FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("TocViewer.fxml"));
         Parent root;
         try {
@@ -83,12 +83,12 @@ public class TocViewer {
 
             @Override
             void addRoot(TocViewer viewer) {
-                CreationRoot rootNode = viewer.rootNode;
+                TableOfContent rootNode = viewer.rootNode;
                 handleColumns(viewer, rootNode);
                 addData(viewer, rootNode);
             }
 
-            private void addData(TocViewer viewer, CreationRoot rootNode) {
+            private void addData(TocViewer viewer, TableOfContent rootNode) {
                 List<? extends Node> collect;
 
                 if (rootNode.hasSubPortion()) {
@@ -99,15 +99,15 @@ public class TocViewer {
                 viewer.portionsTable.getItems().addAll(collect);
             }
 
-            private void handleColumns(TocViewer viewer, CreationRoot rootNode) {
+            private void handleColumns(TocViewer viewer, TableOfContent rootNode) {
                 List<? extends Node> children = rootNode.getChildren();
 
                 if (!children.isEmpty()) {
                     List<TableColumn<Node, ?>> columns = new ArrayList<>();
 
-                    addNodeColumn(rootNode, columns, rootNode.getSectionType(), CreationRoot::hasSection, node -> node.getParent().getParent());
-                    addNodeColumn(rootNode, columns, rootNode.getPortionType(), CreationRoot::hasPortion, Node::getParent);
-                    addNodeColumn(rootNode, columns, rootNode.getSubPortionType(), CreationRoot::hasSubPortion, node -> node);
+                    addNodeColumn(rootNode, columns, rootNode.getSectionType(), TableOfContent::hasSection, node -> node.getParent().getParent());
+                    addNodeColumn(rootNode, columns, rootNode.getPortionType(), TableOfContent::hasPortion, Node::getParent);
+                    addNodeColumn(rootNode, columns, rootNode.getSubPortionType(), TableOfContent::hasSubPortion, node -> node);
 
                     addIconColumn(columns, Leaf::getLocalUri, "img/pc.png");
                     addIconColumn(columns, Leaf::getInternetUri, "img/www.png");
@@ -135,7 +135,7 @@ public class TocViewer {
                 columns.add(imageColumn);
             }
 
-            private void addNodeColumn(CreationRoot rootNode, List<TableColumn<Node, ?>> columns, String type, Predicate<CreationRoot> nodePredicate, Function<Node, Node> function) {
+            private void addNodeColumn(TableOfContent rootNode, List<TableColumn<Node, ?>> columns, String type, Predicate<TableOfContent> nodePredicate, Function<Node, Node> function) {
                 if (nodePredicate.test(rootNode)) {
                     TableColumn<Node, String> column = getNodeColumn(type);
                     column.setCellValueFactory(param -> function.apply(param.getValue()).titleProperty());
@@ -151,7 +151,7 @@ public class TocViewer {
                         collect(Collectors.toList());
             }
 
-            private List<? extends Node> getSecondLevelLeafs(CreationRoot rootNode) {
+            private List<? extends Node> getSecondLevelLeafs(TableOfContent rootNode) {
                 return getFirstLevelLeafs(rootNode).
                         stream().
                         flatMap(node -> node.getChildren().stream()).

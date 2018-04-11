@@ -1,22 +1,18 @@
 package enterprise.data.dataAccess.spring;
 
-import enterprise.data.dataAccess.DataAccessLayer;
-import enterprise.data.intface.CreationEntry;
+import enterprise.data.dataAccess.DataAccessLayerImpl;
 import enterprise.data.intface.DataEntry;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 /**
  *
  */
-public class SpringLayer implements DataAccessLayer {
-
-    private final String name;
-    private final String location;
+public class SpringLayer extends DataAccessLayerImpl {
 
     public SpringLayer(String name, String location) {
-        this.name = name;
-        this.location = location;
+        super(name, location);
     }
 
     @Override
@@ -30,32 +26,13 @@ public class SpringLayer implements DataAccessLayer {
     }
 
     @Override
-    public Collection<CreationEntry> getCreationEntries() {
-        return null;
-    }
-
-    @Override
     public void delete(Collection<DataEntry> entries) {
 
     }
 
     @Override
-    public void startUpdater() {
-
-    }
-
-    @Override
-    public void stopUpdater() {
-
-    }
-
-    @Override
     public <E extends DataEntry> Collection<E> getAll(Class<E> eClass) {
-        return null;
+        return new ArrayList<>();
     }
 
-    @Override
-    public void close() {
-
-    }
 }

@@ -129,6 +129,54 @@ public class PatternSearcher {
         }
     }
 
+    private static List<Map.Entry<String, Integer>> getHits(Collection<String> paths, Collection<String> patterns, Map<String, Integer> hits) {
+        patterns = patterns.stream().filter(PatternSearcher::isValidPattern).collect(Collectors.toList());
+//        List<String> filterPattern = filterPattern(patterns);
+        for (String s : patterns) {
+            hitPattern(paths, hits, s);
+        }
+        List<Map.Entry<String, Integer>> entries = testScraper.sortByValue(hits);
+        /*Map.Entry<String, Integer> entry = getMax(entries);
+
+        if (entry != null && entry.getValue() * 5 < paths.size()) {
+            for (String pattern : patterns) {
+                hitPattern(paths, hits, pattern);
+            }
+        }*/
+        return entries;
+    }
+
+    private static void hitPattern(Collection<String> paths, Map<String, Integer> hits, String s) {
+        Pattern designed = Pattern.compile(s);
+        int patternHits = 0;
+        for (String path : paths) {
+            if (designed.matcher(path).find()) {
+                patternHits++;
+            }
+        }
+        hits.put(s, patternHits);
+    }
+
+    private static void printNotHit(Collection<String> paths, List<Map.Entry<String, Integer>> entries) {
+        if (!entries.isEmpty()) {
+            Map.Entry<String, Integer> entry = entries.get(entries.size() - 1);
+            String mostHitsPattern = entry.getKey();
+
+            Pattern designed = Pattern.compile(mostHitsPattern);
+//            System.out.println("Pattern: " + mostHitsPattern + " Hits: " + entry.getValue());
+
+            for (String path : paths) {
+                if (!designed.matcher(path).find()) {
+//                    System.out.println("no hit for " + path);
+                }
+            }
+        } else {
+            for (String path : paths) {
+//                System.out.println("no hit for " + path);
+            }
+        }
+    }
+
     private static void addLinkPattern(Collection<String> patterns, StringBuilder pattern, String s) {
         Pattern separator = Pattern.compile("[^a-zA-Z]");
         String[] splitResource = s.split(separator.pattern());
@@ -160,6 +208,25 @@ public class PatternSearcher {
         }
         patterns.addAll(builders.stream().map(StringBuilder::toString).collect(Collectors.toList()));
         patterns.addAll(new ArrayList<>(Arrays.asList(splitResource)));
+    }
+
+    private static List<String> getResult(List<String> links, List<Map.Entry<String, Integer>> entries) {
+        if (!entries.isEmpty()) {
+            Map.Entry<String, Integer> entry = entries.get(entries.size() - 1);
+            String mostHitsPattern = entry.getKey();
+
+            Pattern designedPattern = Pattern.compile(mostHitsPattern);
+
+            List<String> result = new ArrayList<>();
+            for (String link : links) {
+                if (designedPattern.matcher(link).find()) {
+                    result.add(link);
+                }
+            }
+            return result;
+        } else {
+            return new ArrayList<>();
+        }
     }
 
     public static List<String> searchText(List<String> texts) {
@@ -222,73 +289,6 @@ public class PatternSearcher {
                 }
             }
         }
-    }
-
-    private static List<Map.Entry<String, Integer>> getHits(Collection<String> paths, Collection<String> patterns, Map<String, Integer> hits) {
-        patterns = patterns.stream().filter(PatternSearcher::isValidPattern).collect(Collectors.toList());
-//        List<String> filterPattern = filterPattern(patterns);
-        for (String s : patterns) {
-            hitPattern(paths, hits, s);
-        }
-        List<Map.Entry<String, Integer>> entries = testScraper.sortByValue(hits);
-        /*Map.Entry<String, Integer> entry = getMax(entries);
-
-        if (entry != null && entry.getValue() * 5 < paths.size()) {
-            for (String pattern : patterns) {
-                hitPattern(paths, hits, pattern);
-            }
-        }*/
-        return entries;
-    }
-
-    private static void printNotHit(Collection<String> paths, List<Map.Entry<String, Integer>> entries) {
-        if (!entries.isEmpty()) {
-            Map.Entry<String, Integer> entry = entries.get(entries.size() - 1);
-            String mostHitsPattern = entry.getKey();
-
-            Pattern designed = Pattern.compile(mostHitsPattern);
-//            System.out.println("Pattern: " + mostHitsPattern + " Hits: " + entry.getValue());
-
-            for (String path : paths) {
-                if (!designed.matcher(path).find()) {
-//                    System.out.println("no hit for " + path);
-                }
-            }
-        } else {
-            for (String path : paths) {
-//                System.out.println("no hit for " + path);
-            }
-        }
-    }
-
-    private static List<String> getResult(List<String> links, List<Map.Entry<String, Integer>> entries) {
-        if (!entries.isEmpty()) {
-            Map.Entry<String, Integer> entry = entries.get(entries.size() - 1);
-            String mostHitsPattern = entry.getKey();
-
-            Pattern designedPattern = Pattern.compile(mostHitsPattern);
-
-            List<String> result = new ArrayList<>();
-            for (String link : links) {
-                if (designedPattern.matcher(link).find()) {
-                    result.add(link);
-                }
-            }
-            return result;
-        } else {
-            return new ArrayList<>();
-        }
-    }
-
-    private static void hitPattern(Collection<String> paths, Map<String, Integer> hits, String s) {
-        Pattern designed = Pattern.compile(s);
-        int patternHits = 0;
-        for (String path : paths) {
-            if (designed.matcher(path).find()) {
-                patternHits++;
-            }
-        }
-        hits.put(s, patternHits);
     }
 
     private static Map.Entry<String, Integer> getMax(List<Map.Entry<String, Integer>> entries) {

@@ -1,6 +1,6 @@
 package enterprise.gui.general.Columns;
 
-import Configs.Setting;
+import Configs.SetAble;
 import enterprise.gui.controller.Content;
 import enterprise.modules.Module;
 import javafx.beans.value.ObservableValue;
@@ -12,7 +12,7 @@ import javafx.util.Callback;
 /**
  *
  */
-public interface Column<V, R> extends Setting, Comparable<Column<V, R>> {
+public interface Column<V, R> extends SetAble, Comparable<Column<V, R>> {
     Callback<TableColumn.CellDataFeatures<V, R>, ObservableValue<R>> getCallBack();
 
     double getPrefWidth();

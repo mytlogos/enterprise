@@ -41,7 +41,7 @@
                     <MenuItem mnemonicParsing="false" onAction="#openAbout" text="About"/>
                 </Menu>
             </MenuBar>
-            <ToolBar onMouseClicked="#paneFocus" prefHeight="40.0" prefWidth="200.0">
+            <ToolBar prefHeight="40.0" prefWidth="200.0">
                 <Button fx:id="showPostsBtn" mnemonicParsing="false" onAction="#showPosts" prefWidth="100.0"
                         text="Zeige Posts"/>
                 <ToggleButton fx:id="enableMoving" mnemonicParsing="false" onAction="#movingMode" text="Verschieben"/>

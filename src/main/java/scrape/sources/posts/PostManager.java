@@ -5,12 +5,12 @@ import enterprise.data.intface.SourceableEntry;
 import enterprise.gui.enterprise.PostView;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.ReadOnlyStringProperty;
+import javafx.collections.ObservableList;
 import javafx.concurrent.ScheduledService;
 import javafx.util.Duration;
 import org.controlsfx.control.Notifications;
 import scrape.concurrent.ScheduledPostScraper;
 import scrape.sources.Source;
-import scrape.sources.SourceList;
 
 import java.util.*;
 
@@ -23,27 +23,23 @@ import java.util.*;
 public class PostManager {
     private static final PostManager MANAGER = new PostManager();
     private final PostList posts = new PostList();
-    /**
-     * This [{@code Map} maps a {@code List} of keyWords to an {@link SourceList}.
-     */
     private final Set<PostSearchEntry> searchEntries = new HashSet<>();
+    private final Map<Source, Post> newestPostMap = new HashMap<>();
+
 
     private final ScheduledPostScraper scheduledScraper = new ScheduledPostScraper();
-    private final List<Post> newPosts = new PostList();
+    private final PostList newPosts = new PostList();
 
     /**
      * The constructor of this {@code PostManager}.
-     * Sets the behaviour of the scraper on a
+     * Sets the behaviour of the web on a
      * {@link javafx.concurrent.Worker.State#SUCCEEDED} event.
      */
     private PostManager() {
         if (MANAGER != null) {
             throw new IllegalStateException();
         }
-        initScheduled();
-    }
 
-    private void initScheduled() {
         scheduledScraper.setOnSucceeded(event -> {
             List<Post> postList;
             postList = scheduledScraper.getValue();
@@ -60,9 +56,24 @@ public class PostManager {
         });
     }
 
+    public void addPosts(Collection<Post> posts) {
+        this.posts.addAll(posts);
+        this.posts.sort(PostView.getInstance().SORTED_BY.getComparator());
+    }
+
     public static PostManager getInstance() {
         return MANAGER;
     }
+
+    public void putPost(Source source, Post post) {
+        if (newestPostMap.containsKey(source)) {
+            if (newestPostMap.get(source).getTimeStamp().compareTo(post.getTimeStamp()) < 0) {
+                newestPostMap.put(source, post);
+            }
+        }
+    }
+
+
 
     private void showNotification() {
         Notifications.
@@ -74,13 +85,12 @@ public class PostManager {
                 show();
     }
 
-    public void addPosts(Collection<Post> posts) {
-        this.posts.addAll(posts);
-        this.posts.sort(PostView.getInstance().SORTED_BY.getComparator());
+    public Post getNewestPost(Source source) {
+        return newestPostMap.get(source);
     }
 
     public PostList getNewPosts() {
-        return (PostList) newPosts;
+        return newPosts;
     }
 
     public void clearNew() {
@@ -107,7 +117,7 @@ public class PostManager {
 
         //todo enable sourceList from hibernate, else it stays null
 
-        SourceList sourceList = sourceableEntry.getSourceable().getSourceList();
+        ObservableList<Source> sourceList = sourceableEntry.getSourceable().getSources();
         if (sourceList != null) {
             for (Source source : sourceList) {
                 PostSearchEntry entry = new PostSearchEntry(creation, source, keyWords);
@@ -120,15 +130,6 @@ public class PostManager {
 
     public void removeSearchEntries(SourceableEntry entry) {
         searchEntries.removeAll(convert(entry));
-    }
-
-    /**
-     * Gets the instance of the {@link ScheduledPostScraper} in this class.
-     *
-     * @return instance of {@code ScheduledPostScraper}
-     */
-    public ScheduledPostScraper getScheduledScraper() {
-        return scheduledScraper;
     }
 
     /**

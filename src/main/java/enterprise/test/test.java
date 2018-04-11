@@ -2,8 +2,8 @@ package enterprise.test;
 
 import org.apache.commons.io.FileUtils;
 import org.jsoup.nodes.Element;
-import scrape.sources.toc.NovelTocProcessor;
-import scrape.sources.toc.structure.CreationRoot;
+import scrape.sources.novel.toc.NovelTocProcessor;
+import scrape.sources.novel.toc.structure.TableOfContent;
 import tools.TimeMeasure;
 
 import java.io.File;
@@ -35,12 +35,12 @@ public class test {
             }
         });
         measure.finish();
-        System.out.println(measure.getMessage(s -> "Time needed: " + s));
+        System.out.println(measure.getMessage(s -> "PostTime needed: " + s));
     }
 
     private static void getProcess(NovelTocProcessor process, String s) {
         System.out.println("for " + s);
-        CreationRoot processed = process.process(s);
+        TableOfContent processed = process.process(s);
         System.out.println(processed);
     }
 

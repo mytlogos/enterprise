@@ -17,7 +17,7 @@ import java.util.ArrayList;
 
 /**
  * Created on 10.07.2017.
- * Part of OgameBot.
+ *
  */
 public class hallo extends Application {
     private static final ArrayList<String> uris = new ArrayList<>();

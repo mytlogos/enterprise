@@ -6,7 +6,6 @@ import enterprise.data.intface.CreationEntry;
 import enterprise.gui.general.BasicMode;
 import enterprise.gui.general.GuiPaths;
 import enterprise.gui.general.Mode;
-import enterprise.misc.EntrySingleton;
 import enterprise.modules.Module;
 import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
@@ -32,10 +31,11 @@ import java.util.logging.Logger;
  * The basic {@link Controller} of all {@code Controller}  with {@link BasicMode#SHOW}.
  * Provides common fields and functionality.
  */
-public abstract class Show<E extends CreationEntry> implements OpenAble {
+public class Show<E extends CreationEntry> implements OpenAble {
 
     private final Logger logger = Default.LOGGER;
-    protected E entryData;
+    E entryData;
+
     @FXML
     private TextArea commentArea;
     @FXML
@@ -65,21 +65,46 @@ public abstract class Show<E extends CreationEntry> implements OpenAble {
     @FXML
     private Text keyWords;
 
+    private Module module;
+
+    public Show() {
+
+    }
+
+    public Show(Module module) {
+        this.module = module;
+    }
+
+    @FXML
+    @Override
+    public void open(CreationEntry entry) {
+        Stage stage = loadStage(entry);
+
+        stage.setTitle(getModule().showName() + " Details");
+        stage.setResizable(false);
+
+        stage.show();
+    }
+
     /**
      * Creates the Window with the content specified by the
      * {@link Mode} and {@link Module} of each Controller.
+     *
+     * @param entry entry to show the details of, not null
      */
-    protected Stage loadStage() {
+    protected Stage loadStage(CreationEntry entry) {
+        entryData = (E) entry;
+
         String location = GuiPaths.getPath(getModule(), getMode());
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource(location));
         loader.setController(this);
+
         Parent root = null;
         try {
             root = loader.load();
         } catch (IOException e) {
             logger.log(Level.SEVERE, "could not load file", e);
-            e.printStackTrace();
         }
 
         Stage stage = new Stage();
@@ -90,18 +115,19 @@ public abstract class Show<E extends CreationEntry> implements OpenAble {
     }
 
     @Override
-    public final BasicMode getMode() {
-        return BasicMode.SHOW;
+    public void initialize() {
+        OpenAble.super.initialize();
+        loadEntry();
     }
 
-    /**
-     * Opens a new Window of {@link Module} of this instance
-     * and in {@link BasicMode#EDIT}.
-     */
-    @FXML
-    protected void openEdit() {
-        EntrySingleton.getInstance().setEntry(entryData);
-        ((OpenAble) ControlComm.get().getController(getModule(), BasicMode.EDIT)).open();
+    @Override
+    public Module getModule() {
+        return module;
+    }
+
+    @Override
+    public final BasicMode getMode() {
+        return BasicMode.SHOW;
     }
 
     /**
@@ -159,5 +185,16 @@ public abstract class Show<E extends CreationEntry> implements OpenAble {
      */
     void bindToText(Text text, StringProperty property) {
         text.textProperty().bind(property);
+    }
+
+    /**
+     * Opens a new Window of {@link Module} of this instance
+     * and in {@link BasicMode#EDIT}.
+     */
+    @FXML
+    protected void openEdit() {
+        if (entryData != null) {
+            ((OpenAble) ControlComm.get().getController(getModule(), BasicMode.EDIT)).open(entryData);
+        }
     }
 }

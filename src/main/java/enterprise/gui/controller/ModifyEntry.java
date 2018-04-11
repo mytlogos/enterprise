@@ -1,6 +1,7 @@
 package enterprise.gui.controller;
 
 import enterprise.data.Default;
+import enterprise.data.intface.CreationEntry;
 import enterprise.gui.general.BasicMode;
 import enterprise.gui.general.GlobalItemValues;
 import enterprise.gui.general.GuiPaths;
@@ -23,7 +24,7 @@ import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.jsoup.Connection;
-import org.jsoup.Jsoup;
+import scrape.sources.SourceAccessor;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -41,11 +42,12 @@ import java.util.logging.Logger;
  * or {@link BasicMode#ADD}.
  * Provides shared functionality.
  */
-abstract class ModifyEntry implements InputLimiter, OpenAble {
+abstract class ModifyEntry<E extends CreationEntry> implements InputLimiter, OpenAble {
 
     private final Logger logger = Default.LOGGER;
     @FXML
     protected Text label;
+    E entryData;
     @FXML
     Pane root;
     @FXML
@@ -242,8 +244,12 @@ abstract class ModifyEntry implements InputLimiter, OpenAble {
     /**
      * Creates the Window with the content specified by the
      * {@link Mode} and {@link Module} of each Controller.
+     *
+     * @param entry
      */
-    protected Stage loadStage() {
+    protected Stage loadStage(CreationEntry entry) {
+        entryData = entry == null ? null : (E) entry;
+
         String location = GuiPaths.getPath(getModule(), getMode());
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource(location));
@@ -303,7 +309,7 @@ abstract class ModifyEntry implements InputLimiter, OpenAble {
     protected void addNetImage() {
         try {
             URI uri = new URI(coverURI.getText());
-            Connection.Response resultImageResponse = Jsoup.connect(uri.toString()).ignoreContentType(true).execute();
+            Connection.Response resultImageResponse = SourceAccessor.getResponse(uri.toString());
 
             String path = uri.getPath();
 

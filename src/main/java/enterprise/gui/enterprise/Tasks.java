@@ -59,12 +59,12 @@ public class Tasks {
     }
 
     private void bind() {
-        UpdateAbleRunnable first = taskQueue.peek();
-
-        message.unbind();
-        workDone.unbind();
-
         Platform.runLater(() -> {
+            UpdateAbleRunnable first = taskQueue.peek();
+
+            message.unbind();
+            workDone.unbind();
+
             if (first != null) {
                 message.bind(first.message);
                 workDone.bind(first.workDone);

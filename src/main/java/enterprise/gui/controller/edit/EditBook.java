@@ -8,12 +8,12 @@ import javafx.stage.Stage;
 
 /**
  * Created on 25.06.2017.
- * Part of OgameBot.
+ * <p>
  * // TODO: 25.08.2017 do the javadoc and functionality
  */
 public class EditBook extends Edit<CreationEntry> {
     @Override
-    public void open() {
+    public void open(CreationEntry entry) {
 
     }
 

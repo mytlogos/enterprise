@@ -14,7 +14,7 @@ import javafx.scene.control.TableView;
 
 /**
  * Created on 24.06.2017.
- * Part of OgameBot.
+ * <p>
  * // TODO: 25.08.2017 do the javadoc and functionality
  */
 public class BookContent extends Content<CreationEntry> {

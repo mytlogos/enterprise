@@ -9,7 +9,7 @@ import gorgon.external.DataAccess;
  * Container class which represents an Entity of an Entry, with Creation, Creator and user procession of said Creation
  */
 @DataAccess(CreationEntryDao.class)
-public interface CreationEntry extends DataEntry, ContainerEntry {
+public interface CreationEntry extends DataEntry {
 
     /**
      * Getter of the {@link User}-Field.

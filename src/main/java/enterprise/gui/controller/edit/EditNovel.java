@@ -1,23 +1,18 @@
 package enterprise.gui.controller.edit;
 
-import enterprise.data.impl.SourceableEntryImpl;
+import enterprise.data.intface.CreationEntry;
 import enterprise.gui.controller.SourceableEdit;
-import enterprise.misc.EntrySingleton;
 import enterprise.modules.BasicModule;
 import enterprise.modules.Module;
-import javafx.fxml.Initializable;
 import javafx.stage.Stage;
-
-import java.net.URL;
-import java.util.ResourceBundle;
 
 /**
  *
  */
-public class EditNovel extends SourceableEdit implements Initializable {
+public class EditNovel extends SourceableEdit {
     @Override
-    public void open() {
-        Stage stage = loadStage();
+    public void open(CreationEntry entry) {
+        Stage stage = loadStage(entry);
 
         setData(stage);
         stage.setResizable(false);
@@ -31,15 +26,8 @@ public class EditNovel extends SourceableEdit implements Initializable {
     }
 
     @Override
-    public Module getModule() {
-        return BasicModule.NOVEL;
-    }
-
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
-        //loads entry to edit
-        creationEntry = (SourceableEntryImpl) EntrySingleton.getInstance().getEntry();
-
+    public void initialize() {
+        super.initialize();
         //loads entry to the nodes
         loadEntry();
 
@@ -49,5 +37,10 @@ public class EditNovel extends SourceableEdit implements Initializable {
         readyComboBoxes();
         onCloseOperation();
         disableAddSource();
+    }
+
+    @Override
+    public Module getModule() {
+        return BasicModule.NOVEL;
     }
 }

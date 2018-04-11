@@ -1,7 +1,5 @@
 package Configs;
 
-import enterprise.misc.TriConsumer;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.prefs.Preferences;
@@ -11,8 +9,9 @@ import java.util.prefs.Preferences;
  */
 public class SettingsManager {
     private static final SettingsManager settings = new SettingsManager();
+
     private final Preferences projectPreferences = Preferences.userRoot().node("enterprise");
-    private final List<Setting> registered = new ArrayList<>();
+    private final List<SetAble> registered = new ArrayList<>();
 
     private SettingsManager() {
         if (settings != null) {
@@ -24,12 +23,12 @@ public class SettingsManager {
         return settings;
     }
 
-    public void register(Setting setting) {
+    public void register(SetAble setting) {
         registered.add(setting);
         loadSetting(setting);
     }
 
-    private void loadSetting(Setting setting) {
+    private void loadSetting(SetAble setting) {
         Preferences preferences = getPreferences(setting);
 
         for (String s : setting.getKeys()) {
@@ -38,7 +37,7 @@ public class SettingsManager {
         }
     }
 
-    private Preferences getPreferences(Setting setting) {
+    private Preferences getPreferences(SetAble setting) {
         Preferences preferences = projectPreferences;
 
         if (setting.isModule()) {
@@ -54,7 +53,7 @@ public class SettingsManager {
     }
 
     public void saveSettings() {
-        for (Setting setting : registered) {
+        for (SetAble setting : registered) {
             Preferences preferences = getPreferences(setting);
 
             for (String s : setting.getKeys()) {
@@ -63,49 +62,4 @@ public class SettingsManager {
         }
     }
 
-    public void saveContentControllerSettings() {
-        contentControlSettings(this::save);
-    }
-
-    private void contentControlSettings(TriConsumer<Preferences, Setting, String> triConsumer) {
-        /*for (BasicModule basicModules : BasicModule.values()) {
-
-            Preferences moduleNode = preferences.node(basicModules.toString());
-
-            Content controller = (Content) ControlComm.get().getController(basicModules, BasicMode.CONTENT);
-            List<Column<? extends CreationEntry,?>> set = controller.getColumnManager().getColumns();
-
-            for (Setting o : set) {
-                String columnNode = o.getNodeName();
-                triConsumer.consume(moduleNode, o, columnNode);
-            }
-        }*/
-    }
-
-    private void load(Preferences moduleNode, Setting o, String columnNode) {
-        for (String s : o.getKeys()) {
-            String key = getKey(columnNode, s);
-            String value = moduleNode.get(key, o.getDefault(key));
-            o.loadSetting(s, value);
-        }
-    }
-
-    private String getKey(String columnNode, String s) {
-        return columnNode.concat(".").concat(s);
-    }
-
-    private void save(Preferences moduleNode, Setting o, String columnNode) {
-        for (String s : o.getKeys()) {
-            String key = getKey(columnNode, s);
-            String value = o.getSetting(s);
-            if (value != null) {
-                save(moduleNode, key, value);
-            } else {
-//                System.out.println("null value of Key: " + key);
-            }
-        }
-    }
-
-    private void save(Preferences preferences, String s, String value) {
-    }
 }

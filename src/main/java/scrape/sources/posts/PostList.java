@@ -9,7 +9,7 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * This class is an extension of {@code SimpleListProperty} to display {@link Post}s in real-Time.
+ * This class is an extension of {@code SimpleListProperty} to display {@link Post}s in real-PostTime.
  */
 public class PostList extends SimpleListProperty<Post> {
 

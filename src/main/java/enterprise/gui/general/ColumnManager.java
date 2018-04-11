@@ -61,22 +61,10 @@ public class ColumnManager<E> {
             tableView.getColumns().addListener((ListChangeListener<? super TableColumn<E, ?>>) observable -> {
                 while (observable.next()) {
                     if (observable.wasAdded()) {
-                        System.out.println("column added ");
                         observable.getAddedSubList().forEach(column -> System.out.println(column.getText()));
                     }
                     if (observable.wasRemoved()) {
-                        System.out.println("column removed");
                         observable.getRemoved().forEach(column -> System.out.println(column.getText()));
-                    }
-                    if (observable.wasPermutated()) {
-                        System.out.println("column permutated ");
-                    }
-                    if (observable.wasReplaced()) {
-                        System.out.println("column replaced ");
-                    }
-                    if (observable.wasUpdated()) {
-                        System.out.println("column updated");
-
                     }
                 }
             });

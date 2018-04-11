@@ -1,26 +1,27 @@
 package scrape.scrapeDaos;
 
 import gorgon.external.*;
-import scrape.sources.posts.FeedGetter;
-import scrape.sources.posts.PostConfigs;
-import scrape.sources.posts.strategies.ArchiveGetter;
-import scrape.sources.posts.strategies.ContentWrapper;
-import scrape.sources.posts.strategies.intface.impl.*;
+import scrape.sources.posts.PostConfig;
+import scrape.sources.posts.strategies.*;
+import scrape.sources.posts.strategies.intface.Filter;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 /**
  *
  */
-public class PostConfigDao extends DataTable<PostConfigs> {
-    private final Relation<PostConfigs, String> postElement = Relate.build(Ratio.ONE_TO_ONE, "POSTELEMENT", Type.TEXT, configs -> String.valueOf(configs.getPosts()));
-    private final Relation<PostConfigs, String> postWrapper = Relate.build(Ratio.ONE_TO_ONE, "POSTWRAPPER", Type.TEXT, configs -> String.valueOf(configs.getWrapper()));
-    private final Relation<PostConfigs, String> timeElement = Relate.build(Ratio.ONE_TO_ONE, "TIMEELEMENT", Type.TEXT, configs -> String.valueOf(configs.getTime()));
-    private final Relation<PostConfigs, String> titleElement = Relate.build(Ratio.ONE_TO_ONE, "TITLEELEMENT", Type.TEXT, configs -> String.valueOf(configs.getTitle()));
-    private final Relation<PostConfigs, String> contentElement = Relate.build(Ratio.ONE_TO_ONE, "CONTENTELEMENT", Type.TEXT, configs -> String.valueOf(configs.getPostContent()));
-    private final Relation<PostConfigs, String> footerElement = Relate.build(Ratio.ONE_TO_ONE, "FOOTERELEMENT", Type.TEXT, configs -> String.valueOf(configs.getFooter()));
-    private final Relation<PostConfigs, String> feed = Relate.build(Ratio.ONE_TO_ONE, "FEED", Type.TEXT, configs -> String.valueOf(configs.getFeed()));
-    private final Relation<PostConfigs, String> archiveSearcher = Relate.build(Ratio.ONE_TO_ONE, "ARCHIVESEARCHER", Type.TEXT, configs -> String.valueOf(configs.getArchive()));
+public class PostConfigDao extends DataTable<PostConfig> {
+    private final Relation<PostConfig, String> postElement = Relate.build(Ratio.ONE_TO_ONE, "POSTELEMENT", Type.TEXT, configs -> String.valueOf(configs.getPosts()));
+    private final Relation<PostConfig, String> postWrapper = Relate.build(Ratio.ONE_TO_ONE, "POSTWRAPPER", Type.TEXT, configs -> String.valueOf(configs.getWrapper()));
+    private final Relation<PostConfig, String> timeElement = Relate.build(Ratio.ONE_TO_ONE, "TIMEELEMENT", Type.TEXT, configs -> String.valueOf(configs.getTime()));
+    private final Relation<PostConfig, String> titleElement = Relate.build(Ratio.ONE_TO_ONE, "TITLEELEMENT", Type.TEXT, configs -> String.valueOf(configs.getTitle()));
+    private final Relation<PostConfig, String> contentElement = Relate.build(Ratio.ONE_TO_ONE, "CONTENTELEMENT", Type.TEXT, configs -> String.valueOf(configs.getPostBody()));
+    private final Relation<PostConfig, String> footerElement = Relate.build(Ratio.ONE_TO_ONE, "FOOTERELEMENT", Type.TEXT, configs -> String.valueOf(configs.getFooter()));
+    private final Relation<PostConfig, String> feed = Relate.build(Ratio.ONE_TO_ONE, "FEED", Type.TEXT, configs -> String.valueOf(configs.getFeed()));
+    private final Relation<PostConfig, String> archiveSearcher = Relate.build(Ratio.ONE_TO_ONE, "ARCHIVESEARCHER", Type.TEXT, configs -> String.valueOf(configs.getArchive()));
 
 
     protected PostConfigDao() {
@@ -28,8 +29,8 @@ public class PostConfigDao extends DataTable<PostConfigs> {
     }
 
     @Override
-    public List<Relation<PostConfigs, ?>> getOneToOne() {
-        List<Relation<PostConfigs, ?>> relations = new ArrayList<>();
+    public List<Relation<PostConfig, ?>> getOneToOne() {
+        List<Relation<PostConfig, ?>> relations = new ArrayList<>();
         relations.add(postElement);
         relations.add(postWrapper);
         relations.add(timeElement);
@@ -42,12 +43,12 @@ public class PostConfigDao extends DataTable<PostConfigs> {
     }
 
     @Override
-    public List<Relation<PostConfigs, ?>> getOneToMany() {
+    public List<Relation<PostConfig, ?>> getOneToMany() {
         return Collections.emptyList();
     }
 
     @Override
-    public PostConfigs getData(Result<PostConfigs> result) throws PersistenceException {
+    public PostConfig getData(Result<PostConfig> result) throws PersistenceException {
         final String postElement = result.get(this.postElement);
         final String wrapper = result.get(this.postWrapper);
         final String time = result.get(this.timeElement);
@@ -57,22 +58,43 @@ public class PostConfigDao extends DataTable<PostConfigs> {
         final String feed = result.get(this.feed);
         final String archive = result.get(this.archiveSearcher);
 
-        PostConfigs configs = new PostConfigs();
+        PostConfig configs = new PostConfig();
 
-        configs.setArchive(getMatch(ArchiveGetter.getFilter(), archive));
-        configs.setFeed(getMatch(FeedGetter.getFilter(), feed));
-        configs.setWrapper(getMatch(Arrays.asList(ContentWrapper.values()), wrapper));
+        //todo better by enum or collection?
 
-        configs.setPosts(getMatch(new PostsFilter().getFilter(), postElement));
-        configs.setTitle(getMatch(new TitlesFilter().getFilter(), title));
-        configs.setTime(getMatch(new TimeFilter().getFilter(), time));
+        /*configs.setArchive(getMatch(Filters.getArchiveFilter(), archive));
+        configs.setFeed(getMatch(Filters.getFeedFilter(), feed));
+        configs.setWrapper(getMatch(Filters.getWrapperFilter(), wrapper));
 
-        configs.setPostBody(getMatch(new ContentFilter().getFilter(), content));
-        configs.setFooter(getMatch(new FooterFilter().getFilter(), footer));
+        configs.setPosts(getMatch(Filters.getPostsFilter(), postElement));
+        configs.setTitle(getMatch(Filters.getTitleFilter(), title));
+        configs.setTime(getMatch(Filters.getTimeFilter(), time));
+
+        configs.setPostBody(getMatch(Filters.getContentFilter(), content));
+        configs.setFooter(getMatch(Filters.getFooterFilter(), footer));*/
+
+        configs.setArchive(getMatch(ArchiveStrategy.class, archive));
+        configs.setFeed(feed);
+        configs.setWrapper(getMatch(PostWrapper.class, wrapper));
+
+        configs.setPosts(getMatch(Posts.class, postElement));
+        configs.setTitle(getMatch(PostTitle.class, title));
+        configs.setTime(getMatch(PostTime.class, time));
+
+        configs.setPostBody(getMatch(PostContent.class, content));
+        configs.setFooter(getMatch(PostFooter.class, footer));
         return configs;
     }
 
-    private <E> E getMatch(Collection<E> collection, String match) {
+    private <E extends Enum<E> & Filter> E getMatch(Class<E> enumClass, String toMatch) {
+        try {
+            return Enum.valueOf(enumClass, toMatch);
+        } catch (RuntimeException e) {
+            return null;
+        }
+    }
+
+    private <E extends Filter> E getMatch(Collection<E> collection, String match) {
         if (match != null) {
             for (E e : collection) {
                 if (e.toString().matches(match)) {

@@ -37,6 +37,18 @@ public class UserImpl extends AbstractDataEntry implements User {
         this(Default.STRING, Default.STRING, Default.VALUE, Default.LIST, Default.VALUE, Default.KEYWORDS);
     }
 
+    @Override
+    public String toString() {
+        return "UserImpl{" +
+                "ownStatus=" + ownStatus.get() +
+                ", comment=" + comment.get() +
+                ", rating=" + rating.get() +
+                ", processedPortion=" + processedPortion.get() +
+                ", listName=" + listName.get() +
+                ", keyWords=" + keyWords.get() +
+                '}';
+    }
+
     /**
      * The constructor of {@code UserImpl}
      *

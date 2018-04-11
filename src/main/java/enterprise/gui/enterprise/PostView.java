@@ -5,7 +5,6 @@ import enterprise.data.Default;
 import javafx.beans.binding.DoubleBinding;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.ComboBox;
@@ -19,16 +18,13 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 import org.controlsfx.control.Notifications;
 import org.controlsfx.control.StatusBar;
-import scrape.concurrent.ScheduledPostScraper;
 import scrape.sources.posts.Post;
 import scrape.sources.posts.PostManager;
 
 import java.awt.*;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URL;
 import java.util.Comparator;
-import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -36,7 +32,7 @@ import java.util.logging.Logger;
  * This class is for presenting the scraped Posts in a new Window.
  * // TODO: 24.08.2017 do the javadoc
  */
-public class PostView implements Initializable {
+public class PostView {
 
     private static final PostView INSTANCE = new PostView();
     private static Stage stage = null;
@@ -161,8 +157,8 @@ public class PostView implements Initializable {
         PostManager.getInstance().getPosts().bindToList(listView.itemsProperty());
     }
 
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
+    public void initialize() {
+
         setListView();
         setStatusBar();
         sortBy.getItems().addAll(SortingBy.values());
@@ -232,10 +228,10 @@ public class PostView implements Initializable {
 
     private void setStatusBar() {
         // FIXME: 24.09.2017 statusbar does not display progress or message or it will be displayed too short
-        ScheduledPostScraper scraper = PostManager.getInstance().getScheduledScraper();
+        PostManager manager = PostManager.getInstance();
 
-        statusBar.progressProperty().bind(scraper.progressProperty());
-        statusBar.textProperty().bind(scraper.messageProperty());
+        statusBar.progressProperty().bind(manager.progressProperty());
+        statusBar.textProperty().bind(manager.messageProperty());
     }
 
     @FXML

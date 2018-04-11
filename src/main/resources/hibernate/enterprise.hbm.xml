@@ -7,7 +7,7 @@
         <id name="id">
             <generator class="increment"/>
         </id>
-        <one-to-one name="user" access="field" cascade="save-update, delete"/>
+        <one-to-one name="user" access="property" cascade="save-update, delete"/>
         <one-to-one name="creation" access="field" cascade="save-update, delete"/>
 
         <property name="module" access="field">
@@ -19,8 +19,9 @@
 
         <union-subclass name="enterprise.data.impl.CreationEntryImpl"/>
         <union-subclass name="enterprise.data.impl.SourceableEntryImpl">
-            <one-to-one name="sourceable" access="field" cascade="save-update, delete"/>
+            <one-to-one name="sourceable" access="property" cascade="save-update, delete"/>
         </union-subclass>
+
     </class>
 
     <class name="enterprise.data.intface.Creation" abstract="true">
@@ -71,6 +72,11 @@
         </id>
         <union-subclass name="enterprise.data.impl.SourceableImpl">
             <property name="translator" type="string"/>
+
+            <bag name="sources" access="property" cascade="save-update">
+                <key column="id"/>
+                <many-to-many class="scrape.sources.Source"/>
+            </bag>
         </union-subclass>
     </class>
 </hibernate-mapping>

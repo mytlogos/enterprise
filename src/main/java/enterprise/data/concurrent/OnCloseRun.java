@@ -1,9 +1,11 @@
 package enterprise.data.concurrent;
 
-import Configs.SettingsRun;
+import Configs.SettingsManager;
 import enterprise.data.Default;
 import enterprise.data.EntryCarrier;
 import enterprise.data.dataAccess.DataAccessManager;
+import javafx.application.Platform;
+import scrape.sources.posts.PostManager;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -29,7 +31,10 @@ public class OnCloseRun implements Runnable {
         DataAccessManager.manager.stopUpdater();
         pool.submit(DataAccessManager.manager::addNew);
         pool.submit(() -> DataAccessManager.manager.delete(new ArrayList<>(EntryCarrier.getInstance().getDeleted())));
-        pool.submit(new SettingsRun(SettingsRun.Action.SAVE));
+        pool.submit(() -> SettingsManager.getInstance().saveSettings());
+
+        //cancel postScraper
+        Platform.runLater(() -> PostManager.getInstance().cancelScheduledScraper());
 
         //executioner should not accept any new tasks anymore
         pool.shutdown();

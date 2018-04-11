@@ -1,29 +1,24 @@
 package scrape.sources;
 
 import enterprise.data.impl.AbstractDataEntry;
-import enterprise.data.intface.Creation;
 import enterprise.data.intface.DataEntry;
 import enterprise.data.intface.Sourceable;
 import gorgon.external.DataAccess;
 import gorgon.external.GorgonEntry;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableSet;
-import javafx.collections.SetChangeListener;
+import scrape.Config;
 import scrape.scrapeDaos.SourceDao;
-import scrape.sources.chapter.ChapterConfigs;
-import scrape.sources.posts.Post;
-import scrape.sources.posts.PostConfigs;
+import scrape.sources.novel.chapter.ChapterConfigs;
+import scrape.sources.posts.PostConfig;
 import tools.Cache;
 import tools.Condition;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashSet;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
 
 /**
  * This class represents a Source from the internet.
@@ -47,34 +42,16 @@ public class Source extends AbstractDataEntry implements DataEntry {
     private final StringProperty sourceName = new SimpleStringProperty();
     private final StringProperty url = new SimpleStringProperty();
     private final ChapterConfigs chapterConfigs = new ChapterConfigs();
-    private final ObservableSet<Sourceable> creationEntries = FXCollections.observableSet();
-    private final Set<Sourceable> deletedEntries = new HashSet<>();
-    private final Map<Creation, Post> newestPosts = new TreeMap<>();
     private SourceType sourceType;
-    private PostConfigs postConfigs = new PostConfigs();
+    private Map<String, Config> configMap = new HashMap<>();
 
     Source() {
-        setListener();
+
     }
 
-    /**
-     * Sets this {@code Source} dead if {@code creationEntries}
-     * is empty, else sets alive.
-     */
-    private void setListener() {
-        creationEntries.addListener((SetChangeListener<? super Sourceable>) observable -> {
-            if (creationEntries.isEmpty()) {
-                setDead();
-            } else {
-                setAlive();
-            }
-        });
-    }
-
-    private Source(String url, SourceType type, PostConfigs configs) throws URISyntaxException {
+    private Source(String url, SourceType type, PostConfig configs) throws URISyntaxException {
         this(url, type);
         Condition.check().nonNull(configs);
-        postConfigs = configs;
     }
 
     /**
@@ -93,61 +70,34 @@ public class Source extends AbstractDataEntry implements DataEntry {
             this.url.set(uri.toString());
         }
         sourceType = type;
-        setListener();
     }
 
-    private void setName(URI uri) {
-        String host = uri.getHost();
-        String[] strings = host.split("\\.");
-        StringBuilder builder = new StringBuilder();
-
-        for (int i = 0, stringsLength = strings.length; i < stringsLength; i++) {
-            String string = strings[i];
-            if (!string.matches("www|com|de|org|blogspot|wordpress")) {
-                builder.append(string);
-                if (i < (stringsLength - 1)) {
-                    builder.append(".");
-                }
-            }
+    public static void cache(Collection<Source> sources) {
+        for (Source source : sources) {
+            cache(source);
         }
-
-        if (builder.lastIndexOf(".") == builder.length() - 1) {
-            builder.deleteCharAt(builder.lastIndexOf("."));
-        }
-        // TODO: 28.09.2017 do sth better to make a sensible name
-        sourceName.set(builder.toString());
     }
 
-    public static Source create(String url, SourceType type, PostConfigs configs) throws URISyntaxException {
+    public static Source cache(Source source) {
+        return sourceCache.checkCache(source, Source::getUrl);
+    }
+
+    public static Source create(String url, SourceType type, PostConfig configs) throws URISyntaxException {
         Source value = new Source(url, type, configs);
         return sourceCache.checkCache(value, source -> source.url.get());
+    }
+
+    @Override
+    public String toString() {
+        return "Source{" +
+                "url=" + url +
+                ", configMap=" + configMap +
+                '}';
     }
 
     public static Source create(String url, SourceType type) throws URISyntaxException {
         Source value = new Source(url, type);
         return sourceCache.checkCache(value, source -> source.url.get());
-    }
-
-    public void putPost(Creation entry, Post post) {
-        if (newestPosts.containsKey(entry)) {
-            if (newestPosts.get(entry).getTimeStamp().compareTo(post.getTimeStamp()) < 0) {
-                newestPosts.put(entry, post);
-            }
-        }
-    }
-
-    public Post getNewestPost(Creation entry) {
-        return newestPosts.get(entry);
-    }
-
-    /**
-     * Returns the Set of {@link Sourceable} which held a reference
-     * to this {@code Source}.
-     *
-     * @return set of {@code Sourceables}
-     */
-    public Set<Sourceable> getDeletedEntries() {
-        return deletedEntries;
     }
 
     /**
@@ -197,8 +147,10 @@ public class Source extends AbstractDataEntry implements DataEntry {
         return sourceName.get();
     }
 
-    public void setSourceName(String sourceName) {
-        this.sourceName.set(sourceName);
+    public <E extends Config> E getConfig(E e) {
+        //per key or per class?
+        final Config config = configMap.computeIfAbsent(e.getKey(), k -> e);
+        return (E) config;
     }
 
     /**
@@ -246,26 +198,30 @@ public class Source extends AbstractDataEntry implements DataEntry {
         return equals;
     }
 
-    @Override
-    public String toString() {
-        return this.getClass().getSimpleName() + "@" + sourceName.get() + "@" + sourceType.name() + "@" + creationEntries.size();
+    void setSourceName(String sourceName) {
+        this.sourceName.set(sourceName);
     }
 
-    /**
-     * Returns the {@code PostConfigs} of this Source.
-     *
-     * @return the postConfigs of this source
-     */
-    public PostConfigs getPostConfigs() {
-        return postConfigs;
-    }
+    private void setName(URI uri) {
+        String host = uri.getHost();
+        String[] strings = host.split("\\.");
+        StringBuilder builder = new StringBuilder();
 
-    public ChapterConfigs getChapterConfigs() {
-        return chapterConfigs;
-    }
+        for (int i = 0, stringsLength = strings.length; i < stringsLength; i++) {
+            String string = strings[i];
+            if (!string.matches("www|com|de|en|org|blogspot|wordpress")) {
+                builder.append(string);
+                if (i < (stringsLength - 1)) {
+                    builder.append(".");
+                }
+            }
+        }
 
-    Set<Sourceable> getSourceables() {
-        return creationEntries;
+        if (builder.lastIndexOf(".") == builder.length() - 1) {
+            builder.deleteCharAt(builder.lastIndexOf("."));
+        }
+        // TODO: 28.09.2017 do sth better to make a sensible name
+        sourceName.set(builder.toString());
     }
 
 }

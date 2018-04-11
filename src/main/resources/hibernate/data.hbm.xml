@@ -3,13 +3,14 @@
         "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
         "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
-    <class name="enterprise.test.Data" table="DATA_ASJI" mutable="false">
+    <class name="enterprise.test.Data" table="DATA_ASJI">
         <id name="id">
             <generator class="increment"/>
         </id>
-        <property name="name"/>
-        <!--<property name="address"/>-->
-        <many-to-one name="address" cascade="save-update"/>
+        <bag name="sources" access="property" cascade="save-update">
+            <key column="id"/>
+            <many-to-many class="scrape.sources.Source"/>
+        </bag>
     </class>
 
     <class name="enterprise.test.Address" abstract="true">

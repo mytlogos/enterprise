@@ -4,6 +4,7 @@ import enterprise.data.Default;
 import enterprise.data.intface.SourceableEntry;
 import enterprise.gui.general.GlobalItemValues;
 import javafx.application.Platform;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.*;
@@ -12,8 +13,6 @@ import scrape.concurrent.ScheduledPostScraper;
 import scrape.sources.Source;
 import scrape.sources.SourceType;
 import scrape.sources.posts.PostManager;
-
-import java.net.URISyntaxException;
 
 /**
  *
@@ -35,6 +34,14 @@ public abstract class SourceableEdit extends Edit<SourceableEntry> {
     @FXML
     private ComboBox<SourceType> urlType;
 
+
+    @Override
+    public void initialize() {
+        super.initialize();
+
+//        sourceTable.itemsProperty().addListener((observable, oldValue, newValue) -> System.out.println(newValue));
+    }
+
     /**
      * Gets the data from the {@code urlType} ComboBox and
      * the {@code sourceURL} TextField, constructing a {@link Source}
@@ -46,10 +53,15 @@ public abstract class SourceableEdit extends Edit<SourceableEntry> {
         String url = validateStringInput(sourceURL);
         try {
             Source source = Source.create(url, type);
+            ObservableList<Source> sources = entryData.getSourceable().getSources();
 
-            sourceTable.getItems().add(source);
+            System.err.println("adding " + source);
+            sources.add(source);
+            System.err.println(sourceTable.getItems());
+            System.err.println(sourceTable.getItems() == sources);
+            System.err.println(sources);
             sourceURL.clear();
-        } catch (URISyntaxException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             // TODO: 01.08.2017 throw error icon
         }
@@ -61,7 +73,9 @@ public abstract class SourceableEdit extends Edit<SourceableEntry> {
         setCombo(translator, GlobalItemValues.getInstance().getTranslators());
         comboAdd(translator);
         getComboOnClose(translator, GlobalItemValues.getInstance().getTranslators());
+
         urlType.getItems().setAll(SourceType.values());
+        urlType.getSelectionModel().select(SourceType.START);
     }
 
     @Override
@@ -80,7 +94,7 @@ public abstract class SourceableEdit extends Edit<SourceableEntry> {
     protected void onCloseOperation() {
         Platform.runLater(() -> root.getScene().getWindow().setOnCloseRequest(event -> {
             unBindEntry();
-            PostManager.getInstance().addSearchEntries(creationEntry);
+            PostManager.getInstance().addSearchEntries(entryData);
         }));
     }
 
@@ -101,13 +115,13 @@ public abstract class SourceableEdit extends Edit<SourceableEntry> {
     }
 
     /**
-     * Checks if {@code creationEntry} is null, if true
+     * Checks if {@code entryData} is null, if true
      * it sets the text of all Text Nodes.
      * If the field is not null, it will proceed to bindByOwn the {@link enterprise.data.intface.CreationEntry}
      * object to the graphic Nodes.
      */
     protected void loadEntry() {
-        if (creationEntry == null) {
+        if (entryData == null) {
             for (Node node : endEditBtn.getParent().getChildrenUnmodifiable()) {
                 if (node instanceof Text) {
                     ((Text) node).setText(Default.STRING);
@@ -121,14 +135,15 @@ public abstract class SourceableEdit extends Edit<SourceableEntry> {
     @Override
     protected void bindEntry() {
         super.bindEntry();
-        bindToComboBox(translator, creationEntry.getSourceable().translatorProperty());
-
-        sourceTable.setItems(creationEntry.getSourceable().getSourceList());
+        bindToComboBox(translator, entryData.getSourceable().translatorProperty());
+        ObservableList<Source> sources = entryData.getSourceable().getSources();
+        System.out.println("binding " + sources + " of " + entryData.getId());
+        sourceTable.setItems(sources);
     }
 
     @Override
     protected void unBindEntry() {
         super.unBindEntry();
-        unbindFromComboBox(translator, creationEntry.getSourceable().translatorProperty());
+        unbindFromComboBox(translator, entryData.getSourceable().translatorProperty());
     }
 }

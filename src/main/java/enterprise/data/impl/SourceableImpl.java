@@ -1,17 +1,19 @@
 package enterprise.data.impl;
 
 import enterprise.data.Default;
-import enterprise.data.intface.Entry;
 import enterprise.data.intface.Sourceable;
 import enterprise.data.intface.User;
 import gorgon.external.GorgonEntry;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import scrape.sources.SourceList;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import scrape.sources.Source;
+import tools.SetList;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Implementation of Sourceable
@@ -20,12 +22,12 @@ import java.util.List;
  */
 public class SourceableImpl extends AbstractDataEntry implements Sourceable {
     private final StringProperty translator = new SimpleStringProperty();
-    private final BooleanProperty sourceListChanged = new SimpleBooleanProperty(false);
-    private SourceList sourceList;
+    private ObservableList<Source> sources;
     private User user;
 
-    SourceableImpl() {
-
+    public SourceableImpl() {
+        sources = FXCollections.observableArrayList(new SetList<>());
+        setTranslator("");
     }
 
     /**
@@ -34,8 +36,8 @@ public class SourceableImpl extends AbstractDataEntry implements Sourceable {
      * @param sourceList list of sources for this {@code SourceableImpl}
      * @param translator translator of this {@code SourceableImpl}
      */
-    private SourceableImpl(SourceList sourceList, String translator) {
-        this.sourceList = sourceList;
+    private SourceableImpl(ObservableList<Source> sourceList, String translator) {
+        this.sources = sourceList;
         this.translator.set(translator);
 
         validateState();
@@ -48,8 +50,8 @@ public class SourceableImpl extends AbstractDataEntry implements Sourceable {
      */
     private void validateState() {
         String message = "";
-        if (sourceList == null) {
-            message = message + "sourceList is null, ";
+        if (sources == null) {
+            message = message + "sources is null, ";
         }
         if (translator.get() == null) {
             message = message + "translator is null";
@@ -60,33 +62,30 @@ public class SourceableImpl extends AbstractDataEntry implements Sourceable {
     }
 
     public static SourceableImpl get() {
-        SourceableImpl sourceable = get(new SourceList(), Default.STRING);
+        SourceableImpl sourceable = get(FXCollections.observableArrayList(new SetList<>()), Default.STRING);
         // TODO: 22.10.2017 check this ?
         sourceable.user = new UserImpl();
         return sourceable;
     }
 
-    public static SourceableImpl get(SourceList sourceList, String translator) {
+    public static SourceableImpl get(ObservableList<Source> sourceList, String translator) {
         return new SourceableImpl(sourceList, translator);
     }
 
     @Override
-    public void fromDataBase() {
-        super.fromDataBase();
-        sourceList.forEach(Entry::setEntryOld);
-        sourceList.setUpdated();
-    }
-
-    @Override
     public int hashCode() {
-        int result = getSourceList() != null ? getSourceList().hashCode() : 0;
+        int result = getSources() != null ? getSources().hashCode() : 0;
         result = 31 * result + (translator != null ? translator.hashCode() : 0);
         return result;
     }
 
     @Override
-    public SourceList getSourceList() {
-        return sourceList;
+    public ObservableList<Source> getSources() {
+        return sources;
+    }
+
+    void setSources(Collection<Source> sources) {
+        this.sources = FXCollections.observableArrayList(new SetList<>(sources));
     }
 
     @Override
@@ -129,7 +128,16 @@ public class SourceableImpl extends AbstractDataEntry implements Sourceable {
 
         SourceableImpl that = (SourceableImpl) o;
 
-        return user.equals(that.user) && translator.get().equals(that.translator.get());
+        return Objects.equals(user, that.user) && Objects.equals(getTranslator(), that.getTranslator());
+    }
+
+    @Override
+    public String toString() {
+        return "SourceableImpl{" +
+                "translator=" + translator.get() +
+                ", sources=" + sources +
+                ", user=" + user +
+                '}';
     }
 
     @Override
@@ -138,10 +146,11 @@ public class SourceableImpl extends AbstractDataEntry implements Sourceable {
         if (gorgonEntry == this) return 0;
         if (!(gorgonEntry instanceof Sourceable)) return -1;
 
-        Sourceable o = (Sourceable) gorgonEntry;
+        SourceableImpl o = (SourceableImpl) gorgonEntry;
         int compare = getTranslator().compareTo(o.getTranslator());
+
         if (compare == 0) {
-            compare = getSourceList().compareTo(o.getSourceList());
+            compare = user.compareTo(o.user);
         }
         return compare;
     }

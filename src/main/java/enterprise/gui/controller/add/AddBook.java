@@ -1,5 +1,6 @@
 package enterprise.gui.controller.add;
 
+import enterprise.data.intface.CreationEntry;
 import enterprise.gui.controller.Add;
 import enterprise.modules.BasicModule;
 import enterprise.modules.Module;
@@ -10,8 +11,8 @@ import javafx.stage.Stage;
  */
 public class AddBook extends Add {
     @Override
-    public void open() {
-        Stage stage = loadStage();
+    public void open(CreationEntry entry) {
+        Stage stage = loadStage(entry);
 
         stage.setResizable(false);
         setData(stage);

@@ -5,7 +5,6 @@ import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
 import javafx.util.Duration;
 import scrape.sources.Source;
-import scrape.sources.SourceList;
 import scrape.sources.posts.*;
 import tools.TimeMeasure;
 
@@ -20,7 +19,7 @@ import java.util.stream.Collectors;
 /**
  * Scheduled Service, which searches for content in the internet specified in the {@code searchEntries}.
  * <p>
- * The searchEntries is a {@code HashMap}, where a list of {@code String}s maps to a {@link SourceList}.
+ * The searchEntries is a {@code HashMap}, where a list of {@code String}s maps to a list of Sources.
  * </p>
  * The list of Strings are the keyWords, which the {@link PostScraper} will search for in the {@link Source} of the mapped
  * {@code SourceList}.
@@ -61,7 +60,8 @@ public class ScheduledPostScraper extends ScheduledService<List<Post>> {
                 measure = TimeMeasure.start();
 
                 //the searchEntries supplied by the PostManager
-                getBySource(PostManager.getInstance().getSearch());
+                searchMap = PostManager.getInstance().getSearch().stream().collect(Collectors.groupingBy(PostSearchEntry::getSource));
+                calcMaxWork();
 
                 updateMessage("LadeService wird durchgeführt...");
                 updateTitle("Scraping Posts...");
@@ -83,14 +83,22 @@ public class ScheduledPostScraper extends ScheduledService<List<Post>> {
                 updateMessage("Fertig");
 
                 measure.finish();
-                System.out.println(measure.getMessage(s -> "Time needed for scraping in seconds: " + s));
+                System.out.println(measure.getMessage(s -> "PostTime needed for scraping in seconds: " + s));
 
                 return postList;
             }
 
-            private void getBySource(Set<PostSearchEntry> searchEntries) {
-                searchMap = searchEntries.stream().collect(Collectors.groupingBy(PostSearchEntry::getSource));
-                calcMaxWork();
+            /**
+             * Calculates the maximal Work with the sizes of the given Lists:
+             * <p>every {@code keyWord}list and and list of {@link Source}.</p>
+             *
+             * @return the calculated size of the work to do, returns zero by default, if the lists are empty
+             */
+            private void calcMaxWork() {
+                maxWork = searchMap.size();
+                for (Source source : searchMap.keySet()) {
+                    maxWork += searchMap.get(source).size();
+                }
             }
 
             /**
@@ -108,6 +116,7 @@ public class ScheduledPostScraper extends ScheduledService<List<Post>> {
                     service.submit(() -> {
                         try {
                             PostScraper scraper = PostScraper.scraper(source);
+
                             for (PostSearchEntry searchEntry : searchMap.get(source)) {
                                 postList.addAll(scraper.getPosts(searchEntry));
                             }
@@ -137,17 +146,8 @@ public class ScheduledPostScraper extends ScheduledService<List<Post>> {
                 System.out.println("finally terminated");
             }
 
-            /**
-             * Calculates the maximal Work with the sizes of the given Lists:
-             * <p>every {@code keyWord}list and {@link SourceList}.</p>
-             *
-             * @return the calculated size of the work to do, returns zero by default, if the lists are empty
-             */
-            private void calcMaxWork() {
-                maxWork = searchMap.size();
-                for (Source source : searchMap.keySet()) {
-                    maxWork += searchMap.get(source).size();
-                }
+            private void getBySource(Set<PostSearchEntry> searchEntries) {
+
             }
         };
     }

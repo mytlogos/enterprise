@@ -35,8 +35,4 @@ public class NovelContent extends SourceableContent {
     public Module getModule() {
         return BasicModule.NOVEL;
     }
-
-    public void paneFocus() {
-// TODO: 25.08.2017 do sth
-    }
 }

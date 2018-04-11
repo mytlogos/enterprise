@@ -31,7 +31,8 @@ public class CreatorImpl extends AbstractDataEntry implements Creator {
     // TODO: 30.08.2017 implement
     private Person personalInfo;
 
-    CreatorImpl() {
+    public CreatorImpl() {
+        name.set("NoName");
         personalInfo = new Person();
     }
 

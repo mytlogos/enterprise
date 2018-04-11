@@ -9,7 +9,6 @@ import enterprise.gui.general.BasicMode;
 import enterprise.gui.general.ColumnManager;
 import enterprise.gui.general.Columns.*;
 import enterprise.gui.general.Mode;
-import enterprise.misc.EntrySingleton;
 import enterprise.modules.BasicModule;
 import enterprise.modules.Module;
 import javafx.application.Platform;
@@ -102,6 +101,18 @@ public abstract class Content<E extends CreationEntry> implements Controller {
             button.setOnMouseClicked(event -> showTargetList(s));
         }
         return button;
+    }
+
+    private void showAllToggle() {
+        if (filteredList != null) {
+            System.out.println("setting predicate to " + null);
+            filteredList.setPredicate(null);
+        }
+    }
+
+    private void showTargetList(String s) {
+        System.out.println("setting predicate to " + s);
+        filteredList.setPredicate(e -> e.getUser().getListName().equals(s));
     }
 
     public ColumnManager<E> getColumnManager() {
@@ -217,8 +228,11 @@ public abstract class Content<E extends CreationEntry> implements Controller {
 
     private void openEditOnClick(TableRow<E> row, MouseEvent event) {
         if (event.isControlDown() && event.getButton().equals(MouseButton.PRIMARY) && !row.isEmpty()) {
-            EntrySingleton.getInstance().setEntry(row.getItem());
-            ((OpenAble) ControlComm.get().getController(getModule(), BasicMode.EDIT)).open();
+            E entry = row.getItem();
+
+            if (entry != null) {
+                ((OpenAble) ControlComm.get().getController(getModule(), BasicMode.EDIT)).open(entry);
+            }
             event.consume();
         }
     }
@@ -226,8 +240,10 @@ public abstract class Content<E extends CreationEntry> implements Controller {
     private void openShowOnDoubleClick(TableRow<E> row, MouseEvent event) {
         if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2 && !row.isEmpty()) {
 
-            EntrySingleton.getInstance().setEntry(row.getItem());
-            ((OpenAble) ControlComm.get().getController(getModule(), BasicMode.SHOW)).open();
+            E entry = row.getItem();
+            if (entry != null) {
+                ((OpenAble) ControlComm.get().getController(getModule(), BasicMode.SHOW)).open(entry);
+            }
             event.consume();
         }
     }
@@ -263,8 +279,10 @@ public abstract class Content<E extends CreationEntry> implements Controller {
      */
     @FXML
     private void openEdit() {
-        EntrySingleton.getInstance().setEntry(entryTable.getSelectionModel().getSelectedItem());
-        ((OpenAble) ControlComm.get().getController(getModule(), BasicMode.EDIT)).open();
+        E entry = entryTable.getSelectionModel().getSelectedItem();
+        if (entry != null) {
+            ((OpenAble) ControlComm.get().getController(getModule(), BasicMode.EDIT)).open(entry);
+        }
     }
 
     /**
@@ -273,18 +291,25 @@ public abstract class Content<E extends CreationEntry> implements Controller {
     @FXML
     private void deleteSelected() {
         E entry = entryTable.getSelectionModel().getSelectedItem();
-        if (entryTable.getItems() == getModule().getEntries()) {
-            deleteEntry(() -> getModule().deleteEntry(entry), entry);
-        } else {
-            deleteEntry(() -> entryTable.getItems().remove(entry), entry);
-            entry.getUser().setListName(Default.LIST);
-        }
+        deleteEntry(() -> getModule().deleteEntry(entry), entry);
+    }
+
+    /**
+     * Opens a new Window with {@link BasicMode} {@code ADD} and {@link Module}
+     * specified by the subclass.
+     */
+    @FXML
+    private void openFullAdd() {
+        ((OpenAble) ControlComm.get().getController(getModule(), BasicMode.ADD)).open(null);
+    }
+
+    private void moveToList(String listName) {
+        entryTable.getSelectionModel().getSelectedItem().getUser().setListName(listName);
     }
 
     private void deleteEntry(BooleanSupplier supplier, E entry) {
         if (supplier.getAsBoolean()) {
             //prevents getting the entry to be added to the database
-            entry.setEntryOld();
             System.out.println(entry + " deleted");
             if (entry instanceof SourceableEntry) {
                 PostManager.getInstance().removeSearchEntries((SourceableEntry) entry);
@@ -326,10 +351,6 @@ public abstract class Content<E extends CreationEntry> implements Controller {
         columnManager.setTableView(entryTable);
     }
 
-    private void moveToList(String listName) {
-        entryTable.getSelectionModel().getSelectedItem().getUser().setListName(listName);
-    }
-
     private void initSegmentButtons() {
         if (segmentedButtons != null) {
             ToggleGroup group = new ToggleGroup();
@@ -367,27 +388,6 @@ public abstract class Content<E extends CreationEntry> implements Controller {
         if (event.getCode() == KeyCode.DELETE) {
             deleteSelected();
         }
-    }
-
-    /**
-     * Opens a new Window with {@link BasicMode} {@code ADD} and {@link Module}
-     * specified by the subclass.
-     */
-    @FXML
-    private void openFullAdd() {
-        ((OpenAble) ControlComm.get().getController(getModule(), BasicMode.ADD)).open();
-    }
-
-    private void showAllToggle() {
-        if (filteredList != null) {
-            System.out.println("setting predicate to " + null);
-            filteredList.setPredicate(null);
-        }
-    }
-
-    private void showTargetList(String s) {
-        System.out.println("setting predicate to " + s);
-        filteredList.setPredicate(e -> e.getUser().getListName().equals(s));
     }
 
     private void addLists(String s) {

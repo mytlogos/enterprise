@@ -4,10 +4,10 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import scrape.Formatter;
-import scrape.sources.PostsFilter;
 import scrape.sources.posts.ParseTime;
-import scrape.sources.posts.PostConfigs;
+import scrape.sources.posts.PostConfig;
 import scrape.sources.posts.PostSearchEntry;
+import scrape.sources.posts.PostsFilter;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -37,6 +37,10 @@ public class PostFormat extends Formatter {
         } else {
             return null;
         }
+    }
+
+    public String getContent(Element element) {
+        return getString(element, "", null);
     }
 
     public String getLink(Element element) {
@@ -74,12 +78,12 @@ public class PostFormat extends Formatter {
         return null;
     }
 
-    public Elements format(Document document, PostConfigs configs) {
+    public Elements format(Document document, PostConfig configs) {
         Elements elements = unFormatted(document, configs);
         return format(elements, configs);
     }
 
-    public Elements unFormatted(Document document, PostConfigs configs) {
+    public Elements unFormatted(Document document, PostConfig configs) {
         Objects.requireNonNull(document);
         Objects.requireNonNull(configs);
 
@@ -87,7 +91,7 @@ public class PostFormat extends Formatter {
         return configs.getPosts().apply(wrapper);
     }
 
-    public Elements format(Elements elements, PostConfigs configs) {
+    public Elements format(Elements elements, PostConfig configs) {
         Objects.requireNonNull(elements);
         Objects.requireNonNull(configs);
 
@@ -102,7 +106,7 @@ public class PostFormat extends Formatter {
 
             setPart(element, post, configs.getTitle());
             setPart(element, post, configs.getTime());
-            setPart(element, post, configs.getPostContent());
+            setPart(element, post, configs.getPostBody());
             setPart(element, post, configs.getFooter());
             posts.add(post);
         }
@@ -110,7 +114,7 @@ public class PostFormat extends Formatter {
         return posts;
     }
 
-    public Elements format(Document document, PostConfigs configs, PostSearchEntry entry) {
+    public Elements format(Document document, PostConfig configs, PostSearchEntry entry) {
         Objects.requireNonNull(document);
         Objects.requireNonNull(configs);
 

@@ -9,7 +9,7 @@ import java.util.List;
  *
  */
 public interface Module {
-    String tabName();
+    String showName();
 
     boolean deleteEntry(CreationEntry entry);
 

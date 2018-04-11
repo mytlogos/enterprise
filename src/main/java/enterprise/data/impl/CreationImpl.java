@@ -1,6 +1,7 @@
 package enterprise.data.impl;
 
 import enterprise.data.CreationRelation;
+import enterprise.data.Default;
 import enterprise.data.intface.Creation;
 import enterprise.data.intface.Creator;
 import gorgon.external.GorgonEntry;
@@ -36,8 +37,10 @@ public class CreationImpl extends AbstractDataEntry implements Creation {
     private CreationRelation relation;
     private Creator creator;
 
-    CreationImpl() {
-
+    public CreationImpl() {
+        title.set("");
+        series.set("");
+        coverPath.set(Default.IMAGE);
     }
 
     @Override

@@ -56,25 +56,19 @@ public abstract class AbstractCreationEntry extends AbstractDataEntry implements
                 references.put(dataEntry, --count);
                 if (count == 0) {
                     references.remove(dataEntry);
-                    dataEntry.setDead();
                 }
             }
         }
+    }
+
+    void setUser(User user) {
+        this.user = user;
     }
 
     private void checkSupport(DataEntry dataEntry) {
         if (dataEntry instanceof CreationEntry) {
             throw new UnsupportedOperationException();
         }
-    }
-
-    @Override
-    public void fromDataBase() {
-        user.fromDataBase();
-        creation.fromDataBase();
-        getCreator().fromDataBase();
-
-        setEntryOld();
     }
 
     void incrementReferences(DataEntry... dataEntries) {

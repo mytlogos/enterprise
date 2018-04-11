@@ -21,21 +21,25 @@ import java.util.regex.Pattern;
  *
  */
 public abstract class AbstractColumn<E, T> implements Column<E, T> {
-    private final String node;
-    private final String indexKey = "index";
-    private final String widthKey = "prefWidth";
-    private final String defaultSelectKey = "defaultSelect";
+    private final String indexKey;
+    private final String widthKey;
+    private final String defaultSelectKey;
     private final Map<String, String> keyMap = new HashMap<>();
     private final Map<String, String> defaultMap = new HashMap<>();
+    private final String columnName;
     private TableColumn<E, T> column;
     private CheckMenuItem item;
     private Module module;
     private boolean shown;
 
 
-    AbstractColumn(String node, Module module) {
+    AbstractColumn(String columnName, Module module) {
         this.module = module;
-        this.node = node;
+        this.columnName = columnName;
+        indexKey = this.columnName + "." + "index";
+        widthKey = columnName + "." + "prefWidth";
+        defaultSelectKey = columnName + "." + "defaultSelect";
+
         initDefault();
         SettingsManager.getInstance().register(this);
     }
@@ -49,7 +53,7 @@ public abstract class AbstractColumn<E, T> implements Column<E, T> {
 
     @Override
     public String getNodeName() {
-        return node;
+        return "column";
     }
 
     @Override
@@ -73,27 +77,8 @@ public abstract class AbstractColumn<E, T> implements Column<E, T> {
     }
 
     @Override
-    public void setColumnModule(Module module) {
-        this.module = module;
-    }
-
-    @Override
     public String getDefault(String key) {
         return defaultMap.get(key);
-    }
-
-    public boolean isShown() {
-        return shown;
-    }
-
-    @Override
-    public void setShown(boolean b) {
-        shown = b;
-    }
-
-    @Override
-    public CheckMenuItem getMenuItem() {
-        return item;
     }
 
     @Override
@@ -113,7 +98,7 @@ public abstract class AbstractColumn<E, T> implements Column<E, T> {
         int result = column != null ? column.hashCode() : 0;
         result = 31 * result + (item != null ? item.hashCode() : 0);
         result = 31 * result + (getModule() != null ? getModule().hashCode() : 0);
-        result = 31 * result + (node != null ? node.hashCode() : 0);
+        result = 31 * result + (columnName != null ? columnName.hashCode() : 0);
         return result;
     }
 
@@ -128,15 +113,7 @@ public abstract class AbstractColumn<E, T> implements Column<E, T> {
                 column.equals(that.column) :
                 that.column == null) && (item != null ?
                 item.equals(that.item) : that.item == null) && (getModule() != null ? getModule().equals(that.getModule()) :
-                that.getModule() == null) && (node != null ? node.equals(that.node) : that.node == null);
-    }
-
-    @Override
-    public TableColumn<E, T> getTableColumn() {
-        if (column == null) {
-            initColumn();
-        }
-        return column;
+                that.getModule() == null) && (columnName != null ? columnName.equals(that.columnName) : that.columnName == null);
     }
 
     @Override
@@ -145,20 +122,24 @@ public abstract class AbstractColumn<E, T> implements Column<E, T> {
     }
 
     @Override
-    public void loadMenuItem(Content controller) {
-        item = new ItemFactory().getCheckMenuItem(controller, this);
-        item.selectedProperty().addListener((observable, oldValue, newValue) -> setSelect(newValue));
+    public void setColumnModule(Module module) {
+        this.module = module;
+    }
+
+    @Override
+    public CheckMenuItem getMenuItem() {
+        return item;
+    }
+
+    @Override
+    public void setShown(boolean b) {
+        shown = b;
     }
 
     void setDefault(int index, double width, boolean select) {
         setDefaultIndex(index);
         setDefaultWidth(width);
         setDefaultSelect(select);
-    }
-
-    @Override
-    public int getPrefIndex() {
-        return getInt(indexKey);
     }
 
     private void setDefaultIndex(int index) {
@@ -168,6 +149,33 @@ public abstract class AbstractColumn<E, T> implements Column<E, T> {
     private void setDefaultWidth(double width) {
         putDefault(widthKey, String.valueOf(width));
     }
+
+    private void putDefault(String key, String value) {
+        defaultMap.put(key, value);
+    }
+
+
+    @Override
+    public TableColumn<E, T> getTableColumn() {
+        if (column == null) {
+            initColumn();
+        }
+        return column;
+    }
+
+
+    @Override
+    public void loadMenuItem(Content controller) {
+        item = new ItemFactory().getCheckMenuItem(controller, this);
+        item.selectedProperty().addListener((observable, oldValue, newValue) -> setSelect(newValue));
+    }
+
+
+    @Override
+    public int getPrefIndex() {
+        return getInt(indexKey);
+    }
+
 
     @Override
     public double getPrefWidth() {
@@ -183,10 +191,6 @@ public abstract class AbstractColumn<E, T> implements Column<E, T> {
 
     private void setDefaultSelect(boolean b) {
         putDefault(defaultSelectKey, String.valueOf(b));
-    }
-
-    private void putDefault(String key, String value) {
-        defaultMap.put(key, value);
     }
 
 

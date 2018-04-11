@@ -18,8 +18,9 @@ public class ParseTime {
     private final static String HAS_DATE = "(?=^\\d{4})((\\d{4}\\W[0-1]?\\d\\W[0-3]?\\d))|(?=[a-zA-z]{3,10})([a-zA-z]{3,10}\\s[0-3]?\\d,\\s\\d{4})|(?=[0-3]?\\d\\s[a-zA-z]{3,10})([0-3]?\\d\\s[a-zA-z]{3,10}\\s\\d{4})|([0-3]?\\d\\W[0-1]?\\d\\W\\d{4})";
     private final static String HAS_TIME = "[0-2]?\\d:[0-5]\\d(:[0-5]\\d)?((.?((am)|(pm))).?)?((.?(\\+\\d{2}:00).?)|(.?((GMT)|(UTC)).?-\\d{1,2}).?)?";
     private final static String MMMM_DD_YYYY = "[a-zA-z]{3,10}\\s[0-3]?\\d,\\s\\d{4}";
-    private final static String DD_MMMM_YYYY = "[0-3]?\\d\\s[a-zA-z]{3,10}\\s\\d{4}";
+    private final static String D_MMMM_YYYY = "[0-3]?\\d\\s[a-zA-z]{3,10}\\s\\d{4}";
     private final static String DD_MM_YYYY = "[0-3]?\\d\\W[0-1]?\\d\\W\\d{4}";
+    private final static String DD_M_YYYY = "[0-3]?\\d\\s[a-zA-Z]{1,3}\\s\\d{4}";
     private final static String YYYY_MM_DD = "(\\d{4}[^a-zA-Z0-9:][0-1]?\\d[^a-zA-Z0-9:][0-3]?\\d)";
     private final static String TIME12 = "[0-2]?\\d:[0-5]\\d(:[0-5]\\d)?(.?(am)|.?(pm))";
     private final static String TIME24 = "[0-2]?\\d:[0-5]\\d(:[0-5]\\d)?";
@@ -143,20 +144,28 @@ public class ParseTime {
     private static LocalDate getLocalDate(String s) {
         LocalDate localDate;
         String date = patternFind(s, YYYY_MM_DD);
+
         if (!date.isEmpty()) {
 
             localDate = LocalDate.parse(date);
         } else {
             date = patternFind(s, DD_MM_YYYY);
+
             if (!date.isEmpty()) {
                 localDate = LocalDate.parse(date, DateTimeFormatter.ofPattern("d.M.uuuu"));
             } else {
-                date = patternFind(s, MMMM_DD_YYYY);
+                date = patternFind(s, DD_M_YYYY);
+
                 if (!date.isEmpty()) {
-                    localDate = LocalDate.parse(date, DateTimeFormatter.ofPattern("MMMM d, yyyy", Locale.US));
+                    localDate = LocalDate.parse(date, DateTimeFormatter.ofPattern("d MMM uuuu", Locale.US));
                 } else {
-                    date = patternFind(s, DD_MMMM_YYYY);
-                    localDate = LocalDate.parse(date, DateTimeFormatter.ofPattern("d MMMM uuuu"));
+                    date = patternFind(s, MMMM_DD_YYYY);
+                    if (!date.isEmpty()) {
+                        localDate = LocalDate.parse(date, DateTimeFormatter.ofPattern("MMMM d, yyyy", Locale.US));
+                    } else {
+                        date = patternFind(s, D_MMMM_YYYY);
+                        localDate = LocalDate.parse(date, DateTimeFormatter.ofPattern("d MMMM uuuu"));
+                    }
                 }
             }
         }

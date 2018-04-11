@@ -1,10 +1,9 @@
 package enterprise.gui.controller.edit;
 
-import enterprise.data.impl.SourceableEntryImpl;
+import enterprise.data.intface.CreationEntry;
 import enterprise.gui.controller.InputLimiter;
 import enterprise.gui.controller.SourceableEdit;
 import enterprise.gui.general.BasicMode;
-import enterprise.misc.EntrySingleton;
 import enterprise.modules.BasicModule;
 import enterprise.modules.Module;
 import javafx.stage.Stage;
@@ -16,8 +15,8 @@ import javafx.stage.Stage;
 public class EditAnime extends SourceableEdit implements InputLimiter {
 
     @Override
-    public void open() {
-        Stage stage = loadStage();
+    public void open(CreationEntry entry) {
+        Stage stage = loadStage(entry);
 
         setData(stage);
         stage.setResizable(false);
@@ -33,8 +32,6 @@ public class EditAnime extends SourceableEdit implements InputLimiter {
     @Override
     public void initialize() {
         super.initialize();
-        //loads entry to edit
-        creationEntry = (SourceableEntryImpl) EntrySingleton.getInstance().getEntry();
 
         //loads entry to the nodes
         loadEntry();

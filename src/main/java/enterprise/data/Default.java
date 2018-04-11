@@ -4,6 +4,7 @@ import enterprise.EnterpriseStart;
 import scrape.sources.Source;
 import tools.Log;
 
+import java.io.File;
 import java.net.URISyntaxException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -20,7 +21,7 @@ public class Default {
     public static final String IMAGE = "img/NoImg.png";
     public static final String LIST = "Alles";
     public static final Source SOURCE;
-    public static final String workDir = System.getProperty("user.dir");
+    public static final String workDir = System.getProperty("user.dir") + File.separator;
     public static final Logger LOGGER = Log.packageLogger(EnterpriseStart.class);
 
     static {

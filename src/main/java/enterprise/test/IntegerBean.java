@@ -17,7 +17,7 @@ public class IntegerBean implements Serializable {
     }
 
 
-    private static List<String> addLinks() {
+    public static List<String> addLinks() {
         links.add("https://webnovel.com/");
         links.add("https://bayabuscotranslation.com/");
         links.add("https://wcctranslation.wordpress.com/");
@@ -62,7 +62,6 @@ public class IntegerBean implements Serializable {
         links.add("https://oniichanyamete.wordpress.com/");
         links.add("http://japtem.com/");
         links.add("https://isekailunatic.wordpress.com/");
-        links.add("https://www.facebook.com/Baka.Tsuki.org");
         links.add("https://shintranslations.com");
         links.add("http://razpyon.tumblr.com/");
         links.add("http://www.oyasumireads.com/");

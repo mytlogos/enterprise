@@ -21,6 +21,8 @@ import java.util.function.BiFunction;
  */
 public class DataAccessManager implements Closeable {
     public static final DataAccessManager manager = new DataAccessManager();
+    private static final String name = "enterprise";
+    private static final String location = Default.workDir;
     private AccessType type;
 
     public DataAccessManager() {
@@ -33,7 +35,7 @@ public class DataAccessManager implements Closeable {
 
     public void setType(AccessType type) {
         this.type = type;
-        Updater.setLayer(type.layer);
+        Updater.setLayer(type.getLayer());
     }
 
     public void update(Collection<DataEntry> entries) {
@@ -95,7 +97,7 @@ public class DataAccessManager implements Closeable {
         SPRING(SpringLayer::new),
         PLAIN_JDBC(PlainLayer::new),
         GORGON(GorgonLayer::new),
-        HIBERNATE((s, s1) -> new HibernateLayer()),;
+        HIBERNATE(HibernateLayer::new),;
 
         private final BiFunction<String, String, DataAccessLayer> layerFunction;
         private DataAccessLayer layer = null;
@@ -106,7 +108,7 @@ public class DataAccessManager implements Closeable {
         }
 
         public DataAccessLayer getLayer() {
-            return layer == null ? layer = layerFunction.apply("enterprise", Default.workDir) : layer;
+            return layer == null ? layer = layerFunction.apply(DataAccessManager.name, DataAccessManager.location) : layer;
         }
     }
 }

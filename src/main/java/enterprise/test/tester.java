@@ -25,7 +25,7 @@ import static scrape.sources.SourceType.START;
 
 /**
  * Created on 08.08.2017.
- * Part of OgameBot.
+ *
  */
 public class tester {
     static Connection con;
@@ -42,7 +42,7 @@ public class tester {
 
         for (List<String> keyWordList : keySources.keySet()) {
 
-            SourceList sources = keySources.getAll(keyWordList);
+            ObservableList<Source>sources = keySources.getAll(keyWordList);
 
             //searches through every given Source with the given keyWords
             for (Source source : sources) {
@@ -86,17 +86,6 @@ public class tester {
                 posts.add(generatePost(j, number));
             }
         }
-
-
-        /*System.out.println(System.getProperties());
-        String lineseparator = System.lineSeparator();
-        System.out.println("Line separator" + lineseparator + "Other line");
-        System.out.println(System.getProperty("os.name"));
-        System.out.println(System.getProperty("os.version"));
-        System.out.println(System.getProperty("os.arch"));
-        System.out.println(System.getProperty("user.name"));
-        System.out.println(System.getProperty("user.home"));
-        System.out.println(System.getProperty("user.dir"));*/
 
 /*
         String ROOT = "";

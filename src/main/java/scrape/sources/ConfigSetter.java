@@ -11,7 +11,7 @@ import java.util.Iterator;
  *
  */
 public abstract class ConfigSetter {
-    public abstract boolean setConfigs();
+    public abstract void setConfigs();
 
     protected <E extends FilterElement> E tryAll(Elements elements, Collection<E> filters) {
         if (!elements.isEmpty() && filters != null && !filters.isEmpty()) {

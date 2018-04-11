@@ -1,7 +1,7 @@
 package scrape.sources;
 
 /**
- * The type enumerator of this {@code Source}.
+ * The type enum of this {@code Source}.
  * At the moment it has no real function, but
  * may be important later for the Scraper.
  */
@@ -9,7 +9,7 @@ public enum SourceType {
     /**
      * The site contains the table of content,
      * used for indexing the portions (chapters,...)
-     * or fetching the whole content.
+     * or fetching the whole novel.
      */
     TOC("TOC"),
     /**

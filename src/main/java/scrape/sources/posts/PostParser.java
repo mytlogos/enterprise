@@ -22,7 +22,7 @@ class PostParser {
         Post post = posts.stream().max(Post::compareTo).orElse(null);
         System.out.println("Newest Post: " + post);
 
-        entry.getSource().putPost(entry.getCreation(), post);
+        PostManager.getInstance().putPost(entry.getSource(), post);
         return posts;
     }
 

@@ -4,24 +4,25 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.safety.Whitelist;
 import scrape.sources.Source;
+import scrape.sources.SourceAccessor;
 
 import java.io.IOException;
 
 /**
  *
  */
-public abstract class Scraper<E extends ScrapeConfigs, R extends SearchEntry> {
+public abstract class Scraper<E extends Config, R extends SearchEntry> {
     protected E configs;
     protected R search;
     protected Source source;
     protected Document document;
 
-    protected static Document getDocument(String uri) throws IOException {
-        return Jsoup.connect(uri).get();
+    public static Document getCleanDocument(String uri) throws IOException {
+        return cleanDoc(getDocument(uri));
     }
 
-    public static Document getCleanDocument(String uri) throws IOException {
-        return cleanDoc(Jsoup.connect(uri).maxBodySize(0).get());
+    protected static Document getDocument(String uri) throws IOException {
+        return SourceAccessor.getDocument(uri);
     }
 
     public static Document cleanDoc(Document document) {

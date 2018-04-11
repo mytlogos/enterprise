@@ -1,26 +1,23 @@
 package enterprise.gui.controller.add;
 
+import enterprise.data.intface.CreationEntry;
 import enterprise.gui.controller.SourceableAdd;
 import enterprise.gui.general.BasicMode;
 import enterprise.modules.BasicModule;
 import enterprise.modules.Module;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.stage.Stage;
-
-import java.net.URL;
-import java.util.ResourceBundle;
 
 /**
  * This class is the {@link enterprise.gui.controller.Controller} of the
  * {@code addNovel.fxml} file with {@link BasicMode#ADD} and {@link BasicModule#NOVEL}.
  */
-public class AddNovel extends SourceableAdd implements Initializable {
+public class AddNovel extends SourceableAdd {
 
     @Override
-    public void open() {
-        Stage stage = loadStage();
+    public void open(CreationEntry entry) {
+        Stage stage = loadStage(entry);
         stage.setResizable(false);
         setData(stage);
         stage.show();
@@ -32,15 +29,10 @@ public class AddNovel extends SourceableAdd implements Initializable {
         label.setText("Füge neuen Novel hinzu");
     }
 
-    @Override
-    public Module getModule() {
-        return BasicModule.NOVEL;
-    }
-
     @FXML
     // This method is called by the FXMLLoader when initialization is complete
     @Override
-    public void initialize(URL location, ResourceBundle resources) {
+    public void initialize() {
         super.initialize();
         //ready GUI
         onCloseOperation();
@@ -48,6 +40,11 @@ public class AddNovel extends SourceableAdd implements Initializable {
         readyInput();
         readySourceColumns();
         readyAddSourceBtn();
+    }
+
+    @Override
+    public Module getModule() {
+        return BasicModule.NOVEL;
     }
 
     /**

@@ -44,7 +44,7 @@ public abstract class Add extends ModifyEntry implements InputLimiter {
         if (getModule().addEntry(entry)) {
 
             //add it to the TableView of the Content Display
-            Content<CreationEntry> controller = (Content) ControlComm.get().getController(getModule(), BasicMode.CONTENT);
+            Content<CreationEntry> controller = (Content<CreationEntry>) ControlComm.get().getController(getModule(), BasicMode.CONTENT);
             controller.addEntry(entry);
 
             //ready for adding it to the database

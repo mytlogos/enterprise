@@ -3,7 +3,7 @@ package scrape.scrapeDaos;
 import gorgon.external.*;
 import scrape.sources.Source;
 import scrape.sources.SourceType;
-import scrape.sources.posts.PostConfigs;
+import scrape.sources.posts.PostConfig;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -16,7 +16,7 @@ import java.util.List;
 public class SourceDao extends DataTable<Source> {
     private final Relation<Source, String> sourceurl = Relate.build(Ratio.ONE_TO_ONE, "SOURCEURL", Type.TEXT, Source::getUrl, Modifier.NOT_NULL);
     private final Relation<Source, SourceType> sourceType = Relate.build(Ratio.ONE_TO_ONE, "SOURCETYPE", SourceType.class, Type.ENUM, Source::getSourceType, Modifier.NOT_NULL);
-    private final Relation<Source, PostConfigs> postConfigs = Relate.build(Ratio.ONE_TO_ONE, PostConfigs.class, Type.ID, Source::getPostConfigs);
+    private final Relation<Source, PostConfig> postConfigs = Relate.build(Ratio.ONE_TO_ONE, PostConfig.class, Type.ID, source -> source.getConfig(new PostConfig()));
 
 
     protected SourceDao() {
@@ -41,10 +41,10 @@ public class SourceDao extends DataTable<Source> {
     public Source getData(Result<Source> result) throws PersistenceException {
         final String sourceurl = result.get(this.sourceurl);
         final SourceType type = result.get(this.sourceType);
-        PostConfigs postConfigs = result.get(this.postConfigs);
+        PostConfig postConfigs = result.get(this.postConfigs);
 
         if (postConfigs == null) {
-            postConfigs = new PostConfigs();
+            postConfigs = new PostConfig();
         }
 
         try {

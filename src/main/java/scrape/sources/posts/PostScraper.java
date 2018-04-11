@@ -4,7 +4,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import scrape.Scraper;
-import scrape.sources.PostsFilter;
 import scrape.sources.Source;
 import scrape.sources.posts.strategies.PostConfigsSetter;
 import scrape.sources.posts.strategies.PostFormat;
@@ -21,7 +20,7 @@ import java.util.Objects;
  * // TODO: 02.10.2017 apply filter earlier
  * // TODO: 02.10.2017 problems in getting the right posts
  */
-public class PostScraper extends Scraper<PostConfigs, PostSearchEntry> {
+public class PostScraper extends Scraper<PostConfig, PostSearchEntry> {
     private final Elements unformattedElements = new Elements();
     private Elements formattedElements;
 
@@ -42,12 +41,19 @@ public class PostScraper extends Scraper<PostConfigs, PostSearchEntry> {
         this.search = entry;
     }
 
-    private void initScraper() throws IOException {
-        document = getDocument(source.getUrl());
-        this.configs = source.getPostConfigs();
-        if (!configs.isInit()) {
-            initConfigs(document);
-        }
+    public List<Post> getPosts(PostSearchEntry entry) {
+        validate(entry);
+        Objects.requireNonNull(document);
+
+        this.search = entry;
+        Elements filtered = new PostsFilter(search).filter(formattedElements);
+        return new PostParser().toPosts(filtered, entry);
+    }
+
+    public List<Post> getPosts() {
+        Objects.requireNonNull(document);
+        Elements elements = getPostElements();
+        return new PostParser().toPosts(elements, search);
     }
 
     public static PostScraper scraper(Source source) throws IOException {
@@ -63,17 +69,14 @@ public class PostScraper extends Scraper<PostConfigs, PostSearchEntry> {
         initScraper();
     }
 
-    public List<Post> getPosts(PostSearchEntry entry) {
-        validate(entry);
-        Objects.requireNonNull(document);
-
-        this.search = entry;
-        Elements filtered = new PostsFilter(search).filter(unformattedElements);
-        return new PostParser().toPosts(filtered, entry);
-    }
-
-    private Elements getAll() {
-        return search(configs.isArchive());
+    private Elements getPostElements() {
+        formattedElements = getAll();
+        if (search.getKeyWords().isEmpty()) {
+            return formattedElements;
+        } else {
+            Elements elements = new PostsFilter(search).filter(unformattedElements);
+            return new PostFormat().format(elements, source.getConfig(new PostConfig()));
+        }
     }
 
     private Elements search(boolean isArchive) {
@@ -115,10 +118,30 @@ public class PostScraper extends Scraper<PostConfigs, PostSearchEntry> {
         return postElements;
     }
 
-    public List<Post> getPosts() {
-        Objects.requireNonNull(document);
-        Elements elements = getPostElements();
-        return new PostParser().toPosts(elements, search);
+    private Elements getAll() {
+        if (!configs.isInit()) {
+            throw new IllegalStateException("PostConfig is not initialized!");
+        }
+        return search(configs.getArchive() != null);
+    }
+
+    private void initScraper() throws IOException {
+        document = getDocument(source.getUrl());
+        this.configs = source.getConfig(new PostConfig());
+
+        if (!configs.isInit()) {
+            initConfigs(document);
+        }
+    }
+
+    private void initConfigs(Document document) {
+        new PostConfigsSetter(configs, document).setConfigs();
+    }
+
+    private Elements postsFromPage(Document document) {
+        Document cleaned = cleanDoc(document);
+        unformattedElements.addAll(new PostFormat().unFormatted(cleaned, configs));
+        return new PostFormat().format(unformattedElements, configs);
     }
 
     /**
@@ -133,7 +156,7 @@ public class PostScraper extends Scraper<PostConfigs, PostSearchEntry> {
      */
     private boolean checkTime(Elements elements) {
         LocalDateTime dateTime = getOldestTime(elements);
-        Post post = search.getSource().getNewestPost(search.getCreation());
+        Post post = PostManager.getInstance().getNewestPost(source);
 
         if (post == null) {
             //not more than 100 posts at once
@@ -141,26 +164,6 @@ public class PostScraper extends Scraper<PostConfigs, PostSearchEntry> {
         } else {
             return post.getTimeStamp().compareTo(dateTime) >= 0;
         }
-    }
-
-    private Elements getPostElements() {
-        formattedElements = getAll();
-        if (search.getKeyWords().isEmpty()) {
-            return formattedElements;
-        } else {
-            Elements elements = new PostsFilter(search).filter(unformattedElements);
-            return new PostFormat().format(elements, source.getPostConfigs());
-        }
-    }
-
-    private void initConfigs(Document document) {
-        new PostConfigsSetter(configs, document).setConfigs();
-    }
-
-    private Elements postsFromPage(Document document) {
-        Document cleaned = cleanDoc(document);
-        unformattedElements.addAll(new PostFormat().unFormatted(cleaned, configs));
-        return new PostFormat().format(cleaned, configs);
     }
 
     /**
@@ -181,7 +184,7 @@ public class PostScraper extends Scraper<PostConfigs, PostSearchEntry> {
             LocalDateTime localDateTime = ParseTime.parseTime(time);
 
             if (localDateTime == null) {
-                throw new IllegalArgumentException("no parsable Time available");
+                throw new IllegalArgumentException("no parsable PostTime available");
             } else {
                 localDateTimes.add(localDateTime);
             }

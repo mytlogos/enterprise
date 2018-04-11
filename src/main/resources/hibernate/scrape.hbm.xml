@@ -16,21 +16,56 @@
                 <param name="useNamed">true</param>
             </type>
         </property>
-        <!--<property name="postConfigs"/>-->
+        <one-to-one name="postConfigs" cascade="all" access="field"/>
     </class>
 
-    <class name="scrape.sources.posts.PostConfigs">
+    <class name="scrape.sources.posts.PostConfig">
         <id name="id">
             <generator class="increment"/>
         </id>
-        <!--<property name="archive"/>
-        <property name="feed"/>
-        <property name="wrapper"/>
-        <property name="posts"/>
-        <property name="time"/>
-        <property name="title"/>
-        <property name="postBody"/>
-        <property name="footer"/>-->
+        <property name="archive" access="property">
+            <type name="org.hibernate.type.EnumType">
+                <param name="enumClass">scrape.sources.posts.strategies.ArchiveStrategy</param>
+                <param name="useNamed">true</param>
+            </type>
+        </property>
+        <property name="feed" access="property" type="string"/>
+        <property name="wrapper" access="property">
+            <type name="org.hibernate.type.EnumType">
+                <param name="enumClass">scrape.sources.posts.strategies.PostWrapper</param>
+                <param name="useNamed">true</param>
+            </type>
+        </property>
+        <property name="posts" access="property">
+            <type name="org.hibernate.type.EnumType">
+                <param name="enumClass">scrape.sources.posts.strategies.Posts</param>
+                <param name="useNamed">true</param>
+            </type>
+        </property>
+        <property name="time" access="property">
+            <type name="org.hibernate.type.EnumType">
+                <param name="enumClass">scrape.sources.posts.strategies.PostTime</param>
+                <param name="useNamed">true</param>
+            </type>
+        </property>
+        <property name="title" access="property">
+            <type name="org.hibernate.type.EnumType">
+                <param name="enumClass">scrape.sources.posts.strategies.PostTitle</param>
+                <param name="useNamed">true</param>
+            </type>
+        </property>
+        <property name="postBody" access="property">
+            <type name="org.hibernate.type.EnumType">
+                <param name="enumClass">scrape.sources.posts.strategies.PostContent</param>
+                <param name="useNamed">true</param>
+            </type>
+        </property>
+        <!--<property name="footer" access="property">
+            <type name="org.hibernate.type.EnumType">
+                <param name="enumClass">scrape.sources.posts.strategies.PostFooter</param>
+                <param name="useNamed">true</param>
+            </type>
+        </property>-->
     </class>
 
     <class name="scrape.sources.posts.Post" table="" mutable="false">

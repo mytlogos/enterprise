@@ -6,9 +6,9 @@ import scrape.sources.Source;
 /**
  *
  */
-public class SearchEntry {
+public abstract class SearchEntry {
     protected final Source source;
-    final Creation creationKey;
+    private final Creation creationKey;
 
     protected SearchEntry(Creation creation, Source source) {
         this.creationKey = creation;

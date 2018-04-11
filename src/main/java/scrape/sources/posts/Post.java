@@ -31,12 +31,20 @@ public final class Post extends AbstractDataEntry implements DataEntry, GorgonEn
 
     }
 
+    public Post(Source source, String title, LocalDateTime timeStamp, String followLink, boolean isSticky) {
+        this(source, title, timeStamp, followLink, null, isSticky);
+        validateState();
+    }
 
     public Post(Source source, String title, String content, String footer, LocalDateTime timeStamp, String followLink, boolean isSticky) {
         this(source, title, timeStamp, followLink, null, isSticky);
         this.content = content;
         this.footer = footer;
         validateState();
+    }
+
+    public void setSource(Source source) {
+        this.source = source;
     }
 
     /**
@@ -55,6 +63,14 @@ public final class Post extends AbstractDataEntry implements DataEntry, GorgonEn
         }
     }
 
+    public boolean isAfter(Post post) {
+        return !isBefore(post);
+    }
+
+    public boolean isBefore(Post post) {
+        return getTimeStamp().isBefore(post.getTimeStamp());
+    }
+
     private void validateState() {
         String message = "";
         if (source == null) {
@@ -65,12 +81,6 @@ public final class Post extends AbstractDataEntry implements DataEntry, GorgonEn
         }
         if (title == null) {
             message = message + "title is null, ";
-        }
-        if (content == null) {
-            message = message + "content is null, ";
-        }
-        if (footer == null) {
-            message = message + "footer is null";
         }
         if (followLink == null) {
             message = message + "followLink is null";
@@ -174,33 +184,31 @@ public final class Post extends AbstractDataEntry implements DataEntry, GorgonEn
 
     @Override
     public int hashCode() {
-        int result = 31 * timeStamp.hashCode();
-        result = 31 * result * title.hashCode();
+        int result = getTitle() != null ? getTitle().hashCode() : 0;
+        result = 31 * result + (getTimeStamp() != null ? getTimeStamp().hashCode() : 0);
         return result;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        boolean equal = false;
-        if (obj instanceof Post) {
-            if (equal = title.equalsIgnoreCase(((Post) obj).getTitle())) {
-                equal = timeStamp.isEqual(((Post) obj).getTimeStamp());
-            }
-        }
-        return equal;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Post post = (Post) o;
+
+        if (getTitle() != null ? !getTitle().equals(post.getTitle()) : post.getTitle() != null) return false;
+        return getTimeStamp() != null ? getTimeStamp().equals(post.getTimeStamp()) : post.getTimeStamp() == null;
     }
 
     @Override
     public String toString() {
         return "Post{" +
                 "sticky=" + sticky +
-                ", source=" + source +
+                ", source=" + source.getUrl() +
                 ", followLink='" + followLink + '\'' +
                 ", title='" + title + '\'' +
                 ", timeStamp=" + timeStamp +
                 ", creation=" + creation +
-                ", content='" + content + '\'' +
-                ", footer='" + footer + '\'' +
                 '}';
     }
 }

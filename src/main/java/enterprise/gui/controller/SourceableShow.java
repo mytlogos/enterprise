@@ -1,7 +1,7 @@
 package enterprise.gui.controller;
 
 import enterprise.data.intface.SourceableEntry;
-import javafx.collections.FXCollections;
+import enterprise.modules.Module;
 import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -11,7 +11,7 @@ import scrape.sources.Source;
 /**
  *
  */
-public abstract class SourceableShow extends Show<SourceableEntry> {
+public class SourceableShow extends Show<SourceableEntry> {
 
     @FXML
     private Text translator;
@@ -24,10 +24,24 @@ public abstract class SourceableShow extends Show<SourceableEntry> {
     @FXML
     private TableColumn<Source, String> urlColumn;
 
+    public SourceableShow() {
+
+    }
+
+    public SourceableShow(Module module) {
+        super(module);
+    }
+
+    @Override
+    public void initialize() {
+        super.initialize();
+        readySourceColumns();
+    }
+
     /**
      * Sets the fields providing data for the Columns.
      */
-    protected void readySourceColumns() {
+    private void readySourceColumns() {
         sourceColumn.setCellValueFactory(param -> param.getValue().sourceNameProperty());
         urlColumn.setCellValueFactory(param -> param.getValue().urlProperty());
     }
@@ -36,6 +50,6 @@ public abstract class SourceableShow extends Show<SourceableEntry> {
     protected void bindEntry() {
         super.bindEntry();
         bindToText(translator, entryData.getSourceable().translatorProperty());
-        sourceTable.setItems(FXCollections.observableArrayList(entryData.getSourceable().getSourceList()));
+        sourceTable.setItems(entryData.getSourceable().getSources());
     }
 }

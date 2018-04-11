@@ -26,7 +26,6 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.stage.WindowEvent;
 import scrape.concurrent.ScheduledPostScraper;
-import scrape.sources.posts.PostManager;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -77,6 +76,7 @@ public class EnterpriseController implements Controller {
     private ProgressBar progressBar;
 
     private boolean openPostView = false;
+
     private Stage postView = null;
     private int indexFirstSep;
     private int indexSecondSep;
@@ -84,9 +84,6 @@ public class EnterpriseController implements Controller {
     @Override
     public void initialize() {
         Controller.super.initialize();
-
-        //starts the ScheduledPostScraper
-        PostManager.getInstance().startScheduledScraper();
 
         //ready the Graphical Content
         setTabPaneListeners();
@@ -152,24 +149,35 @@ public class EnterpriseController implements Controller {
         });
     }
 
-    public void paneFocus() {
+    /**
+     *
+     */
+    @FXML
+    void newList() {
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.showAndWait();
+
+        String newList = dialog.getResult();
+        String tabName = tabPane.getSelectionModel().getSelectedItem().getText();
+
+        if (newList != null) {
+            for (BasicModule basicModules : BasicModule.values()) {
+                if (basicModules.showName().equals(tabName)) {
+                    Content controller = (Content) ControlComm.get().getController(basicModules, BasicMode.CONTENT);
+                    controller.addList(newList);
+                    break;
+                }
+            }
+        }
+    }
+
+    private void paneFocus() {
         for (Node node : root.getChildren()) {
             if (node instanceof Pane) {
                 node.setOnMouseClicked(event -> node.requestFocus());
             }
         }
         root.setOnMouseClicked(event -> root.requestFocus());
-    }
-
-    /**
-     * Sets the name of the Tabs.
-     */
-    private void setTabs() {
-        animeTab.setText(ANIME.tabName());
-        bookTab.setText(BOOK.tabName());
-        mangaTab.setText(MANGA.tabName());
-        novelTab.setText(NOVEL.tabName());
-        seriesTab.setText(SERIES.tabName());
     }
 
     private void readyStatusBar() {
@@ -232,20 +240,14 @@ public class EnterpriseController implements Controller {
     }
 
     /**
-     * Sets the 'hide/show XYColumns' menuItems to the {@code viewMenu}
-     * and removes the old ones from the {@code viewMenu}.
-     *
-     * @param selectedTab name of the selected Tab
+     * Sets the name of the Tabs.
      */
-    private void onNewTab(String selectedTab) {
-        for (BasicModule basicModule : BasicModule.values()) {
-            if (selectedTab.equalsIgnoreCase(basicModule.tabName())) {
-                clearViewMenu();
-                List<CheckMenuItem> items = getCheckMenuItems(basicModule);
-
-                viewMenu.getItems().addAll(indexFirstSep + 1, items);
-            }
-        }
+    private void setTabs() {
+        animeTab.setText(ANIME.showName());
+        bookTab.setText(BOOK.showName());
+        mangaTab.setText(MANGA.showName());
+        novelTab.setText(NOVEL.showName());
+        seriesTab.setText(SERIES.showName());
     }
 
     private List<CheckMenuItem> getCheckMenuItems(BasicModule basicModule) {
@@ -333,23 +335,18 @@ public class EnterpriseController implements Controller {
     }
 
     /**
+     * Sets the 'hide/show XYColumns' menuItems to the {@code viewMenu}
+     * and removes the old ones from the {@code viewMenu}.
      *
+     * @param selectedTab name of the selected Tab
      */
-    @FXML
-    void newList() {
-        TextInputDialog dialog = new TextInputDialog();
-        dialog.showAndWait();
+    private void onNewTab(String selectedTab) {
+        for (BasicModule basicModule : BasicModule.values()) {
+            if (selectedTab.equalsIgnoreCase(basicModule.showName())) {
+                clearViewMenu();
+                List<CheckMenuItem> items = getCheckMenuItems(basicModule);
 
-        String newList = dialog.getResult();
-        String tabName = tabPane.getSelectionModel().getSelectedItem().getText();
-
-        if (newList != null) {
-            for (BasicModule basicModules : BasicModule.values()) {
-                if (basicModules.tabName().equals(tabName)) {
-                    Content controller = (Content) ControlComm.get().getController(basicModules, BasicMode.CONTENT);
-                    controller.addList(newList);
-                    break;
-                }
+                viewMenu.getItems().addAll(indexFirstSep + 1, items);
             }
         }
     }

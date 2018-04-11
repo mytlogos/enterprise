@@ -35,7 +35,7 @@ public class SourceableEntryImpl extends AbstractCreationEntry implements Source
 
         incrementReferences(user, creation, creator, sourceable);
 
-        sourceable.getSourceList().forEach(this::incrementReferences);
+        sourceable.getSources().forEach(this::incrementReferences);
 
         this.creation.setCreator(creator);
         this.sourceable.setUser(user);
@@ -46,12 +46,6 @@ public class SourceableEntryImpl extends AbstractCreationEntry implements Source
         int result = user.hashCode();
         result = 31 * result + creation.hashCode();
         return result;
-    }
-
-    @Override
-    public void fromDataBase() {
-        super.fromDataBase();
-        sourceable.fromDataBase();
     }
 
     @Override
@@ -78,6 +72,16 @@ public class SourceableEntryImpl extends AbstractCreationEntry implements Source
     }
 
     @Override
+    public String toString() {
+        return "SourceableEntryImpl{" +
+                "sourceable=" + sourceable +
+                ", user=" + user +
+                ", creation=" + creation +
+                ", module=" + module +
+                '}';
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof SourceableEntryImpl)) return false;
@@ -96,6 +100,25 @@ public class SourceableEntryImpl extends AbstractCreationEntry implements Source
     }
 
     @Override
+    public boolean readySourceableRemoval() {
+        boolean onlyReference = checkOnlyReference(sourceable);
+        decrementReferences(sourceable);
+
+        PostManager.getInstance().removeSearchEntries(this);
+        sourceable.getSources().forEach(this::decrementReferences);
+        return onlyReference;
+    }
+
+    @Override
+    void setUser(User user) {
+        super.setUser(user);
+
+        if (sourceable != null) {
+            sourceable.setUser(user);
+        }
+    }
+
+    @Override
     public Creation getCreation() {
         return creation;
     }
@@ -105,21 +128,12 @@ public class SourceableEntryImpl extends AbstractCreationEntry implements Source
         return creation.getCreator();
     }
 
-    @Override
-    public boolean readySourceableRemoval() {
-        boolean onlyReference = checkOnlyReference(sourceable);
-        decrementReferences(sourceable);
+    void setSourceable(Sourceable sourceable) {
+        this.sourceable = sourceable;
 
-        PostManager.getInstance().removeSearchEntries(this);
-
-        sourceable.getSourceList().forEach(source -> {
-            if (checkOnlyReference(source)) {
-                source.setDead();
-            }
-        });
-        sourceable.getSourceList().forEach(this::decrementReferences);
-
-        return onlyReference;
+        if (sourceable != null) {
+            sourceable.setUser(user);
+        }
     }
 
     @Override
